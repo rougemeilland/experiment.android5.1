@@ -6,49 +6,63 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/color_frame"
+    <TableLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="latitude"
+                android:layout_margin="4dp"/>
+            <TextView
+                android:id="@+id/textview_latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"/>
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="longitude"
+                android:layout_margin="4dp"/>
+            <TextView
+                android:id="@+id/textview_longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"/>
+        </TableRow>
+    </TableLayout>
 
-    </FrameLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
-            android:id="@+id/set_light_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="light"
-            android:layout_weight="1"
-            tools:ignore="ButtonStyle,HardcodedText" />
-        <Button
-            android:id="@+id/set_dark_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="dark"
-            tools:ignore="ButtonStyle,HardcodedText" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/ok_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="cancel"
-            android:layout_weight="1"
-            tools:ignore="ButtonStyle,HardcodedText" />
         <Button
             android:id="@+id/cancel_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="cancel"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+        <Button
+            android:id="@+id/request_permission_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="request"
+            android:layout_margin="4dp"
+            tools:ignore="ButtonStyle,HardcodedText" />
+        <Button
+            android:id="@+id/ok_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="ok"
+            android:layout_margin="4dp"
             tools:ignore="ButtonStyle,HardcodedText" />
     </LinearLayout>
 </LinearLayout>
