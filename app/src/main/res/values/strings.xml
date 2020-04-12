@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">experiment.android5.1</string>
+    <string-array name="config_timezone_type_selection_items">
+        <item>name@By name</item>
+        <item>numeric@By number</item>
+    </string-array>
+</resources>
