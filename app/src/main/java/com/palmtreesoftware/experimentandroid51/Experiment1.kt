@@ -3,11 +3,6 @@ package com.palmtreesoftware.experimentandroid51
 import android.os.Build
 import android.text.format.DateFormat
 import android.util.Log
-import java.lang.Exception
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.util.*
 
 class Experiment1 {
@@ -29,18 +24,18 @@ class Experiment1 {
                 "UTC+09:00"
             ).forEach { timeZoneId ->
                 val dateTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    ZoneId.of(timeZoneId).let {
+                    java.time.ZoneId.of(timeZoneId).let {
                         Triple(
                             it.id,
-                            LocalDateTime.now(it)
-                                .format(DateTimeFormatter.ofPattern(dateTimeFormat)),
+                            java.time.LocalDateTime.now(it)
+                                .format(java.time.format.DateTimeFormatter.ofPattern(dateTimeFormat)),
                             it.getDisplayName(
-                                TextStyle.FULL, Locale.ENGLISH
+                                java.time.format.TextStyle.FULL, Locale.ENGLISH
                             )
                         )
                     }
                 } else {
-                    TimeZone.getTimeZone(timeZoneId).let {
+                    java.util.TimeZone.getTimeZone(timeZoneId).let {
                         Triple(
                             it.id,
                             DateFormat.format(dateTimeFormat, Calendar.getInstance(it)).toString(),
@@ -77,14 +72,14 @@ class Experiment1 {
             ).map { timeZoneId ->
                 (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     val zoneId = try {
-                        ZoneId.of(timeZoneId)
+                        java.time.ZoneId.of(timeZoneId)
                     } catch (ex: Exception) {
-                        ZoneId.systemDefault()
+                        java.time.ZoneId.systemDefault()
                     }
-                    val now = LocalDateTime.now(zoneId)
+                    val now = java.time.LocalDateTime.now(zoneId)
                     Triple(timeZoneId, zoneId.id, now.toString())
                 } else {
-                    val zoneId = TimeZone.getTimeZone(timeZoneId)
+                    val zoneId = java.util.TimeZone.getTimeZone(timeZoneId)
                     val now = Calendar.getInstance(zoneId)
                     Triple(timeZoneId, zoneId.id, now)
                 }).let {
