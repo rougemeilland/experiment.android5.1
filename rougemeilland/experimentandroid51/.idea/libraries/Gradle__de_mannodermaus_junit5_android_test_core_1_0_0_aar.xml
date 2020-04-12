@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: de.mannodermaus.junit5:android-test-core:1.0.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/d9b875f59924f226be91d174feb53a5f/jetified-android-test-core-1.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/d9b875f59924f226be91d174feb53a5f/jetified-android-test-core-1.0.0/res" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/de.mannodermaus.junit5/android-test-core/1.0.0/6ee19b3fa32ec87df190e3b4c934e018680a2aa3/android-test-core-1.0.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/de.mannodermaus.junit5/android-test-core/1.0.0/98ff842b1152da2c82956d847f2b24cc01a89a0/android-test-core-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

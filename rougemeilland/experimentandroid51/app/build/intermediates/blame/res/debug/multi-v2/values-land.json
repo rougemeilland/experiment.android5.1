@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "Z:\\Sources\\Lunor\\Repos\\rougemeilland\\experimentandroid51\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-land\\values-land.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\lunor\\.gradle\\caches\\transforms-2\\files-2.1\\b85b45b98b46663d36fb4749f6b386b5\\appcompat-1.2.0-beta01\\res\\values-land\\values-land.xml",
+                    "from": {
+                        "startLines": "2,3,4",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,125,196",
+                        "endColumns": "69,70,67",
+                        "endOffsets": "120,191,259"
+                    }
+                }
+            ]
+        }
+    ]
+}

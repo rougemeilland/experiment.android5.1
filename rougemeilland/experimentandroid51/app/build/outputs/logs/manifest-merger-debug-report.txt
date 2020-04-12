@@ -1,0 +1,148 @@
+-- Merging decision tree log ---
+manifest
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+MERGED from [androidx.core:core-ktx:1.2.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\5fc8394162dfec3e787c52ea16428d6a\jetified-core-ktx-1.2.0\AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.appcompat:appcompat:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\b85b45b98b46663d36fb4749f6b386b5\appcompat-1.2.0-beta01\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.fragment:fragment:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\39c2797fe7dab5e0d8a49bdca898428a\fragment-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.appcompat:appcompat-resources:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\a9759c2db5df058207b96438577363e6\jetified-appcompat-resources-1.2.0-beta01\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8511223b474d06ed74218d5d71a15618\drawerlayout-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ee7dafc01dec5ba6a2b001af57338331\viewpager-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ea23058535f287782a72d77705cdbfca\loader-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.activity:activity:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\cfd02f45174ce01e6a565b8493972ea3\jetified-activity-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\43a3f9a3399518bb500aeca7cc747218\vectordrawable-animated-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8a982e5edfec6b14c36b8ada49b5b4e1\vectordrawable-1.1.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\7f3579cd5ec07c04a8142cf0758e9a78\customview-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:17:1-26:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\58be8fd2852da6ff41ec4587237964e5\cursoradapter-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8dd86507480abf99c5a1ee997187385b\versionedparcelable-1.1.0\AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\345187bca7c6802a6b97f22db4dce068\lifecycle-runtime-2.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\93f3485c14257443842e1fbc4c6ce832\lifecycle-viewmodel-2.1.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\160dc871bbc7b2f9a84687e632a4a219\jetified-savedstate-1.0.0\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\dc913a275bb5915d4c6578b958871e2d\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\356d07ec4df450273aef6018fe482a85\lifecycle-livedata-2.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\45e00de7fc065ca7cb4798eaf601abd6\lifecycle-livedata-core-2.0.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\9074f336e7d17ee1adeb4b7938e67db6\core-runtime-2.0.0\AndroidManifest.xml:17:1-22:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+	package
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:3:5-55
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+	android:versionCode
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:1-26:12
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:2:11-69
+uses-permission#android.permission.ACCESS_COARSE_LOCATION
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:5:5-80
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:5:22-78
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:6:5-78
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:6:22-76
+uses-permission#android.permission.INTERNET
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:7:5-67
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:7:22-64
+application
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:9:5-24:19
+MERGED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:24:5-89
+MERGED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:24:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8dd86507480abf99c5a1ee997187385b\versionedparcelable-1.1.0\AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8dd86507480abf99c5a1ee997187385b\versionedparcelable-1.1.0\AndroidManifest.xml:24:5-25:19
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:24:18-86
+	android:supportsRtl
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:15:9-35
+	android:label
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:13:9-41
+	android:fullBackupContent
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:11:9-41
+	android:roundIcon
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:14:9-54
+	android:icon
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:12:9-43
+	android:allowBackup
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:10:9-35
+	android:theme
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:16:9-40
+activity#com.palmtreesoftware.experimentandroid51.MainActivity
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:17:9-23:20
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:17:19-47
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:18:13-22:29
+action#android.intent.action.MAIN
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:19:17-69
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:19:25-66
+category#android.intent.category.LAUNCHER
+ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:21:17-77
+	android:name
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml:21:27-74
+uses-sdk
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+MERGED from [androidx.core:core-ktx:1.2.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\5fc8394162dfec3e787c52ea16428d6a\jetified-core-ktx-1.2.0\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.core:core-ktx:1.2.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\5fc8394162dfec3e787c52ea16428d6a\jetified-core-ktx-1.2.0\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.appcompat:appcompat:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\b85b45b98b46663d36fb4749f6b386b5\appcompat-1.2.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\b85b45b98b46663d36fb4749f6b386b5\appcompat-1.2.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\39c2797fe7dab5e0d8a49bdca898428a\fragment-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\39c2797fe7dab5e0d8a49bdca898428a\fragment-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\a9759c2db5df058207b96438577363e6\jetified-appcompat-resources-1.2.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.appcompat:appcompat-resources:1.2.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\a9759c2db5df058207b96438577363e6\jetified-appcompat-resources-1.2.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8511223b474d06ed74218d5d71a15618\drawerlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8511223b474d06ed74218d5d71a15618\drawerlayout-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ee7dafc01dec5ba6a2b001af57338331\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ee7dafc01dec5ba6a2b001af57338331\viewpager-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ea23058535f287782a72d77705cdbfca\loader-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\ea23058535f287782a72d77705cdbfca\loader-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\cfd02f45174ce01e6a565b8493972ea3\jetified-activity-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\cfd02f45174ce01e6a565b8493972ea3\jetified-activity-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\43a3f9a3399518bb500aeca7cc747218\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\43a3f9a3399518bb500aeca7cc747218\vectordrawable-animated-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8a982e5edfec6b14c36b8ada49b5b4e1\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8a982e5edfec6b14c36b8ada49b5b4e1\vectordrawable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\7f3579cd5ec07c04a8142cf0758e9a78\customview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\7f3579cd5ec07c04a8142cf0758e9a78\customview-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.3.0-beta01] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\fbd2860d71d458b93fbb5ed2bb4bfb98\core-1.3.0-beta01\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\58be8fd2852da6ff41ec4587237964e5\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\58be8fd2852da6ff41ec4587237964e5\cursoradapter-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8dd86507480abf99c5a1ee997187385b\versionedparcelable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\8dd86507480abf99c5a1ee997187385b\versionedparcelable-1.1.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\345187bca7c6802a6b97f22db4dce068\lifecycle-runtime-2.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\345187bca7c6802a6b97f22db4dce068\lifecycle-runtime-2.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\93f3485c14257443842e1fbc4c6ce832\lifecycle-viewmodel-2.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.1.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\93f3485c14257443842e1fbc4c6ce832\lifecycle-viewmodel-2.1.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\160dc871bbc7b2f9a84687e632a4a219\jetified-savedstate-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.savedstate:savedstate:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\160dc871bbc7b2f9a84687e632a4a219\jetified-savedstate-1.0.0\AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\dc913a275bb5915d4c6578b958871e2d\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\dc913a275bb5915d4c6578b958871e2d\interpolator-1.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\356d07ec4df450273aef6018fe482a85\lifecycle-livedata-2.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\356d07ec4df450273aef6018fe482a85\lifecycle-livedata-2.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\45e00de7fc065ca7cb4798eaf601abd6\lifecycle-livedata-core-2.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\45e00de7fc065ca7cb4798eaf601abd6\lifecycle-livedata-core-2.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\9074f336e7d17ee1adeb4b7938e67db6\core-runtime-2.0.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0] C:\Users\lunor\.gradle\caches\transforms-2\files-2.1\9074f336e7d17ee1adeb4b7938e67db6\core-runtime-2.0.0\AndroidManifest.xml:20:5-44
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		ADDED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
+		INJECTED from Z:\Sources\Lunor\Repos\rougemeilland\experimentandroid51\app\src\main\AndroidManifest.xml
