@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">experiment.android5.1</string>
+    <string name="time_zone_short_name_DEFAULT" translatable="false" />
+    <string name="time_zone_short_name_GMT">GMT</string>
+    <string name="time_zone_short_name_JST">JST</string>
+    <string name="time_zone_short_name_EST">EST</string>
+    <string name="time_zone_short_name_PST">PST</string>
+    <string name="time_zone_short_name_CET">CET</string>
+    <string name="time_zone_short_name_WET">WET</string>
 </resources>
