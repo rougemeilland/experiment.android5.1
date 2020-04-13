@@ -21,18 +21,18 @@ abstract class DateTime protected constructor() {
 
     companion object {
         fun now(): DateTime =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Platform.sdK26Depended({
                 DateTimeSDK26.now()
-            } else {
+            }, {
                 DateTimeSDK22.now()
-            }
+            })
 
         fun fromEpochMilliSeconds(milliSseconds: Long): DateTime =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Platform.sdK26Depended({
                 DateTimeSDK26.fromEpochMilliSeconds(milliSseconds)
-            } else {
+            }, {
                 DateTimeSDK22.fromEpochMilliSeconds(milliSseconds)
-            }
+            })
 
         fun fromEpochSeconds(seconds: Long): DateTime =
             fromEpochMilliSeconds(seconds * 1000)
@@ -85,7 +85,7 @@ abstract class DateTime protected constructor() {
             if (javaClass != other?.javaClass)
                 return false
             other as DateTimeSDK26
-            if (!dateTimeUTC.equals(other.dateTimeUTC))
+            if (dateTimeUTC != other.dateTimeUTC)
                 return false
             return true
         }
@@ -164,7 +164,7 @@ abstract class DateTime protected constructor() {
             if (javaClass != other?.javaClass)
                 return false
             other as DateTimeSDK22
-            if (!dateTimeUTC.timeInMillis.equals(other.dateTimeUTC.timeInMillis))
+            if (dateTimeUTC.timeInMillis != other.dateTimeUTC.timeInMillis)
                 return false
             return true
         }

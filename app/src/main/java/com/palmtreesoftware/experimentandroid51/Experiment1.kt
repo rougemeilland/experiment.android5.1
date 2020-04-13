@@ -3,6 +3,7 @@ package com.palmtreesoftware.experimentandroid51
 import android.os.Build
 import android.text.format.DateFormat
 import android.util.Log
+import androidx.annotation.RequiresApi
 import java.util.*
 
 class Experiment1 {
@@ -23,28 +24,35 @@ class Experiment1 {
                 "UTC",
                 "UTC+09:00"
             ).forEach { timeZoneId ->
-                val dateTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    java.time.ZoneId.of(timeZoneId).let {
-                        Triple(
-                            it.id,
-                            java.time.LocalDateTime.now(it)
-                                .format(java.time.format.DateTimeFormatter.ofPattern(dateTimeFormat)),
-                            it.getDisplayName(
-                                java.time.format.TextStyle.FULL, Locale.ENGLISH
-                            )
-                        )
-                    }
-                } else {
-                    java.util.TimeZone.getTimeZone(timeZoneId).let {
-                        Triple(
-                            it.id,
-                            DateFormat.format(dateTimeFormat, Calendar.getInstance(it)).toString(),
-                            it.getDisplayName(
-                                Locale.ENGLISH
-                            )
-                        )
-                    }
-                }
+                val dateTime =
+                    Platform.sdK26Depended(
+                        @RequiresApi(Build.VERSION_CODES.O) {
+                            java.time.ZoneId.of(timeZoneId).let {
+                                Triple(
+                                    it.id,
+                                    java.time.LocalDateTime.now(it)
+                                        .format(
+                                            java.time.format.DateTimeFormatter.ofPattern(
+                                                dateTimeFormat
+                                            )
+                                        ),
+                                    it.getDisplayName(
+                                        java.time.format.TextStyle.FULL, Locale.ENGLISH
+                                    )
+                                )
+                            }
+                        }, {
+                            java.util.TimeZone.getTimeZone(timeZoneId).let {
+                                Triple(
+                                    it.id,
+                                    DateFormat.format(dateTimeFormat, Calendar.getInstance(it))
+                                        .toString(),
+                                    it.getDisplayName(
+                                        Locale.ENGLISH
+                                    )
+                                )
+                            }
+                        })
                 Log.d(
                     "Experiment",
                     dateTime.second + ": " + dateTime.first + "(" + dateTime.third + ")"
@@ -70,19 +78,20 @@ class Experiment1 {
                 "-",
                 ":"
             ).map { timeZoneId ->
-                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val zoneId = try {
-                        java.time.ZoneId.of(timeZoneId)
-                    } catch (ex: Exception) {
-                        java.time.ZoneId.systemDefault()
-                    }
-                    val now = java.time.LocalDateTime.now(zoneId)
-                    Triple(timeZoneId, zoneId.id, now.toString())
-                } else {
-                    val zoneId = java.util.TimeZone.getTimeZone(timeZoneId)
-                    val now = Calendar.getInstance(zoneId)
-                    Triple(timeZoneId, zoneId.id, now)
-                }).let {
+                (Platform.sdK26Depended(
+                    @RequiresApi(Build.VERSION_CODES.O) {
+                        val zoneId = try {
+                            java.time.ZoneId.of(timeZoneId)
+                        } catch (ex: Exception) {
+                            java.time.ZoneId.systemDefault()
+                        }
+                        val now = java.time.LocalDateTime.now(zoneId)
+                        Triple(timeZoneId, zoneId.id, now.toString())
+                    }, {
+                        val zoneId = java.util.TimeZone.getTimeZone(timeZoneId)
+                        val now = Calendar.getInstance(zoneId)
+                        Triple(timeZoneId, zoneId.id, now)
+                    })).let {
                     Log.d(
                         "Experiment",
                         (if (it.first == it.second) "OK" else "NG") + ": original-id=" + it.first + ", actual-id=" + it.second

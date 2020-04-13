@@ -133,9 +133,3 @@ class TimeDuration private constructor(val tickCounts: Long) {
             TimeDuration((seconds * (1000.toDouble() * 60 * 60 * 24 * 7)).toLong())
     }
 }
-
-operator fun Int.times(multiplicand: TimeDuration): TimeDuration =
-    multiplicand.times(this)
-
-operator fun Double.times(multiplicand: TimeDuration): TimeDuration =
-    multiplicand.times(this)

@@ -75,12 +75,17 @@ abstract class TimeZone protected constructor(val id: String) {
             }
 
         fun of(form: TimeZoneForm): TimeZone {
-            if (form.id == timeZoneIdOfSystemDefault) {
-                return getDefault()
-            } else if (form.id == timeZoneIdOfTimeDifferenceExpression) {
-                return NumericTimeZone.createInstance(form.hour, form.minute)
-            } else
-                return SymbolicTimeZone.createInstance(form.id)
+            return when (form.id) {
+                timeZoneIdOfSystemDefault -> {
+                    getDefault()
+                }
+                timeZoneIdOfTimeDifferenceExpression -> {
+                    NumericTimeZone.createInstance(form.hour, form.minute)
+                }
+                else -> {
+                    SymbolicTimeZone.createInstance(form.id)
+                }
+            }
         }
 
         fun of(duration: TimeDuration): TimeZone {
@@ -133,11 +138,11 @@ abstract class TimeZone protected constructor(val id: String) {
 
         companion object {
             fun createInstance(): TimeZone =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Platform.sdK26Depended({
                     TimeZoneSDK26.createInstance()
-                } else {
+                }, {
                     TimeZoneSDK22.createInstance()
-                }
+                })
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -180,11 +185,11 @@ abstract class TimeZone protected constructor(val id: String) {
 
         companion object {
             fun createInstance(timeZoneId: String): TimeZone =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Platform.sdK26Depended({
                     TimeZoneSDK26.createInstance(timeZoneId)
-                } else {
+                }, {
                     TimeZoneSDK22.createInstance(timeZoneId)
-                }
+                })
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
@@ -254,20 +259,18 @@ abstract class TimeZone protected constructor(val id: String) {
         }
 
         companion object {
-            fun createInstance(timeZoneId: String, hour: Int, minute: Int): TimeZone = when {
-                hour < minTimeZoneHour || hour > maxTimeZoneHour -> {
+            fun createInstance(timeZoneId: String, hour: Int, minute: Int): TimeZone =
+                if (hour < minTimeZoneHour || hour > maxTimeZoneHour) {
                     getDefault()
-                }
-                minute < minTimeZoneMinute || minute > maxTimeZoneMinute -> {
+                } else if (minute < minTimeZoneMinute || minute > maxTimeZoneMinute) {
                     getDefault()
+                } else {
+                    Platform.sdK26Depended({
+                        TimeZoneSDK26.createInstance(timeZoneId, hour, minute)
+                    }, {
+                        TimeZoneSDK22.createInstance(timeZoneId, hour, minute)
+                    })
                 }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-                    TimeZoneSDK26.createInstance(timeZoneId, hour, minute)
-                }
-                else -> {
-                    TimeZoneSDK22.createInstance(timeZoneId, hour, minute)
-                }
-            }
 
             fun createInstance(hour: Int, minute: Int): TimeZone =
                 createInstance(gmtFormat.format(hour - innerOffsetOfHour, minute), hour, minute)

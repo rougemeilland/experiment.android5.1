@@ -4,6 +4,9 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 import java.util.*
 
+// TODO("単体テストでは実行環境のSDKバージョンに依存したコードのテストはできない。工夫が要る模様。")
+// TODO("https://proandroiddev.com/build-version-in-unit-testing-4e963940dae7")
+
 class DateTimeTest {
 
     @Test
@@ -24,7 +27,7 @@ class DateTimeTest {
     @Test
     fun fromEpochMilliSecondsNegative() {
         assertThrows(
-            Exception::class.java,
+            IllegalArgumentException::class.java,
             { DateTime.fromEpochMilliSeconds(-100000).epochMilliSeconds })
     }
 
@@ -41,7 +44,7 @@ class DateTimeTest {
     @Test
     fun fromEpochSecondssNegative() {
         assertThrows(
-            Exception::class.java,
+            IllegalArgumentException::class.java,
             { DateTime.fromEpochSeconds(-100000).epochMilliSeconds })
     }
 
@@ -55,33 +58,42 @@ class DateTimeTest {
     @Test
     fun getEpochSeconds() {
         assertEquals(0, DateTime.fromEpochMilliSeconds(0).epochSeconds)
-        assertEquals(1000000, DateTime.fromEpochMilliSeconds(1000).epochSeconds)
+        assertEquals(1000, DateTime.fromEpochMilliSeconds(1000000).epochSeconds)
     }
 
     @Test
     fun atZone() {
-        assertEquals(
-            Pair(0, "GMT"),
-            DateTime.fromEpochMilliSeconds(0).atZone(TimeZone.GMT)
-                .let { Pair(it.epochMilliSeconds, it.timeZone.id) })
-        assertEquals(
-            1000000,
-            DateTime.fromEpochMilliSeconds(1000000).atZone(TimeZone.GMT).epochMilliSeconds
-        )
-        assertEquals(
-            0,
-            DateTime.fromEpochMilliSeconds(0).atZone(TimeZone.of("Asia/Tokyo")).epochMilliSeconds
-        )
-        assertEquals(
-            1000000,
-            DateTime.fromEpochMilliSeconds(1000000)
-                .atZone(TimeZone.of("Asia/Tokyo")).epochMilliSeconds
-        )
+
+        DateTime.fromEpochMilliSeconds(0).atZone(TimeZone.GMT)
+            .let { actual ->
+                assertEquals(0, actual.epochMilliSeconds)
+                assertEquals("GMT", actual.timeZone.id)
+            }
+        DateTime.fromEpochMilliSeconds(10000).atZone(TimeZone.GMT)
+            .let { actual ->
+                assertEquals(10000, actual.epochMilliSeconds)
+                assertEquals("GMT", actual.timeZone.id)
+            }
+        DateTime.fromEpochMilliSeconds(0).atZone(TimeZone.of("Asia/Tokyo"))
+            .let { actual ->
+                assertEquals(0, actual.epochMilliSeconds)
+                assertEquals("Asia/Tokyo", actual.timeZone.id)
+            }
+        DateTime.fromEpochMilliSeconds(10000).atZone(TimeZone.of("Asia/Tokyo"))
+            .let { actual ->
+                assertEquals(10000, actual.epochMilliSeconds)
+                assertEquals("Asia/Tokyo", actual.timeZone.id)
+            }
     }
 
     @Test
     fun plus() {
 
+        Platform.sdK26Depended({
+            throw Exception("x")
+        }, {
+            throw Exception("y")
+        })
     }
 
     @Test

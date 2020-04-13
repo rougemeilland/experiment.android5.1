@@ -21,11 +21,11 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
     companion object {
         fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Platform.sdK26Depended({
                 ZonedDateTimeSDK26.of(dateTime, timeZone)
-            } else {
+            }, {
                 ZonedDateTimeSDK22.of(dateTime, timeZone)
-            }
+            })
 
         fun of(
             year: Int,
@@ -37,7 +37,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             milliSecond: Int,
             timeZone: TimeZone
         ): ZonedDateTime =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Platform.sdK26Depended({
                 ZonedDateTimeSDK26.of(
                     year,
                     month,
@@ -48,7 +48,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     milliSecond,
                     timeZone
                 )
-            } else {
+            }, {
                 ZonedDateTimeSDK22.of(
                     year,
                     month,
@@ -59,7 +59,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     milliSecond,
                     timeZone
                 )
-            }
+            })
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

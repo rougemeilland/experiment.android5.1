@@ -20,7 +20,7 @@ abstract class DateTime protected constructor() {
     abstract val rawObject: Any
 
     companion object {
-        fun now(): DateTime =
+        fun now(): DateTime = Platform.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 DateTimeSDK26.now()
             } else {

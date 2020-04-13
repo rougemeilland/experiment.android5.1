@@ -132,12 +132,17 @@ abstract class TimeZone protected constructor(val id: String) {
         abstract override val rawObject: Any
 
         companion object {
-            fun createInstance(): TimeZone =
+            fun createInstance(): TimeZone {
+
+
+                return
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     TimeZoneSDK26.createInstance()
                 } else {
                     TimeZoneSDK22.createInstance()
                 }
+            }
         }
 
         @RequiresApi(Build.VERSION_CODES.O)

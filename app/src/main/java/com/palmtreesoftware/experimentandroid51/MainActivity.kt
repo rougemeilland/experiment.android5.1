@@ -120,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        test_result.text = Platform.callTestCode() ?: "テストコードはありません"
+
         ok_button.setOnClickListener {
             finish()
         }
@@ -128,14 +130,19 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+        Platform.sdK23Depended({
+            // NOP
+        }, {
             request_permission_button.visibility = View.GONE
-        }
+        })
 
         request_permission_button.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                permissionManager.requestPermission(this)
-            }
+            Platform.sdK23Depended(
+                @RequiresApi(Build.VERSION_CODES.M) {
+                    permissionManager.requestPermission(this)
+                }, {
+                    // NOP
+                })
         }
     }
 
