@@ -36,6 +36,7 @@ abstract class TimeZone protected constructor(val id: String) {
         private const val gmtFormat: String = "GMT%+03d:%02d"
         private const val shortGmtFormat = "%+03d%02d"
 
+        // TODO("以下の仕様は TimeZoneForm を実装するフォーム側に持ち込む")
         // android の NumberPicker は負数は扱えない模様
         // ※ minValue に負の数を入れてみたら、例外 (java.lang.IllegalArgumentException: minValue must be >= 0) が発生した
         // この問題を回避するため、以下の対策を行った
@@ -61,15 +62,11 @@ abstract class TimeZone protected constructor(val id: String) {
                         // 時差表現ではない場合 (システムデフォルト、または名前の表現)
                         SymbolicTimeZone.createInstance(timeZoneId)
                     } else {
-                        try {
-                            NumericTimeZone.createInstance(
-                                timeZoneId,
-                                matchResult.destructured.component1().toInt() + innerOffsetOfHour,
-                                matchResult.destructured.component2().toInt()
-                            )
-                        } catch (ex: Exception) {
-                            getDefault()
-                        }
+                        NumericTimeZone.createInstance(
+                            timeZoneId,
+                            matchResult.destructured.component1().toInt() + innerOffsetOfHour,
+                            matchResult.destructured.component2().toInt()
+                        )
                     }
                 }
             }
@@ -118,9 +115,7 @@ abstract class TimeZone protected constructor(val id: String) {
             "America/Los_Angeles" -> R.string.time_zone_short_name_PST
             "Europe/Berlin" -> R.string.time_zone_short_name_CET
             "Europe/Lisbon" -> R.string.time_zone_short_name_WET
-            else -> {
-                throw Exception("AppWidgetTimeZone.mapTimeZoneIdToResourceId: Cannot resolve time zone id: timeZoneId='$timeZoneId'")
-            }
+            else -> R.string.time_zone_short_name_NONE
         }
     }
 
@@ -171,11 +166,16 @@ abstract class TimeZone protected constructor(val id: String) {
     }
 
     protected abstract class SymbolicTimeZone private constructor(
-        timeZoneId: String,
+        private val timeZoneId: String,
         private val shortNameResourceId: Int
     ) : TimeZone(timeZoneId) {
         override fun getTimeZoneShortName(context: Context): String =
-            context.getString(shortNameResourceId)
+            shortNameResourceId.let {
+                if (it == R.string.time_zone_short_name_NONE)
+                    timeZoneId
+                else
+                    context.getString(it)
+            }
 
         override fun setForm(form: TimeZoneForm) {
             form.id = id
@@ -202,15 +202,12 @@ abstract class TimeZone protected constructor(val id: String) {
                 get() = o
 
             companion object {
-                fun createInstance(timeZoneId: String): TimeZone = try {
+                fun createInstance(timeZoneId: String): TimeZone =
                     TimeZoneSDK26(
                         java.time.ZoneId.of(timeZoneId),
                         timeZoneId,
                         mapTimeZoneIdToResourceId(timeZoneId)
                     )
-                } catch (ex: Exception) {
-                    getDefault()
-                }
             }
         }
 

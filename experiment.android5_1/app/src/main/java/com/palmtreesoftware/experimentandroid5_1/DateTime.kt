@@ -1,6 +1,5 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 
@@ -93,11 +92,8 @@ abstract class DateTime protected constructor() {
         override fun hashCode(): Int = dateTimeUTC.hashCode()
 
         override fun toString(): String =
-            "DateTime(dateTime='${dateTimeUTC.atZone(gmt).format(
-                java.time.format.DateTimeFormatter.ofPattern(
-                    "yyyy/MM/dd HH:mm.ss.SSS OOOO"
-                )
-            )}')"
+            "DateTime(epochMilliSeconds='${dateTimeUTC.toInstant(java.time.ZoneOffset.UTC)
+                .toEpochMilli()}')"
 
         companion object {
             private val gmt by lazy { java.time.ZoneId.of("GMT") }
@@ -105,17 +101,26 @@ abstract class DateTime protected constructor() {
             fun now(): DateTime =
                 DateTimeSDK26(java.time.LocalDateTime.now(gmt))
 
-            fun fromEpochMilliSeconds(milliSseconds: Long): DateTime =
-                if (milliSseconds < 0)
-                    throw IllegalArgumentException("${DateTimeSDK26::class.java.canonicalName}.fromEpochMilliSeconds(): 'milliSseconds' is negative")
-                else
-                    DateTimeSDK26(
+            fun fromEpochMilliSeconds(milliSseconds: Long): DateTime {
+                val second = milliSseconds / 1000
+                val milliSecond = (milliSseconds % 1000).toInt()
+
+                return DateTimeSDK26(
+                    if (milliSecond >= 0) {
                         java.time.LocalDateTime.ofEpochSecond(
-                            milliSseconds / 1000L,
-                            (milliSseconds % 1000).toInt() * 1000 * 1000,
+                            second,
+                            milliSecond * (1000 * 1000),
                             java.time.ZoneOffset.UTC
                         )
-                    )
+                    } else {
+                        java.time.LocalDateTime.ofEpochSecond(
+                            second - 1,
+                            (milliSecond + 1000) * (1000 * 1000),
+                            java.time.ZoneOffset.UTC
+                        )
+                    }
+                )
+            }
 
             fun of(dateTime: java.time.LocalDateTime): DateTime =
                 DateTimeSDK26(dateTime)
@@ -130,7 +135,15 @@ abstract class DateTime protected constructor() {
         }
 
         override val epochSeconds: Long
-            get() = dateTimeUTC.timeInMillis / 1000
+            get() =
+                dateTimeUTC.timeInMillis.let { milliSeconds ->
+                    (milliSeconds / 1000).let { seconds ->
+                        if (milliSeconds % 1000 >= 0)
+                            seconds
+                        else
+                            seconds - 1
+                    }
+                }
 
         override val epochMilliSeconds: Long
             get() = dateTimeUTC.timeInMillis
@@ -171,10 +184,8 @@ abstract class DateTime protected constructor() {
 
         override fun hashCode(): Int = dateTimeUTC.timeInMillis.hashCode()
 
-        @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
-            "DateTime(dateTime='${java.text.SimpleDateFormat("yyyy/MM/dd HH:mm.ss.SSS z")
-                .also { it.timeZone = gmt }.format(dateTimeUTC.time)}')"
+            "DateTime(epochMilliSeconds='${dateTimeUTC.timeInMillis}')"
 
         override val rawObject: Any
             get() = dateTimeUTC
@@ -188,14 +199,11 @@ abstract class DateTime protected constructor() {
             fun fromEpochMilliSeconds(
                 milliSseconds: Long
             ): DateTime =
-                if (milliSseconds < 0)
-                    throw IllegalArgumentException("${DateTimeSDK26::class.java.canonicalName}.fromEpochMilliSeconds(): 'milliSseconds' is negative")
-                else
-                    DateTimeSDK22(
-                        java.util.Calendar.getInstance().also {
-                            it.timeZone = gmt
-                            it.timeInMillis = milliSseconds
-                        })
+                DateTimeSDK22(
+                    java.util.Calendar.getInstance().also {
+                        it.timeZone = gmt
+                        it.timeInMillis = milliSseconds
+                    })
 
             fun of(dateTime: java.util.Calendar): DateTime =
                 DateTimeSDK22(dateTime)

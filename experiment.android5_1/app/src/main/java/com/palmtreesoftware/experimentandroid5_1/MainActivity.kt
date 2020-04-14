@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +36,6 @@ class MainActivity : AppCompatActivity() {
                 if (location != null) {
                     currentLatitude = location.latitude
                     currentLongitude = location.longitude
-                    isLocationChangedButWeatherNotUpdated = true
                     AsyncUtility.getAddressFromLocation(
                         this@MainActivity,
                         scope,
@@ -46,10 +44,7 @@ class MainActivity : AppCompatActivity() {
                     ) { address ->
                         textview_city.text = address.locality
                     }
-                    val now = DateTime.now()
-
-                    if (now - weatherInfoLastUpdated >= minimumWeatherPollingInterval)
-                        requestCurrentWeatherInfo(currentLatitude, currentLongitude)
+                    requestCurrentWeatherInfo(currentLatitude, currentLongitude)
                 }
             }
 
@@ -99,12 +94,8 @@ class MainActivity : AppCompatActivity() {
     private var currentWeatherViewIndex = 0
 
     private var weatherPollingRunnable: Runnable = Runnable {}
-    private val minimumWeatherPollingInterval: TimeDuration =
-        TimeDuration.fromMilliSeconds(1000.0 * 60 * 10)
+    private val minimumWeatherPollingIntervalMilliSeconds: Long = 1000 * 60 * 10
     private val maximumWeatherPollingIntervalMilliSeconds: Long = 1000 * 60 * 60
-    private var cachedWeatherInfo: String = ""
-    private var weatherInfoLastUpdated: DateTime = DateTime.EPOCH
-    private var isLocationChangedButWeatherNotUpdated = false
 
     //TODO("イベントとなるのは以下の通り")
     //TODO("1) 位置情報の変化")
@@ -211,126 +202,129 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun stopLocationService() {
+        handler.removeCallbacks(imageUpdateRunnable)
+        handler.removeCallbacks(weatherPollingRunnable)
         locationManager.removeUpdates(locationListener)
         unregisterReceiver(locationReceiver)
     }
 
     private fun requestCurrentWeatherInfo(latitude: Double, longitude: Double) {
-        AsyncUtility.downloadString(
+        OpenWeatherMap.Current.getCurrent(
+            this,
             scope,
-            OpenWeatherMap.Current.buildRequest(
-                this,
-                Locale.getDefault(),
-                latitude,
-                longitude
-            )
-        ) { text ->
-            val current = try {
-                OpenWeatherMap.Current.fromJSONString(text)
-            } catch (ex: Exception) {
-                null
-            }
-            if (current != null) {
-                textview_datetime_observation.text =
-                    current.lastUpdated.atZone(TimeZone.getDefault()).format("HH:mm:ss")
-                AsyncUtility.getAddressFromLocation(
-                    this,
-                    scope,
-                    current.coord.latitude,
-                    current.coord.longitude
-                ) { address ->
-                    textview_address_observation.text =
-                        with(address) {
-                            (0..maxAddressLineIndex).map { getAddressLine(it) }
-                        }.joinToString("\n")
-                }
-                current.sys.let {
-                    if (it.sunrise >= it.sunset) {
-                        textview_sunrise_or_sunset_label_1.text = "日の入り"
-                        textview_sunrise_or_sunset_1.text =
-                            it.sunset.atZone(TimeZone.getDefault()).format("HH:mm:ss")
-                        textview_sunrise_or_sunset_label_2.text = "日の出"
-                        textview_sunrise_or_sunset_2.text =
-                            it.sunrise.atZone(TimeZone.getDefault()).format("HH:mm:ss")
-                    } else {
-                        textview_sunrise_or_sunset_label_1.text = "日の出"
-                        textview_sunrise_or_sunset_1.text =
-                            it.sunrise.atZone(TimeZone.getDefault()).format("HH:mm:ss")
-                        textview_sunrise_or_sunset_label_2.text = "日の入り"
-                        textview_sunrise_or_sunset_2.text =
-                            it.sunset.atZone(TimeZone.getDefault()).format("HH:mm:ss")
-                    }
-                }
-                weatherInfos.clear()
-                current.weathers.map { WeatherInfo(it.iconUrl, null, it.description) }
-                    .forEach {
-                        weatherInfos.add(it)
-                    }
-                currentWeatherViewIndex = 0
-                weatherInfos.forEach {
-                    AsyncUtility.downloadImage(
-                        scope,
-                        it.iconUrl,
-                        { bitmap ->
-                            it.iconImage = bitmap
-                        }
-                    )
-                }
+            java.util.Locale.getDefault(),
+            latitude,
+            longitude,
+            { current ->
+                updateWeatherView(current)
                 handler.removeCallbacks(imageUpdateRunnable)
                 if (weatherInfos.isEmpty()) {
                     weathwe_icon_image.setImageBitmap(null)
                     weathwe_name.text = ""
                 } else {
-                    handler.removeCallbacks(imageUpdateRunnable)
-                    imageUpdateRunnable = Runnable {
-                        handler.removeCallbacks(imageUpdateRunnable)
-                        if (weatherInfos.isEmpty()) {
-                            // NOP
-                        } else if (weatherInfos.count() == 1) {
-                            val weatherInfo = weatherInfos[0]
-                            if (weatherInfo.iconImage != null)
-                                weathwe_icon_image.setImageBitmap(weatherInfo.iconImage)
-                            weathwe_name.text = weatherInfo.weatherName
-                            if (weatherInfo.iconImage == null) {
-                                handler.postDelayed(
-                                    imageUpdateRunnable,
-                                    updatingWeatherIconIntervalMilliSeconds
-                                )
-                            }
-                        } else {
-                            if (currentWeatherViewIndex >= weatherInfos.count())
-                                currentWeatherViewIndex = 0
-                            val weatherInfo = weatherInfos[currentWeatherViewIndex]
-                            if (weatherInfo.iconImage != null)
-                                weathwe_icon_image.setImageBitmap(weatherInfo.iconImage)
-                            weathwe_name.text = weatherInfo.weatherName
-                            ++currentWeatherViewIndex
-                            handler.postDelayed(
-                                imageUpdateRunnable,
-                                updatingWeatherIconIntervalMilliSeconds
-                            )
-                        }
-                    }
-                    handler.post(imageUpdateRunnable)
+                    requestToUpdateIconImage()
                 }
-                cachedWeatherInfo = current.toJSONString()
-                weatherInfoLastUpdated = DateTime.now()
-                isLocationChangedButWeatherNotUpdated = false
-                handler.removeCallbacks(weatherPollingRunnable)
-                weatherPollingRunnable = Runnable {
-                    handler.removeCallbacks(weatherPollingRunnable)
-                    Pair(currentLatitude, currentLongitude).let {
-                        if (!it.first.isNaN() && !it.second.isNaN()) {
-                            requestCurrentWeatherInfo(it.first, it.second)
-                            handler.postDelayed(
-                                weatherPollingRunnable,
-                                maximumWeatherPollingIntervalMilliSeconds
-                            )
-                        }
-                    }
-                }
-                handler.post(weatherPollingRunnable)
+                resetOpenWeatherPollingTimer(
+                    if (current.isCached)
+                        minimumWeatherPollingIntervalMilliSeconds
+                    else
+                        maximumWeatherPollingIntervalMilliSeconds
+                )
+            })
+    }
+
+    private fun updateWeatherView(current: OpenWeatherMap.Current) {
+        textview_datetime_observation.text =
+            current.lastUpdated.atZone(TimeZone.getDefault()).format("HH:mm:ss")
+        AsyncUtility.getAddressFromLocation(
+            this,
+            scope,
+            current.coord.latitude,
+            current.coord.longitude
+        ) { address ->
+            textview_address_observation.text =
+                with(address) {
+                    (0..maxAddressLineIndex).map { getAddressLine(it) }
+                }.joinToString("\n")
+        }
+        current.sys.let {
+            if (it.sunrise >= it.sunset) {
+                textview_sunrise_or_sunset_label_1.text = "日の入り"
+                textview_sunrise_or_sunset_1.text =
+                    it.sunset.atZone(TimeZone.getDefault()).format("HH:mm:ss")
+                textview_sunrise_or_sunset_label_2.text = "日の出"
+                textview_sunrise_or_sunset_2.text =
+                    it.sunrise.atZone(TimeZone.getDefault()).format("HH:mm:ss")
+            } else {
+                textview_sunrise_or_sunset_label_1.text = "日の出"
+                textview_sunrise_or_sunset_1.text =
+                    it.sunrise.atZone(TimeZone.getDefault()).format("HH:mm:ss")
+                textview_sunrise_or_sunset_label_2.text = "日の入り"
+                textview_sunrise_or_sunset_2.text =
+                    it.sunset.atZone(TimeZone.getDefault()).format("HH:mm:ss")
             }
         }
+        weatherInfos.clear()
+        current.weathers.map { WeatherInfo(it.iconUrl, null, it.description) }
+            .forEach {
+                weatherInfos.add(it)
+            }
+        currentWeatherViewIndex = 0
+        weatherInfos.forEach {
+            AsyncUtility.downloadImage(
+                scope,
+                it.iconUrl,
+                { bitmap ->
+                    it.iconImage = bitmap
+                }
+            )
+        }
+    }
+
+    private fun requestToUpdateIconImage() {
+        handler.removeCallbacks(imageUpdateRunnable)
+        imageUpdateRunnable = Runnable {
+            handler.removeCallbacks(imageUpdateRunnable)
+            if (weatherInfos.isEmpty()) {
+                // NOP
+            } else if (weatherInfos.count() == 1) {
+                val weatherInfo = weatherInfos[0]
+                if (weatherInfo.iconImage != null)
+                    weathwe_icon_image.setImageBitmap(weatherInfo.iconImage)
+                weathwe_name.text = weatherInfo.weatherName
+                if (weatherInfo.iconImage == null) {
+                    handler.postDelayed(
+                        imageUpdateRunnable,
+                        updatingWeatherIconIntervalMilliSeconds
+                    )
+                }
+            } else {
+                if (currentWeatherViewIndex >= weatherInfos.count())
+                    currentWeatherViewIndex = 0
+                val weatherInfo = weatherInfos[currentWeatherViewIndex]
+                if (weatherInfo.iconImage != null)
+                    weathwe_icon_image.setImageBitmap(weatherInfo.iconImage)
+                weathwe_name.text = weatherInfo.weatherName
+                ++currentWeatherViewIndex
+                handler.postDelayed(
+                    imageUpdateRunnable,
+                    updatingWeatherIconIntervalMilliSeconds
+                )
+            }
+        }
+        handler.post(imageUpdateRunnable)
+    }
+
+    private fun resetOpenWeatherPollingTimer(interval: Long) {
+        handler.removeCallbacks(weatherPollingRunnable)
+        weatherPollingRunnable = Runnable {
+            handler.removeCallbacks(weatherPollingRunnable)
+            Pair(currentLatitude, currentLongitude).let {
+                if (!it.first.isNaN() && !it.second.isNaN()) {
+                    requestCurrentWeatherInfo(it.first, it.second)
+                }
+            }
+        }
+        handler.postDelayed(weatherPollingRunnable, interval)
     }
 }

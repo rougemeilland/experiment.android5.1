@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 class TimeDurationTest {
 
     @Test
-    fun ZERO() {
+    fun zero() {
         assertEquals(0, TimeDuration.ZERO.tickCounts)
     }
 
@@ -115,10 +115,18 @@ class TimeDurationTest {
     }
 
     @Test
-    fun PlusDateTime() {
+    fun plusDateTime() {
         assertEquals(
             110,
             (TimeDuration.fromTickCounts(10L) + DateTime.fromEpochMilliSeconds(100L)).epochMilliSeconds
+        )
+        assertEquals(
+            0,
+            (TimeDuration.fromTickCounts(-100L) + DateTime.fromEpochMilliSeconds(100L)).epochMilliSeconds
+        )
+        assertEquals(
+            -90,
+            (TimeDuration.fromTickCounts(-100L) + DateTime.fromEpochMilliSeconds(10L)).epochMilliSeconds
         )
     }
 
@@ -150,10 +158,10 @@ class TimeDurationTest {
             TimeDuration.fromTickCounts(1000).compareTo(TimeDuration.fromTickCounts(1000)) == 0
         )
         assertTrue(
-            TimeDuration.fromTickCounts(1000).compareTo(TimeDuration.fromTickCounts(-1000)) > 0
+            TimeDuration.fromTickCounts(1000) > TimeDuration.fromTickCounts(-1000)
         )
         assertTrue(
-            TimeDuration.fromTickCounts(-1000).compareTo(TimeDuration.fromTickCounts(1000)) < 0
+            TimeDuration.fromTickCounts(-1000) < TimeDuration.fromTickCounts(1000)
         )
     }
 
@@ -193,11 +201,11 @@ class TimeDurationTest {
     fun testEquals() {
         assertEquals(
             false,
-            TimeDuration.fromTickCounts(-1000).equals(TimeDuration.fromTickCounts(1000))
+            TimeDuration.fromTickCounts(-1000) == TimeDuration.fromTickCounts(1000)
         )
         assertEquals(
             true,
-            TimeDuration.fromTickCounts(1000).equals(TimeDuration.fromTickCounts(1000))
+            TimeDuration.fromTickCounts(1000) == TimeDuration.fromTickCounts(1000)
         )
     }
 

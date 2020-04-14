@@ -30,7 +30,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         fun of(
             year: Int,
             month: Month,
-            dayofMonth: Int,
+            dayOfMonth: Int,
             hour: Int,
             minute: Int,
             second: Int,
@@ -41,7 +41,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 ZonedDateTimeSDK26.of(
                     year,
                     month,
-                    dayofMonth,
+                    dayOfMonth,
                     hour,
                     minute,
                     second,
@@ -52,7 +52,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 ZonedDateTimeSDK22.of(
                     year,
                     month,
-                    dayofMonth,
+                    dayOfMonth,
                     hour,
                     minute,
                     second,
@@ -91,7 +91,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     java.time.Month.OCTOBER -> Month.OCTOBER
                     java.time.Month.NOVEMBER -> Month.NOVEMBER
                     java.time.Month.DECEMBER -> Month.DECEMBER
-                    else -> throw Exception("${javaClass.canonicalName}.month: Bad month value: month=${dateTimeLocal.month}")
+                    else -> throw Exception("ZonedDateTime.month: Bad month value: month=${dateTimeLocal.month}")
                 }
 
         override val dayOfMonth: Int
@@ -107,7 +107,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     java.time.DayOfWeek.FRIDAY -> DayOfWeek.FRIDAY
                     java.time.DayOfWeek.SATURDAY -> DayOfWeek.SATURDAY
                     java.time.DayOfWeek.SUNDAY -> DayOfWeek.SUNDAY
-                    else -> throw Exception("${javaClass.canonicalName}.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.dayOfWeek}")
+                    else -> throw Exception("ZonedDateTime.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.dayOfWeek}")
                 }
 
         override val hour: Int
@@ -144,7 +144,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         override fun toString(): String {
             return "DateTime(dateTime='${dateTimeLocal
-                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm.ss.SSS OOOO"))}', timeZone='${dateTimeLocal.zone.id}')"
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS XXXXX"))}', timeZone='${dateTimeLocal.zone.id}')"
         }
 
         companion object {
@@ -168,16 +168,23 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 timeZone: TimeZone
             ): ZonedDateTime =
                 ZonedDateTimeSDK26(
-                    java.time.ZonedDateTime.of(
-                        year,
-                        month.value,
-                        dayofMonth,
-                        hour,
-                        minute,
-                        second,
-                        milliSecond,
-                        timeZone.rawObject as java.time.ZoneId
-                    ),
+                    try {
+                        java.time.ZonedDateTime.of(
+                            year,
+                            month.value,
+                            dayofMonth,
+                            hour,
+                            minute,
+                            second,
+                            milliSecond * (1000 * 1000),
+                            timeZone.rawObject as java.time.ZoneId
+                        )
+                    } catch (ex: java.time.DateTimeException) {
+                        throw IllegalArgumentException(
+                            "ZonedDatetime.of(): Any parameter is out of range",
+                            ex
+                        )
+                    },
                     timeZone
                 )
         }
@@ -188,7 +195,15 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         timeZone: TimeZone
     ) : ZonedDateTime(timeZone) {
         override val epochSeconds: Long
-            get() = dateTimeLocal.timeInMillis / 1000
+            get() =
+                dateTimeLocal.timeInMillis.let { milliSeconds ->
+                    (milliSeconds / 1000).let { seconds ->
+                        if (milliSeconds % 1000 >= 0)
+                            seconds
+                        else
+                            seconds - 1
+                    }
+                }
 
         override val epochMilliSeconds: Long
             get() = dateTimeLocal.timeInMillis
@@ -212,7 +227,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     10 -> Month.NOVEMBER
                     11 -> Month.DECEMBER
                     else -> throw Exception(
-                        "${javaClass.canonicalName}.month: Bad month value: month=${dateTimeLocal.get(
+                        "ZonedDateTime.month: Bad month value: month=${dateTimeLocal.get(
                             java.util.Calendar.MONTH
                         )}"
                     )
@@ -231,14 +246,15 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     6 -> DayOfWeek.FRIDAY
                     7 -> DayOfWeek.SATURDAY
                     else -> throw Exception(
-                        "${javaClass.canonicalName}.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.get(
+                        "ZonedDateTime.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.get(
                             java.util.Calendar.DAY_OF_WEEK
                         )}"
                     )
                 }
 
         override val hour: Int
-            get() = dateTimeLocal.get(java.util.Calendar.HOUR)
+            // Calendar.HOUR は 12 時間制の値なので間違えないこと
+            get() = dateTimeLocal.get(java.util.Calendar.HOUR_OF_DAY)
 
         override val minute: Int
             get() = dateTimeLocal.get(java.util.Calendar.MINUTE)
@@ -281,7 +297,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
-            "DateTime(dateTime='${java.text.SimpleDateFormat("yyyy/MM/dd HH:mm.ss.SSS z")
+            "DateTime(dateTime='${java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS XXX")
                 .also { it.timeZone = dateTimeLocal.timeZone }
                 .format(dateTimeLocal.time)}', timeZone='${dateTimeLocal.timeZone.id}')"
 
@@ -327,14 +343,34 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                             }
                         )
                         it.set(java.util.Calendar.DAY_OF_MONTH, dayofMonth)
-                        it.set(java.util.Calendar.HOUR, hour)
+                        // Calendar.HOUR は 12 時間制の値なので間違えないこと
+                        it.set(java.util.Calendar.HOUR_OF_DAY, hour)
                         it.set(java.util.Calendar.MINUTE, minute)
                         it.set(java.util.Calendar.SECOND, second)
                         it.set(java.util.Calendar.MILLISECOND, milliSecond)
                         it.timeZone = timeZone.rawObject as java.util.TimeZone
                     },
                     timeZone
-                )
+                ).also {
+                    // Calendar の構築時にパラメタの検査をしていないらしく、範囲外のパラメタを与えると
+                    // 意図しない日時の Calendar ができることがあるので、
+                    // 生成された Calendar オブジェクトの各コンポーネントを検査して与えた値と異なっていたら
+                    // パラメタエラーとしている
+                    // 例: 2020年1月0日を指定した場合 -> Calendar の year は 2019 、
+                    // month は DECEMBER 、dayOfMonth は 31 になる
+                    if (it.year != year ||
+                        it.month != month ||
+                        it.dayOfMonth != dayofMonth ||
+                        it.hour != hour ||
+                        it.minute != minute ||
+                        it.second != second ||
+                        it.millSecond != milliSecond
+                    ) {
+                        throw IllegalArgumentException(
+                            "ZonedDatetime.of(): Any parameter is out of range"
+                        )
+                    }
+                }
         }
     }
 }

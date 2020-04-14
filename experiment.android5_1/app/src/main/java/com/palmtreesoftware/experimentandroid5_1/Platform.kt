@@ -41,7 +41,7 @@ class Platform {
         fun callTestCode(): String? {
             // テストコードのコードをリフレクションで探す。 release のときは見つからないので例外が通知される
             val testCodeClass = try {
-                Class.forName("com.palmtreesoftware.experimentandroid51.TestCode").kotlin
+                Class.forName("com.palmtreesoftware.experimentandroid5_1.TestCode").kotlin
             } catch (ex: ClassNotFoundException) {
                 return null
             }

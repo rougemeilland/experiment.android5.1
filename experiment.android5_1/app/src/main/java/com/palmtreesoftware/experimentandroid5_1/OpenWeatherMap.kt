@@ -2,12 +2,14 @@ package com.palmtreesoftware.experimentandroid5_1
 
 import android.content.Context
 import android.net.Uri
-import org.json.JSONArray
+import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
-import java.util.*
+import kotlin.math.floor
 
 class OpenWeatherMap {
+
     class Current(
+        val sourceText: String,
         /*val id: String,*/
         /*val name: String,*/
         val coord: Coord,
@@ -19,10 +21,16 @@ class OpenWeatherMap {
         val clouds: Clouds?,
         val rain: Rain?,
         val snow: Snow?,
-        val lastUpdated: DateTime
+        val lastUpdated: DateTime,
+        val isCached: Boolean
     ) {
-        fun toJSONString(): String = toJSONObject().toString()
+        fun saveToCache(context: Context) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
+            prefs.putString(PREF_KEY_CACHE_CURRENT, sourceText)
+            prefs.apply()
+        }
 
+        /*
         private fun toJSONObject(): JSONObject =
             JSONObject().also { o ->
                 o.put("coord", coord.toJSONObject())
@@ -35,11 +43,88 @@ class OpenWeatherMap {
                 snow?.let { o.put("snow", it.toJSONObject()) }
                 o.put("dt", lastUpdated.epochSeconds)
             }
+         */
 
         companion object {
-            fun buildRequest(
+            fun getCurrent(
                 context: Context,
-                locale: Locale,
+                scope: CoroutineScope,
+                locale: java.util.Locale,
+                latitude: Double,
+                longitude: Double,
+                callback: (Current) -> Unit
+            ) {
+                val now = DateTime.now()
+                if (now - getLatestRequestDateTime(context) < minimumInterval) {
+                    val cache = loadFromCache(context)
+                    if (cache != null) {
+                        callback(cache)
+                    } else {
+                        getCurrentFromServer(
+                            scope,
+                            context,
+                            locale,
+                            latitude,
+                            longitude,
+                            now,
+                            callback
+                        )
+                    }
+                } else {
+                    getCurrentFromServer(scope, context, locale, latitude, longitude, now, callback)
+                }
+            }
+
+            private fun getCurrentFromServer(
+                scope: CoroutineScope,
+                context: Context,
+                locale: java.util.Locale,
+                latitude: Double,
+                longitude: Double,
+                now: DateTime,
+                callback: (Current) -> Unit
+            ) {
+                setLatestRequestDateTime(context, now)
+                AsyncUtility.downloadString(
+                    scope,
+                    buildRequest(
+                        context,
+                        locale,
+                        latitude,
+                        longitude
+                    )
+                ) { text ->
+                    val current = try {
+                        fromJSONString(text, false)
+                    } catch (ex: Exception) {
+                        null
+                    }
+                    if (current != null) {
+                        current.saveToCache(context)
+                        callback(current)
+                    }
+                }
+            }
+
+            private fun loadFromCache(context: Context): Current? {
+                return context.getSharedPreferences(PREFS_NAME, 0).let { prefs ->
+                    prefs.getString(PREF_KEY_CACHE_CURRENT, null).let { sourceText ->
+                        if (sourceText == null) {
+                            null
+                        } else {
+                            try {
+                                fromJSONString(sourceText, true)
+                            } catch (ex: Exception) {
+                                null
+                            }
+                        }
+                    }
+                }
+            }
+
+            private fun buildRequest(
+                context: Context,
+                locale: java.util.Locale,
                 latitude: Double,
                 longitude: Double
             ): Uri {
@@ -59,18 +144,25 @@ class OpenWeatherMap {
                 }
             }
 
-            fun fromJSONString(source: String): Current {
+            private fun fromJSONString(sourceText: String, isCached: Boolean): Current {
                 return fromJSONObject(
+                    sourceText,
                     try {
-                        JSONObject(source)
+                        JSONObject(sourceText)
                     } catch (ex: Exception) {
-                        throw Exception("JSONObject(soource) is failed: source=$source")
-                    }
+                        throw Exception("JSONObject(soource) is failed: source=$sourceText")
+                    },
+                    isCached
                 )
             }
 
-            private fun fromJSONObject(o: JSONObject): Current {
+            private fun fromJSONObject(
+                sourceText: String,
+                o: JSONObject,
+                isCached: Boolean
+            ): Current {
                 return Current(
+                    sourceText,
                     /*getString(o, "id"),*/
                     /*getString(o, "name"),*/
                     Coord.fromJSONObject(getJSONObject(o, "coord")),
@@ -83,18 +175,21 @@ class OpenWeatherMap {
                     Clouds.fromJSONObjectOrNull(optJSONObject(o, "clouds")),
                     Rain.fromJSONObjectOrNull(optJSONObject(o, "rain")),
                     Snow.fromJSONObjectOrNull(optJSONObject(o, "snow")),
-                    DateTime.fromEpochSeconds(getLong(o, "dt"))
+                    DateTime.fromEpochSeconds(getLong(o, "dt")),
+                    isCached
                 )
             }
 
         }
 
         class Coord private constructor(val latitude: Double, val longitude: Double) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("lat", latitude)
                     o.put("lon", longitude)
                 }
+             */
 
             companion object {
                 fun fromJSONObject(o: JSONObject): Coord {
@@ -111,11 +206,13 @@ class OpenWeatherMap {
             val sunrise: DateTime,
             val sunset: DateTime
         ) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("sunrise", sunrise.epochSeconds)
                     o.put("sunset", sunset.epochSeconds)
                 }
+             */
 
             companion object {
                 fun fromJSONObject(o: JSONObject): Sys {
@@ -138,6 +235,7 @@ class OpenWeatherMap {
             /*val seaLevelHectoPascal: Double?,*/
             /*val grndLevelHectoPascal: Double?*/
         ) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("feels_like", temperatureCelsius)
@@ -145,6 +243,7 @@ class OpenWeatherMap {
                     o.put("temp_max", maxTemperatureCelsius)
                     o.put("humidity", humidityPercent)
                 }
+             */
 
             companion object {
                 fun fromJSONObject(o: JSONObject): Main {
@@ -178,11 +277,13 @@ class OpenWeatherMap {
                     }
                 }
 
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("description", description)
                     o.put("icon", description)
                 }
+             */
 
             companion object {
                 fun fromJSONObject(o: JSONObject): Weather {
@@ -204,11 +305,13 @@ class OpenWeatherMap {
             val direction: SixteenDirections?
                 get() = degree?.let { getDirection(it) }
 
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("speed", speedMeterPerSecond)
                     degree?.let { o.put("deg", it) }
                 }
+             */
 
             companion object {
                 fun fromJSONObject(o: JSONObject): Wind {
@@ -224,10 +327,12 @@ class OpenWeatherMap {
             // 曇天の度合い
             val allPercent: Double
         ) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     o.put("all", allPercent)
                 }
+             */
 
             companion object {
                 fun fromJSONObjectOrNull(o: JSONObject?): Clouds? {
@@ -242,11 +347,13 @@ class OpenWeatherMap {
         }
 
         class Rain private constructor(val `1hMilliMeter`: Double?, val `3hMilliMeter`: Double?) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     `1hMilliMeter`?.let { o.put("1h", it) }
                     `3hMilliMeter`?.let { o.put("3h", it) }
                 }
+             */
 
             companion object {
                 fun fromJSONObjectOrNull(o: JSONObject?): Rain? {
@@ -262,11 +369,13 @@ class OpenWeatherMap {
         }
 
         class Snow private constructor(val `1hMilliMeter`: Double?, val `3hMilliMeter`: Double?) {
+            /*
             fun toJSONObject(): JSONObject =
                 JSONObject().also { o ->
                     `1hMilliMeter`?.let { o.put("1h", it) }
                     `3hMilliMeter`?.let { o.put("3h", it) }
                 }
+             */
 
             companion object {
                 fun fromJSONObjectOrNull(o: JSONObject?): Snow? {
@@ -283,6 +392,22 @@ class OpenWeatherMap {
     }
 
     companion object {
+        private const val PREFS_NAME = "com.palmtreesoftware.experimentandroid5_1"
+        private const val PREF_KEY_LATEST_REQUEST = "latest-request"
+        private const val PREF_KEY_CACHE_CURRENT = "cache-current"
+        private val minimumInterval: TimeDuration = TimeDuration.fromMinutes(10.0)
+
+        private fun getLatestRequestDateTime(context: Context): DateTime =
+            context.getSharedPreferences(PREFS_NAME, 0).let { prefs ->
+                DateTime.fromEpochSeconds(prefs.getLong(PREF_KEY_LATEST_REQUEST, 0))
+            }
+
+        private fun setLatestRequestDateTime(context: Context, dateTime: DateTime) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
+            prefs.putLong(PREF_KEY_LATEST_REQUEST, dateTime.epochSeconds)
+            prefs.apply()
+        }
+
         private val directions: Array<SixteenDirections> =
             arrayOf(
                 SixteenDirections.N,
@@ -333,6 +458,7 @@ class OpenWeatherMap {
             }
         }
 
+        /*
         private fun optArrayOfJSONObject(o: JSONObject, name: String): Array<JSONObject>? =
             try {
                 if (!o.has(name))
@@ -348,6 +474,7 @@ class OpenWeatherMap {
             } catch (ex: Exception) {
                 throw Exception("JSONObject.optJSONArray('$name') is failed: source=$o")
             }
+         */
 
         private fun getJSONObject(o: JSONObject, name: String): JSONObject {
             try {
@@ -373,6 +500,7 @@ class OpenWeatherMap {
             }
         }
 
+        /*
         private fun optLong(o: JSONObject, name: String): Long? {
             try {
                 return if (o.has(name)) o.getLong(name) else null
@@ -380,6 +508,7 @@ class OpenWeatherMap {
                 throw Exception("JSONObject.optLong('$name') is failed: source=$o")
             }
         }
+         */
 
         private fun getString(o: JSONObject, name: String): String {
             try {
@@ -389,6 +518,7 @@ class OpenWeatherMap {
             }
         }
 
+        /*
         private fun optString(o: JSONObject, name: String): String? {
             try {
                 return if (o.has(name)) o.getString(name) else null
@@ -396,6 +526,7 @@ class OpenWeatherMap {
                 throw Exception("JSONObject.optString('$name') is failed: source=$o")
             }
         }
+         */
 
         private fun getDouble(o: JSONObject, name: String): Double {
             try {
@@ -414,11 +545,11 @@ class OpenWeatherMap {
         }
 
         private fun getDirection(degree: Double): SixteenDirections? {
-            return directions[((degree / 360 * 32).toInt() % 32).let {
-                if (it >= 0) it else it + 32
-            }]
+            return directions[
+                    (floor(degree / 360 * 32).toInt() % 32)
+                        .let {
+                            if (it >= 0) it else it + 32
+                        }]
         }
     }
 }
-
-

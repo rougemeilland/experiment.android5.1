@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="パッケージ単体テスト 29" type="AndroidJUnit" factoryName="Android JUnit" singleton="false">
+    <module name="app" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="com.palmtreesoftware.experimentandroid5_1.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <option name="ALTERNATIVE_JRE_PATH" value="Android API 29 Platform" />
+    <option name="PACKAGE_NAME" value="com.palmtreesoftware.experimentandroid5_1" />
+    <option name="MAIN_CLASS_NAME" value="" />
+    <option name="METHOD_NAME" value="" />
+    <option name="TEST_OBJECT" value="package" />
+    <option name="PARAMETERS" value="" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+    <envs>
+      <env name="__UNITTESTSDKVERSION" value="29" />
+    </envs>
+    <method v="2">
+      <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -17,7 +17,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.palmtreesoftware.experimentandroid51"
+        applicationId "com.palmtreesoftware.experimentandroid5_1"
         minSdkVersion 22
         targetSdkVersion 29
         versionCode 1

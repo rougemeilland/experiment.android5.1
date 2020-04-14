@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">experiment.android5.1</string>
+    <string name="time_zone_short_name_NONE" translatable="false" />
     <string name="time_zone_short_name_DEFAULT" translatable="false" />
     <string name="time_zone_short_name_GMT">GMT</string>
     <string name="time_zone_short_name_JST">JST</string>
