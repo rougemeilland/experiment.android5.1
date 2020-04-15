@@ -1,13 +1,13 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
 
 class ZonedDateTimeTest {
 
     @Test
-    fun of() {
+    fun ofUntilMilliSecond() {
         // dayOfMonth の範囲テスト (下限)
         assertThrows(IllegalArgumentException::class.java) {
             ZonedDateTime.of(
@@ -205,185 +205,22 @@ class ZonedDateTimeTest {
             )
         }
 
-        // month のテスト (JANUARY)
-        assertEquals(
-            "DateTime(dateTime='2020/01/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.JANUARY,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (FEBRUARY)
-        assertEquals(
-            "DateTime(dateTime='2020/02/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.FEBRUARY,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (MARCH)
-        assertEquals(
-            "DateTime(dateTime='2020/03/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.MARCH,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (APRIL)
-        assertEquals(
-            "DateTime(dateTime='2020/04/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.APRIL,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (MAY)
-        assertEquals(
-            "DateTime(dateTime='2020/05/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.MAY,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (JUNE)
-        assertEquals(
-            "DateTime(dateTime='2020/06/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.JUNE,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (JULY)
-        assertEquals(
-            "DateTime(dateTime='2020/07/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.JULY,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (AUGUST)
-        assertEquals(
-            "DateTime(dateTime='2020/08/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.AUGUST,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (SEPTEMBER)
-        assertEquals(
-            "DateTime(dateTime='2020/09/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.SEPTEMBER,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (OCTOBER)
-        assertEquals(
-            "DateTime(dateTime='2020/10/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.OCTOBER,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (NOVEMBER)
-        assertEquals(
-            "DateTime(dateTime='2020/11/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.NOVEMBER,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
-
-        // month のテスト (DECEMBER)
-        assertEquals(
-            "DateTime(dateTime='2020/12/01 00:00:00.000 Z', timeZone='GMT')",
-            ZonedDateTime.of(
-                2020,
-                Month.DECEMBER,
-                1,
-                0,
-                0,
-                0,
-                0,
-                TimeZone.GMT
-            ).toString()
-        )
+        // month のテスト
+        Month.values().forEach { month ->
+            assertEquals(
+                "DateTime(dateTime='2020/%02d/01 00:00:00.000 Z', timeZone='GMT')".format(month.value),
+                ZonedDateTime.of(
+                    2020,
+                    month,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    TimeZone.GMT
+                ).toString()
+            )
+        }
 
         ZonedDateTime.of(
             2020,
@@ -600,6 +437,620 @@ class ZonedDateTimeTest {
     }
 
     @Test
+    fun ofUntilSecond() {
+        // dayOfMonth の範囲テスト (下限)
+        assertThrows(IllegalArgumentException::class.java) {
+            ZonedDateTime.of(
+                2019,
+                Month.APRIL,
+                0,
+                0,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+
+        // dayOfMonth の範囲テスト (30日の月の上限)
+        assertThrows(IllegalArgumentException::class.java)
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.APRIL,
+                31,
+                0,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (31日の月の上限)
+        assertThrows(
+            IllegalArgumentException::
+            class.java
+        )
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.JANUARY,
+                32,
+                0,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (28日の月の上限)
+        assertThrows(
+            IllegalArgumentException::
+            class.java
+        )
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.FEBRUARY,
+                29,
+                0,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (うるう年の2月29日が正しく認識できること)
+        assertEquals(
+            29,
+            ZonedDateTime.of(
+                2020,
+                Month.FEBRUARY,
+                29,
+                0,
+                0,
+                0,
+                TimeZone.GMT
+            ).dayOfMonth
+        )
+        // hour の範囲テスト (下限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                -1,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // hour の範囲テスト (上限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                25,
+                0,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // minute の範囲テスト (下限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                0,
+                -1,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // minute の範囲テスト (上限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                0,
+                60,
+                0,
+                TimeZone.GMT
+            )
+        }
+        // second の範囲テスト (下限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                0,
+                0,
+                -1,
+                TimeZone.GMT
+            )
+        }
+        // second の範囲テスト (上限)
+        assertThrows(
+            IllegalArgumentException::class.java
+        ) {
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                1,
+                0,
+                0,
+                60,
+                TimeZone.GMT
+            )
+        }
+
+        // month のテスト
+        Month.values().forEach { month ->
+            assertEquals(
+                "DateTime(dateTime='2020/%02d/01 00:00:00.000 Z', timeZone='GMT')".format(month.value),
+                ZonedDateTime.of(
+                    2020,
+                    month,
+                    1,
+                    0,
+                    0,
+                    0,
+                    TimeZone.GMT
+                ).toString()
+            )
+        }
+
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("GMT+00:00")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 Z', timeZone='${
+                Platform.sdK26Depended(
+                    { "GMT" },
+                    { "GMT+00:00" }
+                )}')",
+                it.toString()
+            )
+            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals(1586480523000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.GMT
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1586480523000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("GMT")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1586480523000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("UTC")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 Z', timeZone='UTC')",
+                it.toString()
+            )
+            assertEquals("UTC", it.timeZone.id)
+            assertEquals(1586480523000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("Europe/London")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 +01:00', timeZone='Europe/London')",
+                it.toString()
+            )
+            assertEquals("Europe/London", it.timeZone.id)
+            assertEquals(1586480523000 - 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("Asia/Tokyo")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 01:02:03.000 +09:00', timeZone='Asia/Tokyo')",
+                it.toString()
+            )
+            assertEquals("Asia/Tokyo", it.timeZone.id)
+            assertEquals(1586480523000 - 9 * 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("GMT+00:00")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 Z', timeZone='${
+                Platform.sdK26Depended(
+                    { "GMT" },
+                    { "GMT+00:00" }
+                )}')",
+                it.toString()
+            )
+            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals(1578618123000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.GMT
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1578618123000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("GMT")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1578618123000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("UTC")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 Z', timeZone='UTC')",
+                it.toString()
+            )
+            assertEquals("UTC", it.timeZone.id)
+            assertEquals(1578618123000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("Europe/London")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 Z', timeZone='Europe/London')",
+                it.toString()
+            )
+            assertEquals("Europe/London", it.timeZone.id)
+            assertEquals(1578618123000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            1,
+            2,
+            3,
+            TimeZone.of("Asia/Tokyo")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 01:02:03.000 +09:00', timeZone='Asia/Tokyo')",
+                it.toString()
+            )
+            assertEquals("Asia/Tokyo", it.timeZone.id)
+            assertEquals(1578618123000 - 9 * 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+    }
+
+    @Test
+    fun ofUntilDay() {
+        // dayOfMonth の範囲テスト (下限)
+        assertThrows(IllegalArgumentException::class.java) {
+            ZonedDateTime.of(
+                2019,
+                Month.APRIL,
+                0,
+                TimeZone.GMT
+            )
+        }
+
+        // dayOfMonth の範囲テスト (30日の月の上限)
+        assertThrows(IllegalArgumentException::class.java)
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.APRIL,
+                31,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (31日の月の上限)
+        assertThrows(
+            IllegalArgumentException::
+            class.java
+        )
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.JANUARY,
+                32,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (28日の月の上限)
+        assertThrows(
+            IllegalArgumentException::
+            class.java
+        )
+        {
+            ZonedDateTime.of(
+                2019,
+                Month.FEBRUARY,
+                29,
+                TimeZone.GMT
+            )
+        }
+        // dayOfMonth の範囲テスト (うるう年の2月29日が正しく認識できること)
+        assertEquals(
+            29,
+            ZonedDateTime.of(
+                2020,
+                Month.FEBRUARY,
+                29,
+                TimeZone.GMT
+            ).dayOfMonth
+        )
+
+        // month のテスト
+        Month.values().forEach { month ->
+            assertEquals(
+                "DateTime(dateTime='2020/%02d/01 00:00:00.000 Z', timeZone='GMT')".format(month.value),
+                ZonedDateTime.of(
+                    2020,
+                    month,
+                    1,
+                    TimeZone.GMT
+                ).toString()
+            )
+        }
+
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.of("GMT+00:00")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 Z', timeZone='${
+                Platform.sdK26Depended(
+                    { "GMT" },
+                    { "GMT+00:00" }
+                )}')",
+                it.toString()
+            )
+            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals(1586476800000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.GMT
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1586476800000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.of("GMT")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1586476800000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.of("UTC")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 Z', timeZone='UTC')",
+                it.toString()
+            )
+            assertEquals("UTC", it.timeZone.id)
+            assertEquals(1586476800000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.of("Europe/London")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 +01:00', timeZone='Europe/London')",
+                it.toString()
+            )
+            assertEquals("Europe/London", it.timeZone.id)
+            assertEquals(1586476800000 - 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.APRIL,
+            10,
+            TimeZone.of("Asia/Tokyo")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/04/10 00:00:00.000 +09:00', timeZone='Asia/Tokyo')",
+                it.toString()
+            )
+            assertEquals("Asia/Tokyo", it.timeZone.id)
+            assertEquals(1586476800000 - 9 * 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.of("GMT+00:00")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 Z', timeZone='${
+                Platform.sdK26Depended(
+                    { "GMT" },
+                    { "GMT+00:00" }
+                )}')",
+                it.toString()
+            )
+            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals(1578614400000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.GMT
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1578614400000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.of("GMT")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 Z', timeZone='GMT')",
+                it.toString()
+            )
+            assertEquals("GMT", it.timeZone.id)
+            assertEquals(1578614400000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.of("UTC")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 Z', timeZone='UTC')",
+                it.toString()
+            )
+            assertEquals("UTC", it.timeZone.id)
+            assertEquals(1578614400000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.of("Europe/London")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 Z', timeZone='Europe/London')",
+                it.toString()
+            )
+            assertEquals("Europe/London", it.timeZone.id)
+            assertEquals(1578614400000, it.epochMilliSeconds)
+        }
+        ZonedDateTime.of(
+            2020,
+            Month.JANUARY,
+            10,
+            TimeZone.of("Asia/Tokyo")
+        ).also {
+            assertEquals(
+                "DateTime(dateTime='2020/01/10 00:00:00.000 +09:00', timeZone='Asia/Tokyo')",
+                it.toString()
+            )
+            assertEquals("Asia/Tokyo", it.timeZone.id)
+            assertEquals(1578614400000 - 9 * 60 * 60 * 1000, it.epochMilliSeconds)
+        }
+    }
+
+    @Test
     fun ofDateTime() {
         DateTime.fromEpochMilliSeconds(1586480523004).also { dateTime ->
             ZonedDateTime.of(dateTime, TimeZone.GMT).also { zonedDateTime ->
@@ -730,16 +1181,605 @@ class ZonedDateTimeTest {
     }
 
     @Test
-    fun getEpochSeconds() {
-        
+    fun getLengthOfMonthYear() {
+        TODO("テストを書く")
+    }
+
+    @Test
+    fun getLengthOfYearYearMonth() {
+        TODO("テストを書く")
     }
 
     @Test
     fun getEpochMilliSeconds() {
+        TimeZone.GMT.let { timeZone ->
+            val offset = 0L
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochMilliSeconds
+            )
+        }
+        TimeZone.of("GMT+01:00").let { timeZone ->
+            val offset = -1000L * 60 * 60
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochMilliSeconds
+            )
+        }
+        TimeZone.of("GMT-01:00").let { timeZone ->
+            val offset = +1000L * 60 * 60
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1000,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochMilliSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochMilliSeconds
+            )
+        }
+    }
+
+    @Test
+    fun getEpochSeconds() {
+        TimeZone.GMT.let { timeZone ->
+            val offset = 0L
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochSeconds
+            )
+        }
+        TimeZone.of("GMT+01:00").let { timeZone ->
+            val offset = -60L * 60
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochSeconds
+            )
+        }
+        TimeZone.of("GMT-01:00").let { timeZone ->
+            val offset = +60L * 60
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60 * 24,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60 * 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 60,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    1,
+                    0,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 1,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    1,
+                    0,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset + 0,
+                ZonedDateTime.of(
+                    1970,
+                    Month.JANUARY,
+                    1,
+                    0,
+                    0,
+                    0,
+                    1,
+                    timeZone
+                ).epochSeconds
+            )
+            assertEquals(
+                offset - 1,
+                ZonedDateTime.of(
+                    1969,
+                    Month.DECEMBER,
+                    31,
+                    23,
+                    59,
+                    59,
+                    999,
+                    timeZone
+                ).epochSeconds
+            )
+        }
     }
 
     @Test
     fun getYear() {
+        arrayOf(1969, 1970, 1971).crossMap(
+            arrayOf(
+                "+00:00",
+                "+01:00",
+                "-01:00"
+            )
+        ) { year, timeZoneId ->
+            assertEquals(
+                year,
+                ZonedDateTime.of(year, Month.JANUARY, 1, 0, 0, 0, TimeZone.of(timeZoneId)).year
+            )
+            assertEquals(
+                year,
+                ZonedDateTime.of(year, Month.DECEMBER, 31, 23, 59, 59, TimeZone.of(timeZoneId)).year
+            )
+        }
     }
 
     @Test
@@ -754,6 +1794,18 @@ class ZonedDateTimeTest {
     @Test
     fun getDayOfWeek() {
         //TODO("DayOfWeekを全検査")
+    }
+
+    @Test
+    fun getDayOfYear() {
+    }
+
+    @Test
+    fun getLengthOfMonth() {
+    }
+
+    @Test
+    fun getLengthOfYear() {
     }
 
     @Test

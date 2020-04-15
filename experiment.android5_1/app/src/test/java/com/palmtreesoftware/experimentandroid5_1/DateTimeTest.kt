@@ -1,8 +1,8 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import java.util.*
 
 class DateTimeTest {

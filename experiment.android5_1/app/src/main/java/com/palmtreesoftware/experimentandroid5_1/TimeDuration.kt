@@ -1,24 +1,23 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-
 class TimeDuration private constructor(val tickCounts: Long) {
     val milliSeconds: Double
         get() = tickCounts.toDouble()
 
     val seconds: Double
-        get() = tickCounts / 1000.toDouble()
+        get() = tickCounts / 1000.0
 
     val minutes: Double
-        get() = tickCounts / (1000.toDouble() * 60)
+        get() = tickCounts / (1000.0 * 60)
 
     val hours: Double
-        get() = tickCounts / (1000.toDouble() * 60 * 60)
+        get() = tickCounts / (1000.0 * 60 * 60)
 
     val days: Double
-        get() = tickCounts / (1000.toDouble() * 60 * 60 * 24)
+        get() = tickCounts / (1000.0 * 60 * 60 * 24)
 
     val weeks: Double
-        get() = tickCounts / (1000.toDouble() * 60 * 60 * 24 * 7)
+        get() = tickCounts / (1000.0 * 60 * 60 * 24 * 7)
 
     operator fun plus(dateTime: DateTime): DateTime = dateTime.plus(this)
 
@@ -29,6 +28,9 @@ class TimeDuration private constructor(val tickCounts: Long) {
         TimeDuration(tickCounts - duration.tickCounts)
 
     operator fun times(multiplicand: Int): TimeDuration =
+        TimeDuration(tickCounts * multiplicand)
+
+    operator fun times(multiplicand: Long): TimeDuration =
         TimeDuration(tickCounts * multiplicand)
 
     operator fun times(multiplicand: Double): TimeDuration =
@@ -121,15 +123,15 @@ class TimeDuration private constructor(val tickCounts: Long) {
             TimeDuration((seconds * 1000).toLong())
 
         fun fromMinutes(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.toDouble() * 60)).toLong())
+            TimeDuration((seconds * (1000.0 * 60)).toLong())
 
         fun fromHours(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.toDouble() * 60 * 60)).toLong())
+            TimeDuration((seconds * (1000.0 * 60 * 60)).toLong())
 
         fun fromDays(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.toDouble() * 60 * 60 * 24)).toLong())
+            TimeDuration((seconds * (1000.0 * 60 * 60 * 24)).toLong())
 
         fun fromWeeks(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.toDouble() * 60 * 60 * 24 * 7)).toLong())
+            TimeDuration((seconds * (1000.0 * 60 * 60 * 24 * 7)).toLong())
     }
 }

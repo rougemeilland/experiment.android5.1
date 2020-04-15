@@ -1,8 +1,8 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 class TimeDurationTest {
 
@@ -141,9 +141,8 @@ class TimeDurationTest {
     @Test
     fun times() {
         assertEquals(3000, (TimeDuration.fromTickCounts(1000) * 3).tickCounts)
+        assertEquals(3000, (TimeDuration.fromTickCounts(1000) * 3L).tickCounts)
         assertEquals(3000, (TimeDuration.fromTickCounts(1000) * 3.0).tickCounts)
-        assertEquals(3000, (3 * TimeDuration.fromTickCounts(1000)).tickCounts)
-        assertEquals(3000, (3.0 * TimeDuration.fromTickCounts(1000)).tickCounts)
     }
 
     @Test

@@ -11,13 +11,19 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     abstract val month: Month
     abstract val dayOfMonth: Int
     abstract val dayOfWeek: DayOfWeek
+    abstract val dayOfYear: Int
+    abstract val lengthOfMonth: Int
+    abstract val lengthOfYear: Int
     abstract val hour: Int
     abstract val minute: Int
     abstract val second: Int
     abstract val millSecond: Int
     abstract fun toDateTime(): DateTime
-    abstract fun format(dateFormatString: String): String
+    abstract fun format(dateFormatString: String, locale: java.util.Locale): String
     abstract override fun toString(): String
+
+    fun format(dateFormatString: String): String =
+        format(dateFormatString, java.util.Locale.getDefault())
 
     companion object {
         fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
@@ -60,6 +66,39 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     timeZone
                 )
             })
+
+        fun of(
+            year: Int,
+            month: Month,
+            dayOfMonth: Int,
+            hour: Int,
+            minute: Int,
+            second: Int,
+            timeZone: TimeZone
+        ): ZonedDateTime =
+            of(year, month, dayOfMonth, hour, minute, second, 0, timeZone)
+
+        fun of(
+            year: Int,
+            month: Month,
+            dayOfMonth: Int,
+            timeZone: TimeZone
+        ): ZonedDateTime =
+            of(year, month, dayOfMonth, 0, 0, 0, 0, timeZone)
+
+        fun getLengthOfMonth(year: Int, month: Month): Int =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.getLengthOfMonth(year, month)
+            }, {
+                ZonedDateTimeSDK22.getLengthOfMonth(year, month)
+            })
+
+        fun getLengthOfYear(year: Int): Int =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.getLengthOfYear(year)
+            }, {
+                ZonedDateTimeSDK22.getLengthOfYear(year)
+            })
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -67,6 +106,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         private val dateTimeLocal: java.time.ZonedDateTime,
         timeZone: TimeZone
     ) : ZonedDateTime(timeZone) {
+        private val dateLocal: java.time.LocalDate = dateTimeLocal.toLocalDate()
+
         override val epochSeconds: Long
             get() = dateTimeLocal.toInstant().epochSecond
 
@@ -77,22 +118,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             get() = dateTimeLocal.year
 
         override val month: Month
-            get() =
-                when (dateTimeLocal.month) {
-                    java.time.Month.JANUARY -> Month.JANUARY
-                    java.time.Month.FEBRUARY -> Month.FEBRUARY
-                    java.time.Month.MARCH -> Month.MARCH
-                    java.time.Month.APRIL -> Month.APRIL
-                    java.time.Month.MAY -> Month.MAY
-                    java.time.Month.JUNE -> Month.JUNE
-                    java.time.Month.JULY -> Month.JULY
-                    java.time.Month.AUGUST -> Month.AUGUST
-                    java.time.Month.SEPTEMBER -> Month.SEPTEMBER
-                    java.time.Month.OCTOBER -> Month.OCTOBER
-                    java.time.Month.NOVEMBER -> Month.NOVEMBER
-                    java.time.Month.DECEMBER -> Month.DECEMBER
-                    else -> throw Exception("ZonedDateTime.month: Bad month value: month=${dateTimeLocal.month}")
-                }
+            get() = mapMonthFromNative(dateTimeLocal.month)
 
         override val dayOfMonth: Int
             get() = dateTimeLocal.dayOfMonth
@@ -110,6 +136,15 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     else -> throw Exception("ZonedDateTime.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.dayOfWeek}")
                 }
 
+        override val dayOfYear: Int
+            get() = dateTimeLocal.dayOfYear
+
+        override val lengthOfMonth: Int
+            get() = dateLocal.lengthOfMonth()
+
+        override val lengthOfYear: Int
+            get() = dateLocal.lengthOfYear()
+
         override val hour: Int
             get() = dateTimeLocal.hour
 
@@ -124,8 +159,13 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         override fun toDateTime(): DateTime = DateTime.of(dateTimeLocal.toLocalDateTime())
 
-        override fun format(dateFormatString: String): String =
-            dateTimeLocal.format(java.time.format.DateTimeFormatter.ofPattern(dateFormatString))
+        override fun format(dateFormatString: String, locale: java.util.Locale): String =
+            dateTimeLocal.format(
+                java.time.format.DateTimeFormatter.ofPattern(
+                    dateFormatString,
+                    locale
+                )
+            )
 
         override fun equals(other: Any?): Boolean {
             if (this === other)
@@ -144,7 +184,12 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         override fun toString(): String {
             return "DateTime(dateTime='${dateTimeLocal
-                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS XXXXX"))}', timeZone='${dateTimeLocal.zone.id}')"
+                .format(
+                    java.time.format.DateTimeFormatter.ofPattern(
+                        "yyyy/MM/dd HH:mm:ss.SSS XXXXX",
+                        java.util.Locale.ENGLISH
+                    )
+                )}', timeZone='${dateTimeLocal.zone.id}')"
         }
 
         companion object {
@@ -171,7 +216,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     try {
                         java.time.ZonedDateTime.of(
                             year,
-                            month.value,
+                            mapMonthToNative(month).value,
                             dayofMonth,
                             hour,
                             minute,
@@ -187,6 +232,45 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     },
                     timeZone
                 )
+
+            fun getLengthOfMonth(year: Int, month: Month): Int =
+                java.time.YearMonth.of(year, mapMonthToNative(month)).lengthOfMonth()
+
+            fun getLengthOfYear(year: Int): Int =
+                java.time.Year.of(year).length()
+
+            private fun mapMonthFromNative(month: java.time.Month): Month =
+                when (month) {
+                    java.time.Month.JANUARY -> Month.JANUARY
+                    java.time.Month.FEBRUARY -> Month.FEBRUARY
+                    java.time.Month.MARCH -> Month.MARCH
+                    java.time.Month.APRIL -> Month.APRIL
+                    java.time.Month.MAY -> Month.MAY
+                    java.time.Month.JUNE -> Month.JUNE
+                    java.time.Month.JULY -> Month.JULY
+                    java.time.Month.AUGUST -> Month.AUGUST
+                    java.time.Month.SEPTEMBER -> Month.SEPTEMBER
+                    java.time.Month.OCTOBER -> Month.OCTOBER
+                    java.time.Month.NOVEMBER -> Month.NOVEMBER
+                    java.time.Month.DECEMBER -> Month.DECEMBER
+                    else -> throw Exception("ZonedDateTime.mapMonthFromNative: Bad month value: month=${month}")
+                }
+
+            private fun mapMonthToNative(month: Month): java.time.Month =
+                when (month) {
+                    Month.JANUARY -> java.time.Month.JANUARY
+                    Month.FEBRUARY -> java.time.Month.FEBRUARY
+                    Month.MARCH -> java.time.Month.MARCH
+                    Month.APRIL -> java.time.Month.APRIL
+                    Month.MAY -> java.time.Month.MAY
+                    Month.JUNE -> java.time.Month.JUNE
+                    Month.JULY -> java.time.Month.JULY
+                    Month.AUGUST -> java.time.Month.AUGUST
+                    Month.SEPTEMBER -> java.time.Month.SEPTEMBER
+                    Month.OCTOBER -> java.time.Month.OCTOBER
+                    Month.NOVEMBER -> java.time.Month.NOVEMBER
+                    Month.DECEMBER -> java.time.Month.DECEMBER
+                }
         }
     }
 
@@ -196,14 +280,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     ) : ZonedDateTime(timeZone) {
         override val epochSeconds: Long
             get() =
-                dateTimeLocal.timeInMillis.let { milliSeconds ->
-                    (milliSeconds / 1000).let { seconds ->
-                        if (milliSeconds % 1000 >= 0)
-                            seconds
-                        else
-                            seconds - 1
-                    }
-                }
+                dateTimeLocal.timeInMillis.divideFloor(1000)
 
         override val epochMilliSeconds: Long
             get() = dateTimeLocal.timeInMillis
@@ -212,26 +289,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             get() = dateTimeLocal.get(java.util.Calendar.YEAR)
 
         override val month: Month
-            get() =
-                when (dateTimeLocal.get(java.util.Calendar.MONTH)) {
-                    0 -> Month.JANUARY
-                    1 -> Month.FEBRUARY
-                    2 -> Month.MARCH
-                    3 -> Month.APRIL
-                    4 -> Month.MAY
-                    5 -> Month.JUNE
-                    6 -> Month.JULY
-                    7 -> Month.AUGUST
-                    8 -> Month.SEPTEMBER
-                    9 -> Month.OCTOBER
-                    10 -> Month.NOVEMBER
-                    11 -> Month.DECEMBER
-                    else -> throw Exception(
-                        "ZonedDateTime.month: Bad month value: month=${dateTimeLocal.get(
-                            java.util.Calendar.MONTH
-                        )}"
-                    )
-                }
+            get() = mapMonthFromNative(dateTimeLocal.get(java.util.Calendar.MONTH))
+
         override val dayOfMonth: Int
             get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_MONTH)
 
@@ -251,6 +310,15 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                         )}"
                     )
                 }
+
+        override val dayOfYear: Int
+            get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_YEAR)
+
+        override val lengthOfMonth: Int
+            get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_MONTH)
+
+        override val lengthOfYear: Int
+            get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_YEAR)
 
         override val hour: Int
             // Calendar.HOUR は 12 時間制の値なので間違えないこと
@@ -272,9 +340,9 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             })
 
         @SuppressLint("SimpleDateFormat")
-        override fun format(dateFormatString: String): String {
-            return java.text.SimpleDateFormat(dateFormatString)
-                .also { it.timeZone = dateTimeLocal.timeZone }
+        override fun format(dateFormatString: String, locale: java.util.Locale): String {
+            return java.text.SimpleDateFormat(dateFormatString, locale)
+                .apply { timeZone = dateTimeLocal.timeZone }
                 .format(dateTimeLocal.time)
         }
 
@@ -297,8 +365,11 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
-            "DateTime(dateTime='${java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS XXX")
-                .also { it.timeZone = dateTimeLocal.timeZone }
+            "DateTime(dateTime='${java.text.SimpleDateFormat(
+                "yyyy/MM/dd HH:mm:ss.SSS XXX",
+                java.util.Locale.ENGLISH
+            )
+                .apply { timeZone = dateTimeLocal.timeZone }
                 .format(dateTimeLocal.time)}', timeZone='${dateTimeLocal.timeZone.id}')"
 
         companion object {
@@ -306,8 +377,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
             fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
                 ZonedDateTimeSDK22(
-                    java.util.Calendar.getInstance(timeZone.rawObject as java.util.TimeZone).also {
-                        it.timeInMillis = (dateTime.rawObject as java.util.Calendar).timeInMillis
+                    java.util.Calendar.getInstance(timeZone.rawObject as java.util.TimeZone).apply {
+                        timeInMillis = (dateTime.rawObject as java.util.Calendar).timeInMillis
                     },
                     timeZone
                 )
@@ -315,7 +386,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             fun of(
                 year: Int,
                 month: Month,
-                dayofMonth: Int,
+                dayOfMonth: Int,
                 hour: Int,
                 minute: Int,
                 second: Int,
@@ -323,32 +394,17 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 timeZone: TimeZone
             ): ZonedDateTime =
                 ZonedDateTimeSDK22(
-                    java.util.Calendar.getInstance().also {
-                        it.clear()
-                        it.set(java.util.Calendar.YEAR, year)
-                        it.set(
-                            java.util.Calendar.MONTH, when (month) {
-                                Month.JANUARY -> 0
-                                Month.FEBRUARY -> 1
-                                Month.MARCH -> 2
-                                Month.APRIL -> 3
-                                Month.MAY -> 4
-                                Month.JUNE -> 5
-                                Month.JULY -> 6
-                                Month.AUGUST -> 7
-                                Month.SEPTEMBER -> 8
-                                Month.OCTOBER -> 9
-                                Month.NOVEMBER -> 10
-                                Month.DECEMBER -> 11
-                            }
-                        )
-                        it.set(java.util.Calendar.DAY_OF_MONTH, dayofMonth)
+                    java.util.Calendar.getInstance().apply {
+                        clear()
+                        set(java.util.Calendar.YEAR, year)
+                        set(java.util.Calendar.MONTH, mapMonthToNative(month))
+                        set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth)
                         // Calendar.HOUR は 12 時間制の値なので間違えないこと
-                        it.set(java.util.Calendar.HOUR_OF_DAY, hour)
-                        it.set(java.util.Calendar.MINUTE, minute)
-                        it.set(java.util.Calendar.SECOND, second)
-                        it.set(java.util.Calendar.MILLISECOND, milliSecond)
-                        it.timeZone = timeZone.rawObject as java.util.TimeZone
+                        set(java.util.Calendar.HOUR_OF_DAY, hour)
+                        set(java.util.Calendar.MINUTE, minute)
+                        set(java.util.Calendar.SECOND, second)
+                        set(java.util.Calendar.MILLISECOND, milliSecond)
+                        this.timeZone = timeZone.rawObject as java.util.TimeZone
                     },
                     timeZone
                 ).also {
@@ -360,7 +416,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     // month は DECEMBER 、dayOfMonth は 31 になる
                     if (it.year != year ||
                         it.month != month ||
-                        it.dayOfMonth != dayofMonth ||
+                        it.dayOfMonth != dayOfMonth ||
                         it.hour != hour ||
                         it.minute != minute ||
                         it.second != second ||
@@ -370,6 +426,52 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                             "ZonedDatetime.of(): Any parameter is out of range"
                         )
                     }
+                }
+
+            fun getLengthOfMonth(year: Int, month: Month): Int =
+                java.util.Calendar.getInstance().apply {
+                    clear()
+                    set(java.util.Calendar.YEAR, year)
+                    set(java.util.Calendar.MONTH, mapMonthToNative(month))
+                }.getActualMaximum(java.util.Calendar.DAY_OF_MONTH)
+
+            fun getLengthOfYear(year: Int): Int =
+                java.util.Calendar.getInstance().apply {
+                    clear()
+                    set(java.util.Calendar.YEAR, year)
+                }.getActualMaximum(java.util.Calendar.DAY_OF_YEAR)
+
+            private fun mapMonthFromNative(month: Int): Month =
+                when (month) {
+                    java.util.Calendar.JANUARY -> Month.JANUARY
+                    java.util.Calendar.FEBRUARY -> Month.FEBRUARY
+                    java.util.Calendar.MARCH -> Month.MARCH
+                    java.util.Calendar.APRIL -> Month.APRIL
+                    java.util.Calendar.MAY -> Month.MAY
+                    java.util.Calendar.JUNE -> Month.JUNE
+                    java.util.Calendar.JULY -> Month.JULY
+                    java.util.Calendar.AUGUST -> Month.AUGUST
+                    java.util.Calendar.SEPTEMBER -> Month.SEPTEMBER
+                    java.util.Calendar.OCTOBER -> Month.OCTOBER
+                    java.util.Calendar.NOVEMBER -> Month.NOVEMBER
+                    java.util.Calendar.DECEMBER -> Month.DECEMBER
+                    else -> throw Exception("ZonedDateTime.mapMonthFromNative: Bad month value: month=${month}")
+                }
+
+            private fun mapMonthToNative(month: Month): Int =
+                when (month) {
+                    Month.JANUARY -> java.util.Calendar.JANUARY
+                    Month.FEBRUARY -> java.util.Calendar.FEBRUARY
+                    Month.MARCH -> java.util.Calendar.MARCH
+                    Month.APRIL -> java.util.Calendar.APRIL
+                    Month.MAY -> java.util.Calendar.MAY
+                    Month.JUNE -> java.util.Calendar.JUNE
+                    Month.JULY -> java.util.Calendar.JULY
+                    Month.AUGUST -> java.util.Calendar.AUGUST
+                    Month.SEPTEMBER -> java.util.Calendar.SEPTEMBER
+                    Month.OCTOBER -> java.util.Calendar.OCTOBER
+                    Month.NOVEMBER -> java.util.Calendar.NOVEMBER
+                    Month.DECEMBER -> java.util.Calendar.DECEMBER
                 }
         }
     }

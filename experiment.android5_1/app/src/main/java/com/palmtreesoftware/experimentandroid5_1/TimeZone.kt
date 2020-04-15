@@ -85,22 +85,6 @@ abstract class TimeZone protected constructor(val id: String) {
             }
         }
 
-        fun of(duration: TimeDuration): TimeZone {
-            val (hour, minute) =
-                duration.tickCounts.let { tickCount ->
-                    if (tickCount >= 0) {
-                        (tickCount / 1000 / 60).let { totalMinites ->
-                            Pair(totalMinites / 60 + innerOffsetOfHour, totalMinites % 60)
-                        }
-                    } else {
-                        ((-tickCount) / 1000 / 60).let { totalMinites ->
-                            Pair(-(totalMinites / 60) + innerOffsetOfHour, totalMinites % 60)
-                        }
-                    }
-                }
-            return NumericTimeZone.createInstance(hour.toInt(), minute.toInt())
-        }
-
         fun getHourStringOnForm(format: String, hourOnForm: Int): String =
             String.format(format, hourOnForm - innerOffsetOfHour)
 

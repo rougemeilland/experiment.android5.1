@@ -102,23 +102,12 @@ abstract class DateTime protected constructor() {
                 DateTimeSDK26(java.time.LocalDateTime.now(gmt))
 
             fun fromEpochMilliSeconds(milliSseconds: Long): DateTime {
-                val second = milliSseconds / 1000
-                val milliSecond = (milliSseconds % 1000).toInt()
-
                 return DateTimeSDK26(
-                    if (milliSecond >= 0) {
-                        java.time.LocalDateTime.ofEpochSecond(
-                            second,
-                            milliSecond * (1000 * 1000),
-                            java.time.ZoneOffset.UTC
-                        )
-                    } else {
-                        java.time.LocalDateTime.ofEpochSecond(
-                            second - 1,
-                            (milliSecond + 1000) * (1000 * 1000),
-                            java.time.ZoneOffset.UTC
-                        )
-                    }
+                    java.time.LocalDateTime.ofEpochSecond(
+                        milliSseconds.divideFloor(1000),
+                        milliSseconds.modulo(1000).toInt() * (1000 * 1000),
+                        java.time.ZoneOffset.UTC
+                    )
                 )
             }
 
@@ -136,14 +125,7 @@ abstract class DateTime protected constructor() {
 
         override val epochSeconds: Long
             get() =
-                dateTimeUTC.timeInMillis.let { milliSeconds ->
-                    (milliSeconds / 1000).let { seconds ->
-                        if (milliSeconds % 1000 >= 0)
-                            seconds
-                        else
-                            seconds - 1
-                    }
-                }
+                dateTimeUTC.timeInMillis.divideFloor(1000)
 
         override val epochMilliSeconds: Long
             get() = dateTimeUTC.timeInMillis
