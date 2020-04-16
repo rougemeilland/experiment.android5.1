@@ -17,7 +17,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     abstract val hour: Int
     abstract val minute: Int
     abstract val second: Int
-    abstract val millSecond: Int
+    abstract val milliSecond: Int
     abstract fun toDateTime(): DateTime
     abstract fun format(dateFormatString: String, locale: java.util.Locale): String
     abstract override fun toString(): String
@@ -26,6 +26,17 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         format(dateFormatString, java.util.Locale.getDefault())
 
     companion object {
+        internal val dateTimeFormatOfISO8601 =
+            "yyyy-MM-dd'T'HH:mm:ss.SSS$timeZoneFormatSpecOfISO8601"
+
+        val timeZoneFormatSpecOfISO8601: String
+            get() =
+                Platform.sdK26Depended({
+                    ZonedDateTimeSDK26.TimeZoneFormatSpecOfISO8601
+                }, {
+                    ZonedDateTimeSDK22.TimeZoneFormatSpecOfISO8601
+                })
+
         fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
             Platform.sdK26Depended({
                 ZonedDateTimeSDK26.of(dateTime, timeZone)
@@ -154,10 +165,15 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         override val second: Int
             get() = dateTimeLocal.second
 
-        override val millSecond: Int
+        override val milliSecond: Int
             get() = dateTimeLocal.get(java.time.temporal.ChronoField.MILLI_OF_SECOND)
 
-        override fun toDateTime(): DateTime = DateTime.of(dateTimeLocal.toLocalDateTime())
+        override fun toDateTime(): DateTime =
+            DateTime.of(
+                dateTimeLocal
+                    .withZoneSameInstant(gmt)
+                    .toLocalDateTime()
+            )
 
         override fun format(dateFormatString: String, locale: java.util.Locale): String =
             dateTimeLocal.format(
@@ -182,22 +198,24 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             return dateTimeLocal.hashCode()
         }
 
-        override fun toString(): String {
-            return "DateTime(dateTime='${dateTimeLocal
+        override fun toString(): String =
+            "ZonedDateTime(dateTime='${dateTimeLocal
                 .format(
                     java.time.format.DateTimeFormatter.ofPattern(
-                        "yyyy/MM/dd HH:mm:ss.SSS XXXXX",
+                        dateTimeFormatOfISO8601,
                         java.util.Locale.ENGLISH
                     )
                 )}', timeZone='${dateTimeLocal.zone.id}')"
-        }
 
         companion object {
             private val gmt by lazy { java.time.ZoneId.of("GMT") }
 
+            val TimeZoneFormatSpecOfISO8601 = "XXXXX"
+
             fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
                 ZonedDateTimeSDK26(
-                    (dateTime.rawObject as java.time.LocalDateTime).atZone(gmt)
+                    (dateTime.rawObject as java.time.LocalDateTime)
+                        .atZone(gmt)
                         .withZoneSameInstant(timeZone.rawObject as java.time.ZoneId),
                     timeZone
                 )
@@ -216,7 +234,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     try {
                         java.time.ZonedDateTime.of(
                             year,
-                            mapMonthToNative(month).value,
+                            month.value,
                             dayofMonth,
                             hour,
                             minute,
@@ -297,13 +315,13 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         override val dayOfWeek: DayOfWeek
             get() =
                 when (dateTimeLocal.get(java.util.Calendar.DAY_OF_WEEK)) {
-                    1 -> DayOfWeek.SUNDAY
-                    2 -> DayOfWeek.MONDAY
-                    3 -> DayOfWeek.TUESDAY
-                    4 -> DayOfWeek.WEDNESDAY
-                    5 -> DayOfWeek.THURSDAY
-                    6 -> DayOfWeek.FRIDAY
-                    7 -> DayOfWeek.SATURDAY
+                    java.util.Calendar.SUNDAY -> DayOfWeek.SUNDAY
+                    java.util.Calendar.MONDAY -> DayOfWeek.MONDAY
+                    java.util.Calendar.TUESDAY -> DayOfWeek.TUESDAY
+                    java.util.Calendar.WEDNESDAY -> DayOfWeek.WEDNESDAY
+                    java.util.Calendar.THURSDAY -> DayOfWeek.THURSDAY
+                    java.util.Calendar.FRIDAY -> DayOfWeek.FRIDAY
+                    java.util.Calendar.SATURDAY -> DayOfWeek.SATURDAY
                     else -> throw Exception(
                         "ZonedDateTime.month: Bad dayOfWeek value: dayOfWeek=${dateTimeLocal.get(
                             java.util.Calendar.DAY_OF_WEEK
@@ -315,10 +333,10 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_YEAR)
 
         override val lengthOfMonth: Int
-            get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_MONTH)
+            get() = dateTimeLocal.getActualMaximum(java.util.Calendar.DATE)
 
         override val lengthOfYear: Int
-            get() = dateTimeLocal.get(java.util.Calendar.DAY_OF_YEAR)
+            get() = dateTimeLocal.getActualMaximum(java.util.Calendar.DAY_OF_YEAR)
 
         override val hour: Int
             // Calendar.HOUR は 12 時間制の値なので間違えないこと
@@ -330,7 +348,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         override val second: Int
             get() = dateTimeLocal.get(java.util.Calendar.SECOND)
 
-        override val millSecond: Int
+        override val milliSecond: Int
             get() = dateTimeLocal.get(java.util.Calendar.MILLISECOND)
 
         override fun toDateTime(): DateTime =
@@ -340,11 +358,10 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             })
 
         @SuppressLint("SimpleDateFormat")
-        override fun format(dateFormatString: String, locale: java.util.Locale): String {
-            return java.text.SimpleDateFormat(dateFormatString, locale)
+        override fun format(dateFormatString: String, locale: java.util.Locale): String =
+            java.text.SimpleDateFormat(dateFormatString, locale)
                 .apply { timeZone = dateTimeLocal.timeZone }
                 .format(dateTimeLocal.time)
-        }
 
         override fun equals(other: Any?): Boolean {
             if (this === other)
@@ -365,8 +382,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
-            "DateTime(dateTime='${java.text.SimpleDateFormat(
-                "yyyy/MM/dd HH:mm:ss.SSS XXX",
+            "ZonedDateTime(dateTime='${java.text.SimpleDateFormat(
+                dateTimeFormatOfISO8601,
                 java.util.Locale.ENGLISH
             )
                 .apply { timeZone = dateTimeLocal.timeZone }
@@ -374,6 +391,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         companion object {
             private val gmt by lazy { java.util.TimeZone.getTimeZone("GMT") }
+
+            val TimeZoneFormatSpecOfISO8601 = "XXX"
 
             fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
                 ZonedDateTimeSDK22(
@@ -420,7 +439,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                         it.hour != hour ||
                         it.minute != minute ||
                         it.second != second ||
-                        it.millSecond != milliSecond
+                        it.milliSecond != milliSecond
                     ) {
                         throw IllegalArgumentException(
                             "ZonedDatetime.of(): Any parameter is out of range"

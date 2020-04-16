@@ -12,7 +12,7 @@ abstract class TimeZone protected constructor(val id: String) {
     }
 
     abstract fun getTimeZoneShortName(context: Context): String
-    abstract fun setForm(form: TimeZoneForm)
+    abstract fun setToForm(form: TimeZoneForm)
     internal abstract val rawObject: Any
 
     override fun equals(other: Any?): Boolean {
@@ -109,7 +109,7 @@ abstract class TimeZone protected constructor(val id: String) {
         ) {
         override fun getTimeZoneShortName(context: Context): String = ""
 
-        override fun setForm(form: TimeZoneForm) {
+        override fun setToForm(form: TimeZoneForm) {
             form.id = timeZoneIdOfSystemDefault
         }
 
@@ -161,7 +161,7 @@ abstract class TimeZone protected constructor(val id: String) {
                     context.getString(it)
             }
 
-        override fun setForm(form: TimeZoneForm) {
+        override fun setToForm(form: TimeZoneForm) {
             form.id = id
         }
 
@@ -233,7 +233,7 @@ abstract class TimeZone protected constructor(val id: String) {
             return shortGmtFormat.format(hour - innerOffsetOfHour, minute)
         }
 
-        override fun setForm(form: TimeZoneForm) {
+        override fun setToForm(form: TimeZoneForm) {
             form.id = timeZoneIdOfTimeDifferenceExpression
             form.hour = hour
             form.minute = minute

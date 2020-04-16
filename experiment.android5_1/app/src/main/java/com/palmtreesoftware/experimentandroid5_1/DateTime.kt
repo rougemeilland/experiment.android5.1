@@ -92,7 +92,14 @@ abstract class DateTime protected constructor() {
         override fun hashCode(): Int = dateTimeUTC.hashCode()
 
         override fun toString(): String =
-            "DateTime(epochMilliSeconds='${dateTimeUTC.toInstant(java.time.ZoneOffset.UTC)
+            "DateTime(dateTime='${dateTimeUTC
+                .atZone(gmt)
+                .format(
+                    java.time.format.DateTimeFormatter.ofPattern(
+                        ZonedDateTime.dateTimeFormatOfISO8601,
+                        java.util.Locale.ENGLISH
+                    )
+                )}', epochMilliSeconds='${dateTimeUTC.toInstant(java.time.ZoneOffset.UTC)
                 .toEpochMilli()}')"
 
         companion object {
@@ -167,7 +174,12 @@ abstract class DateTime protected constructor() {
         override fun hashCode(): Int = dateTimeUTC.timeInMillis.hashCode()
 
         override fun toString(): String =
-            "DateTime(epochMilliSeconds='${dateTimeUTC.timeInMillis}')"
+            "DateTime(dateTime='${java.text.SimpleDateFormat(
+                ZonedDateTime.dateTimeFormatOfISO8601,
+                java.util.Locale.ENGLISH
+            )
+                .apply { timeZone = gmt }
+                .format(dateTimeUTC.time)}', epochMilliSeconds='${dateTimeUTC.timeInMillis}')"
 
         override val rawObject: Any
             get() = dateTimeUTC

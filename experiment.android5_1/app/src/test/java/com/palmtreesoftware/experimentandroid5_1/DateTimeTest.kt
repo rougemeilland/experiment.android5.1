@@ -147,23 +147,23 @@ class DateTimeTest {
     @Test
     fun testToString() {
         assertEquals(
-            "DateTime(epochMilliSeconds='10000000')",
+            "DateTime(dateTime='1970-01-01T02:46:40.000Z', epochMilliSeconds='10000000')",
             DateTime.fromEpochMilliSeconds(10000000).toString()
         )
         assertEquals(
-            "DateTime(epochMilliSeconds='9999999')",
+            "DateTime(dateTime='1970-01-01T02:46:39.999Z', epochMilliSeconds='9999999')",
             DateTime.fromEpochMilliSeconds(9999999).toString()
         )
         assertEquals(
-            "DateTime(epochMilliSeconds='0')",
+            "DateTime(dateTime='1970-01-01T00:00:00.000Z', epochMilliSeconds='0')",
             DateTime.fromEpochMilliSeconds(0).toString()
         )
         assertEquals(
-            "DateTime(epochMilliSeconds='-9999999')",
+            "DateTime(dateTime='1969-12-31T21:13:20.001Z', epochMilliSeconds='-9999999')",
             DateTime.fromEpochMilliSeconds(-9999999).toString()
         )
         assertEquals(
-            "DateTime(epochMilliSeconds='-10000000')",
+            "DateTime(dateTime='1969-12-31T21:13:20.000Z', epochMilliSeconds='-10000000')",
             DateTime.fromEpochMilliSeconds(-10000000).toString()
         )
     }
