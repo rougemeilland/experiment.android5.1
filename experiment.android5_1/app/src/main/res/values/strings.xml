@@ -8,4 +8,25 @@
     <string name="time_zone_short_name_PST">PST</string>
     <string name="time_zone_short_name_CET">CET</string>
     <string name="time_zone_short_name_WET">WET</string>
+    <string name="ultraviolet_index_rank_name_low">Low</string>
+    <string name="ultraviolet_index_rank_name_moderate">Moderate</string>
+    <string name="ultraviolet_index_rank_name_high">High</string>
+    <string name="ultraviolet_index_rank_name_very_high">Very high</string>
+    <string name="ultraviolet_index_rank_name_extreme">Extreme</string>
+    <string name="sixteen_directions_description_N">North</string>
+    <string name="sixteen_directions_description_NNE">North-northeast</string>
+    <string name="sixteen_directions_description_NE">Northeast</string>
+    <string name="sixteen_directions_description_ENE">East-northeast</string>
+    <string name="sixteen_directions_description_E">East</string>
+    <string name="sixteen_directions_description_ESE">East-southeast</string>
+    <string name="sixteen_directions_description_SE">Southeast</string>
+    <string name="sixteen_directions_description_SSE">South-southeast</string>
+    <string name="sixteen_directions_description_S">South</string>
+    <string name="sixteen_directions_description_SSW">South-southwest</string>
+    <string name="sixteen_directions_description_SW">Southwest</string>
+    <string name="sixteen_directions_description_WSW">West-southwest</string>
+    <string name="sixteen_directions_description_W">West</string>
+    <string name="sixteen_directions_description_WNW">West-northwest</string>
+    <string name="sixteen_directions_description_NW">Northwest</string>
+    <string name="sixteen_directions_description_NNW">North-northwest</string>
 </resources>

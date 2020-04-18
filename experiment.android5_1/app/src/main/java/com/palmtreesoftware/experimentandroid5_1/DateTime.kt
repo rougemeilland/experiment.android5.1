@@ -6,9 +6,6 @@ import androidx.annotation.RequiresApi
 abstract class DateTime protected constructor() {
     abstract val epochSeconds: Long
     abstract val epochMilliSeconds: Long
-
-    fun atZone(timeZone: TimeZone): ZonedDateTime = ZonedDateTime.of(this, timeZone)
-
     abstract operator fun plus(duration: TimeDuration): DateTime
     abstract operator fun minus(dateTime: DateTime): TimeDuration
     abstract operator fun minus(duration: TimeDuration): DateTime
@@ -17,6 +14,9 @@ abstract class DateTime protected constructor() {
     abstract override fun hashCode(): Int
     abstract override fun toString(): String
     abstract val rawObject: Any
+
+    fun atZone(timeZone: TimeZone): ZonedDateTime =
+        ZonedDateTime.of(this, timeZone)
 
     companion object {
         fun now(): DateTime =
@@ -108,15 +108,14 @@ abstract class DateTime protected constructor() {
             fun now(): DateTime =
                 DateTimeSDK26(java.time.LocalDateTime.now(gmt))
 
-            fun fromEpochMilliSeconds(milliSseconds: Long): DateTime {
-                return DateTimeSDK26(
+            fun fromEpochMilliSeconds(milliSseconds: Long): DateTime =
+                DateTimeSDK26(
                     java.time.LocalDateTime.ofEpochSecond(
                         milliSseconds.divideFloor(1000),
                         milliSseconds.modulo(1000).toInt() * (1000 * 1000),
                         java.time.ZoneOffset.UTC
                     )
                 )
-            }
 
             fun of(dateTime: java.time.LocalDateTime): DateTime =
                 DateTimeSDK26(dateTime)

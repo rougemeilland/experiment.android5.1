@@ -209,31 +209,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestCurrentWeatherInfo(latitude: Double, longitude: Double) {
-        OpenWeatherMap.Current.getCurrent(
+        OpenWeatherMap.CurrentWeatherData.getInstance(
             this,
             scope,
             java.util.Locale.getDefault(),
             latitude,
-            longitude,
-            { current ->
-                updateWeatherView(current)
-                handler.removeCallbacks(imageUpdateRunnable)
-                if (weatherInfos.isEmpty()) {
-                    weathwe_icon_image.setImageBitmap(null)
-                    weathwe_name.text = ""
-                } else {
-                    requestToUpdateIconImage()
-                }
-                resetOpenWeatherPollingTimer(
-                    if (current.isCached)
-                        minimumWeatherPollingIntervalMilliSeconds
-                    else
-                        maximumWeatherPollingIntervalMilliSeconds
-                )
-            })
+            longitude
+        ) { current ->
+            updateWeatherView(current)
+            handler.removeCallbacks(imageUpdateRunnable)
+            if (weatherInfos.isEmpty()) {
+                weathwe_icon_image.setImageBitmap(null)
+                weathwe_name.text = ""
+            } else {
+                requestToUpdateIconImage()
+            }
+            resetOpenWeatherPollingTimer(
+                if (current.isCached)
+                    minimumWeatherPollingIntervalMilliSeconds
+                else
+                    maximumWeatherPollingIntervalMilliSeconds
+            )
+        }
     }
 
-    private fun updateWeatherView(current: OpenWeatherMap.Current) {
+    private fun updateWeatherView(current: OpenWeatherMap.CurrentWeatherData) {
         textview_datetime_observation.text =
             current.lastUpdated.atZone(TimeZone.getDefault()).format("HH:mm:ss")
         AsyncUtility.getAddressFromLocation(

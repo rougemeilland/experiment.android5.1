@@ -5,113 +5,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 
 abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
-    abstract val epochSeconds: Long
-    abstract val epochMilliSeconds: Long
-    abstract val year: Int
-    abstract val month: Month
-    abstract val dayOfMonth: Int
-    abstract val dayOfWeek: DayOfWeek
-    abstract val dayOfYear: Int
-    abstract val lengthOfMonth: Int
-    abstract val lengthOfYear: Int
-    abstract val hour: Int
-    abstract val minute: Int
-    abstract val second: Int
-    abstract val milliSecond: Int
-    abstract fun toDateTime(): DateTime
-    abstract fun format(dateFormatString: String, locale: java.util.Locale): String
-    abstract override fun toString(): String
-
-    fun format(dateFormatString: String): String =
-        format(dateFormatString, java.util.Locale.getDefault())
-
-    companion object {
-        internal val dateTimeFormatOfISO8601 =
-            "yyyy-MM-dd'T'HH:mm:ss.SSS$timeZoneFormatSpecOfISO8601"
-
-        val timeZoneFormatSpecOfISO8601: String
-            get() =
-                Platform.sdK26Depended({
-                    ZonedDateTimeSDK26.TimeZoneFormatSpecOfISO8601
-                }, {
-                    ZonedDateTimeSDK22.TimeZoneFormatSpecOfISO8601
-                })
-
-        fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
-            Platform.sdK26Depended({
-                ZonedDateTimeSDK26.of(dateTime, timeZone)
-            }, {
-                ZonedDateTimeSDK22.of(dateTime, timeZone)
-            })
-
-        fun of(
-            year: Int,
-            month: Month,
-            dayOfMonth: Int,
-            hour: Int,
-            minute: Int,
-            second: Int,
-            milliSecond: Int,
-            timeZone: TimeZone
-        ): ZonedDateTime =
-            Platform.sdK26Depended({
-                ZonedDateTimeSDK26.of(
-                    year,
-                    month,
-                    dayOfMonth,
-                    hour,
-                    minute,
-                    second,
-                    milliSecond,
-                    timeZone
-                )
-            }, {
-                ZonedDateTimeSDK22.of(
-                    year,
-                    month,
-                    dayOfMonth,
-                    hour,
-                    minute,
-                    second,
-                    milliSecond,
-                    timeZone
-                )
-            })
-
-        fun of(
-            year: Int,
-            month: Month,
-            dayOfMonth: Int,
-            hour: Int,
-            minute: Int,
-            second: Int,
-            timeZone: TimeZone
-        ): ZonedDateTime =
-            of(year, month, dayOfMonth, hour, minute, second, 0, timeZone)
-
-        fun of(
-            year: Int,
-            month: Month,
-            dayOfMonth: Int,
-            timeZone: TimeZone
-        ): ZonedDateTime =
-            of(year, month, dayOfMonth, 0, 0, 0, 0, timeZone)
-
-        fun getLengthOfMonth(year: Int, month: Month): Int =
-            Platform.sdK26Depended({
-                ZonedDateTimeSDK26.getLengthOfMonth(year, month)
-            }, {
-                ZonedDateTimeSDK22.getLengthOfMonth(year, month)
-            })
-
-        fun getLengthOfYear(year: Int): Int =
-            Platform.sdK26Depended({
-                ZonedDateTimeSDK26.getLengthOfYear(year)
-            }, {
-                ZonedDateTimeSDK22.getLengthOfYear(year)
-            })
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     private class ZonedDateTimeSDK26 private constructor(
         private val dateTimeLocal: java.time.ZonedDateTime,
@@ -194,9 +87,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             return true
         }
 
-        override fun hashCode(): Int {
-            return dateTimeLocal.hashCode()
-        }
+        override fun hashCode(): Int = dateTimeLocal.hashCode()
 
         override fun toString(): String =
             "ZonedDateTime(dateTime='${dateTimeLocal
@@ -210,7 +101,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         companion object {
             private val gmt by lazy { java.time.ZoneId.of("GMT") }
 
-            val TimeZoneFormatSpecOfISO8601 = "XXXXX"
+            const val TimeZoneFormatSpecOfISO8601 = "XXXXX"
 
             fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
                 ZonedDateTimeSDK26(
@@ -353,6 +244,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
 
         override fun toDateTime(): DateTime =
             DateTime.of(java.util.Calendar.getInstance().also {
+                it.clear()
                 it.timeZone = gmt
                 it.timeInMillis = dateTimeLocal.timeInMillis
             })
@@ -376,9 +268,8 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             return true
         }
 
-        override fun hashCode(): Int {
-            return dateTimeLocal.timeZone.id.hashCode() * 32 + dateTimeLocal.timeInMillis.hashCode()
-        }
+        override fun hashCode(): Int =
+            dateTimeLocal.timeZone.id.hashCode() * 32 + dateTimeLocal.timeInMillis.hashCode()
 
         @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
@@ -392,12 +283,14 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         companion object {
             private val gmt by lazy { java.util.TimeZone.getTimeZone("GMT") }
 
-            val TimeZoneFormatSpecOfISO8601 = "XXX"
+            const val TimeZoneFormatSpecOfISO8601 = "XXX"
 
             fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
                 ZonedDateTimeSDK22(
-                    java.util.Calendar.getInstance(timeZone.rawObject as java.util.TimeZone).apply {
-                        timeInMillis = (dateTime.rawObject as java.util.Calendar).timeInMillis
+                    java.util.Calendar.getInstance().also {
+                        it.clear()
+                        it.timeZone = timeZone.rawObject as java.util.TimeZone
+                        it.timeInMillis = (dateTime.rawObject as java.util.Calendar).timeInMillis
                     },
                     timeZone
                 )
@@ -493,5 +386,113 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     Month.DECEMBER -> java.util.Calendar.DECEMBER
                 }
         }
+    }
+
+    abstract val epochSeconds: Long
+    abstract val epochMilliSeconds: Long
+    abstract val year: Int
+    abstract val month: Month
+    abstract val dayOfMonth: Int
+    abstract val dayOfWeek: DayOfWeek
+    abstract val dayOfYear: Int
+    abstract val lengthOfMonth: Int
+    abstract val lengthOfYear: Int
+    abstract val hour: Int
+    abstract val minute: Int
+    abstract val second: Int
+    abstract val milliSecond: Int
+    abstract fun toDateTime(): DateTime
+    abstract fun format(dateFormatString: String, locale: java.util.Locale): String
+    abstract override fun toString(): String
+
+    fun format(dateFormatString: String): String =
+        format(dateFormatString, java.util.Locale.getDefault())
+
+    companion object {
+        internal val dateTimeFormatOfISO8601 =
+            "yyyy-MM-dd'T'HH:mm:ss.SSS$timeZoneFormatSpecOfISO8601"
+
+        val timeZoneFormatSpecOfISO8601: String
+            get() =
+                Platform.sdK26Depended(
+                    @RequiresApi(Build.VERSION_CODES.O) {
+                        ZonedDateTimeSDK26.TimeZoneFormatSpecOfISO8601
+                    }, {
+                        ZonedDateTimeSDK22.TimeZoneFormatSpecOfISO8601
+                    })
+
+        fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.of(dateTime, timeZone)
+            }, {
+                ZonedDateTimeSDK22.of(dateTime, timeZone)
+            })
+
+        fun of(
+            year: Int,
+            month: Month,
+            dayOfMonth: Int,
+            hour: Int,
+            minute: Int,
+            second: Int,
+            milliSecond: Int,
+            timeZone: TimeZone
+        ): ZonedDateTime =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.of(
+                    year,
+                    month,
+                    dayOfMonth,
+                    hour,
+                    minute,
+                    second,
+                    milliSecond,
+                    timeZone
+                )
+            }, {
+                ZonedDateTimeSDK22.of(
+                    year,
+                    month,
+                    dayOfMonth,
+                    hour,
+                    minute,
+                    second,
+                    milliSecond,
+                    timeZone
+                )
+            })
+
+        fun of(
+            year: Int,
+            month: Month,
+            dayOfMonth: Int,
+            hour: Int,
+            minute: Int,
+            second: Int,
+            timeZone: TimeZone
+        ): ZonedDateTime =
+            of(year, month, dayOfMonth, hour, minute, second, 0, timeZone)
+
+        fun of(
+            year: Int,
+            month: Month,
+            dayOfMonth: Int,
+            timeZone: TimeZone
+        ): ZonedDateTime =
+            of(year, month, dayOfMonth, 0, 0, 0, 0, timeZone)
+
+        fun getLengthOfMonth(year: Int, month: Month): Int =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.getLengthOfMonth(year, month)
+            }, {
+                ZonedDateTimeSDK22.getLengthOfMonth(year, month)
+            })
+
+        fun getLengthOfYear(year: Int): Int =
+            Platform.sdK26Depended({
+                ZonedDateTimeSDK26.getLengthOfYear(year)
+            }, {
+                ZonedDateTimeSDK22.getLengthOfYear(year)
+            })
     }
 }

@@ -47,8 +47,7 @@ class DateTimeTest {
     }
 
     @Test
-    fun atZone() {
-
+    fun atZoneTimeZone() {
         DateTime.fromEpochMilliSeconds(0).atZone(TimeZone.GMT)
             .let { actual ->
                 assertEquals(0, actual.epochMilliSeconds)

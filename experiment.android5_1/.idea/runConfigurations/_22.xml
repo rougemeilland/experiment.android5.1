@@ -17,6 +17,7 @@
     <envs>
       <env name="__UNITTESTSDKVERSION" value="22" />
     </envs>
+    <dir value="$PROJECT_DIR$/app/src/test" />
     <method v="2">
       <option name="Android.Gradle.BeforeRunTask" enabled="true" />
     </method>

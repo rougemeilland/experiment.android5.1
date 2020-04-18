@@ -233,14 +233,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.004Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03.004Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1586480523004, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -339,14 +335,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.004Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03.004Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1578618123004, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -620,14 +612,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1586480523000, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -720,14 +708,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1578618123000, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -891,14 +875,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1586476800000, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -973,14 +953,10 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='${
-                Platform.sdK26Depended(
-                    { "GMT" },
-                    { "GMT+00:00" }
-                )}')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='GMT')",
                 it.toString()
             )
-            assertEquals("GMT+00:00", it.timeZone.id)
+            assertEquals("GMT", it.timeZone.id)
             assertEquals(1578614400000, it.epochMilliSeconds)
         }
         ZonedDateTime.of(
@@ -1051,7 +1027,7 @@ class ZonedDateTimeTest {
     }
 
     @Test
-    fun ofDateTime() {
+    fun ofDateTimeTimeZone() {
         DateTime.fromEpochMilliSeconds(1586480523004).also { dateTime ->
             ZonedDateTime.of(dateTime, TimeZone.GMT).also { zonedDateTime ->
                 assertEquals(
