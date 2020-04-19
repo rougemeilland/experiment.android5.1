@@ -74,15 +74,15 @@ class DateTimeTest {
     fun plus() {
         assertEquals(
             110,
-            (DateTime.fromEpochMilliSeconds(10L) + TimeDuration.fromTickCounts(100L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(10L) + TimeDuration.ofTickCounts(100L)).epochMilliSeconds
         )
         assertEquals(
             0,
-            (DateTime.fromEpochMilliSeconds(100L) + TimeDuration.fromTickCounts(-100L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(100L) + TimeDuration.ofTickCounts(-100L)).epochMilliSeconds
         )
         assertEquals(
             -90,
-            (DateTime.fromEpochMilliSeconds(-100L) + TimeDuration.fromTickCounts(10L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(-100L) + TimeDuration.ofTickCounts(10L)).epochMilliSeconds
         )
     }
 
@@ -106,15 +106,15 @@ class DateTimeTest {
     fun minusTimeDuration() {
         assertEquals(
             90,
-            (DateTime.fromEpochMilliSeconds(100L) - TimeDuration.fromTickCounts(10L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(100L) - TimeDuration.ofTickCounts(10L)).epochMilliSeconds
         )
         assertEquals(
             0,
-            (DateTime.fromEpochMilliSeconds(100L) - TimeDuration.fromTickCounts(100L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(100L) - TimeDuration.ofTickCounts(100L)).epochMilliSeconds
         )
         assertEquals(
             -90,
-            (DateTime.fromEpochMilliSeconds(10L) - TimeDuration.fromTickCounts(100L)).epochMilliSeconds
+            (DateTime.fromEpochMilliSeconds(10L) - TimeDuration.ofTickCounts(100L)).epochMilliSeconds
         )
     }
 

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="open_weather_map_minimum_interval_seconds">600</integer>
+</resources>

@@ -11,12 +11,16 @@
     <option name="PACKAGE_NAME" value="com.palmtreesoftware.experimentandroid5_1" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
-    <option name="TEST_OBJECT" value="package" />
+    <option name="TEST_OBJECT" value="pattern" />
     <option name="PARAMETERS" value="" />
     <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
     <envs>
       <env name="__UNITTESTSDKVERSION" value="29" />
     </envs>
+    <dir value="$PROJECT_DIR$/app/src/test/java" />
+    <patterns>
+      <pattern testClass="^(?!.*Instrumented).*$" />
+    </patterns>
     <method v="2">
       <option name="Android.Gradle.BeforeRunTask" enabled="true" />
     </method>

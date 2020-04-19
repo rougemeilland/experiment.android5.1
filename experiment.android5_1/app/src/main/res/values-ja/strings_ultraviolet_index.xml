@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultraviolet_index_rank_name_low">弱い</string>
+    <string name="ultraviolet_index_rank_name_moderate">中程度</string>
+    <string name="ultraviolet_index_rank_name_high">強い</string>
+    <string name="ultraviolet_index_rank_name_very_high">非常に強い</string>
+    <string name="ultraviolet_index_rank_name_extreme">極端に強い</string>
+</resources>

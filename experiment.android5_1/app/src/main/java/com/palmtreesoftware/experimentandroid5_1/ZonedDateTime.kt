@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 
+// TODO("年月日のみ扱えることができ、時分秒ミリ秒は扱えない、ZonedDateクラスの新設")
+// TODO("ZonedDateTime と ZonedDate の間の相互変換手段の用意")
+
 abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     @RequiresApi(Build.VERSION_CODES.O)
     private class ZonedDateTimeSDK26 private constructor(

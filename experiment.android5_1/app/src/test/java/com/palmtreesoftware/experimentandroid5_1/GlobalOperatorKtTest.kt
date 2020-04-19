@@ -272,8 +272,8 @@ internal class GlobalOperatorKtTest {
 
     @Test
     fun timesTimeDuration() {
-        assertEquals(3000, (3 * TimeDuration.fromTickCounts(1000)).tickCounts)
-        assertEquals(3000, (3L * TimeDuration.fromTickCounts(1000)).tickCounts)
-        assertEquals(3000, (3.0 * TimeDuration.fromTickCounts(1000)).tickCounts)
+        assertEquals(3000, (3 * TimeDuration.ofTickCounts(1000)).tickCounts)
+        assertEquals(3000, (3L * TimeDuration.ofTickCounts(1000)).tickCounts)
+        assertEquals(3000, (3.0 * TimeDuration.ofTickCounts(1000)).tickCounts)
     }
 }

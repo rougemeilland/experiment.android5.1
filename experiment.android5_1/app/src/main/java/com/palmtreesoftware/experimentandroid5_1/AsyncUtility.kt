@@ -18,13 +18,15 @@ class AsyncUtility {
             scope: CoroutineScope,
             latitude: Double,
             longitude: Double,
-            callback: (Address) -> Unit
+            onCompleted: (Address?) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
             val geocorder = Geocoder(context, Locale.getDefault())
             scope.launch {
                 try {
-                    geocoderAsync(geocorder, latitude, longitude, callback)
+                    geocoderAsync(geocorder, latitude, longitude, onCompleted, onFailed)
                 } catch (ex: Exception) {
+                    onFailed(ex)
                     scope.coroutineContext.cancelChildren()
                 }
             }
@@ -35,26 +37,32 @@ class AsyncUtility {
             geocoder: Geocoder,
             latitude: Double,
             longitude: Double,
-            callback: (Address) -> Unit
+            onCompleted: (Address?) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
-            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-            if (addresses.isNotEmpty()) {
+            try {
+                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
                 withContext(Dispatchers.Main) {
-                    callback(addresses[0])
+                    onCompleted(if (addresses.isEmpty()) null else addresses[0])
                 }
+            } catch (ex: Exception) {
+                onFailed(ex)
+                return
             }
         }
 
         fun downloadString(
             scope: CoroutineScope,
             uri: Uri,
-            callback: (String) -> Unit
+            onCompleted: (String) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
             val url = URL(uri.toString())
             scope.launch {
                 try {
-                    downloadStringAsync(url, callback)
+                    downloadStringAsync(url, onCompleted, onFailed)
                 } catch (ex: Exception) {
+                    onFailed(ex)
                     scope.coroutineContext.cancelChildren()
                 }
             }
@@ -63,7 +71,8 @@ class AsyncUtility {
         @Suppress("BlockingMethodInNonBlockingContext")
         private suspend fun downloadStringAsync(
             url: URL,
-            callback: (String) -> Unit
+            onCompleted: (String) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
             val text =
                 try {
@@ -74,22 +83,25 @@ class AsyncUtility {
                         it.readText()
                     }
                 } catch (ex: Exception) {
+                    onFailed(ex)
                     return
                 }
             withContext(Dispatchers.Main) {
-                callback(text)
+                onCompleted(text)
             }
         }
 
         fun downloadImage(
             scope: CoroutineScope,
             uri: Uri,
-            callback: (Bitmap) -> Unit
+            onCompleted: (Bitmap) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
             scope.launch {
                 try {
-                    downloadImageAsync(URL(uri.toString()), callback)
+                    downloadImageAsync(URL(uri.toString()), onCompleted, onFailed)
                 } catch (ex: Exception) {
+                    onFailed(ex)
                     scope.coroutineContext.cancelChildren()
                 }
             }
@@ -98,18 +110,19 @@ class AsyncUtility {
         @Suppress("BlockingMethodInNonBlockingContext")
         private suspend fun downloadImageAsync(
             url: URL,
-            callback: (Bitmap) -> Unit
+            onCompleted: (Bitmap) -> Unit,
+            onFailed: (Exception) -> Unit
         ) {
             try {
-
                 url.openStream().use {
                     val bitmap = BitmapFactory.decodeStream(it)
                     withContext(Dispatchers.Main) {
-                        callback(bitmap)
+                        onCompleted(bitmap)
                     }
                 }
             } catch (ex: Exception) {
-                throw ex
+                onFailed(ex)
+                return
             }
         }
     }

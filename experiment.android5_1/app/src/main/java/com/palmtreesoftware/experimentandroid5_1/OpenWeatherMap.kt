@@ -2,9 +2,9 @@ package com.palmtreesoftware.experimentandroid5_1
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
-import kotlin.math.floor
 
 class OpenWeatherMap {
     abstract class WeatherData protected constructor(
@@ -13,10 +13,10 @@ class OpenWeatherMap {
     ) {
         class Coord private constructor(val latitude: Double, val longitude: Double) {
             companion object {
-                fun fromJSONObject(o: JSONObject): Coord =
+                fun of(o: JSONObject): Coord =
                     Coord(
-                        getDouble(o, "lat"),
-                        getDouble(o, "lon")
+                        o.getDouble("lat"),
+                        o.getDouble("lon")
                     )
             }
         }
@@ -28,20 +28,20 @@ class OpenWeatherMap {
             val maximumTemperatureInCelsius: Double,
             val humidityInPercent: Double,
             val pressureInHectopascal: Double,
-            val pressureOnTheSeaLevelInHectopascal: Double,
-            val pressureOnTheGroundLevelInHectopascal: Double
+            val pressureOnTheSeaLevelInHectopascal: Double?,
+            val pressureOnTheGroundLevelInHectopascal: Double?
         ) {
             companion object {
-                fun fromJSONObject(o: JSONObject): Main =
+                fun of(o: JSONObject): Main =
                     Main(
-                        getDouble(o, "temp"),
-                        getDouble(o, "feels_like"),
-                        getDouble(o, "temp_min"),
-                        getDouble(o, "temp_max"),
-                        getDouble(o, "humidity"),
-                        getDouble(o, "pressure"),
-                        getDouble(o, "sea_level"),
-                        getDouble(o, "grnd_level")
+                        o.getDouble("temp"),
+                        o.getDouble("feels_like"),
+                        o.getDouble("temp_min"),
+                        o.getDouble("temp_max"),
+                        o.getDouble("humidity"),
+                        o.getDouble("pressure"),
+                        o.optDouble("sea_level"),
+                        o.optDouble("grnd_level")
                     )
             }
         }
@@ -60,10 +60,10 @@ class OpenWeatherMap {
                     }
 
             companion object {
-                fun fromJSONObject(o: JSONObject): Weather =
+                fun of(o: JSONObject): Weather =
                     Weather(
-                        getString(o, "description"),
-                        getString(o, "icon")
+                        o.getString("description"),
+                        o.getString("icon")
                     )
             }
         }
@@ -75,14 +75,14 @@ class OpenWeatherMap {
             val speedInMeterPerSecond: Double,
             val directionInDegrees: Double?
         ) {
-            val direction: SixteenDirections?
-                get() = directionInDegrees?.let { getDirection(it) }
+            val direction: SixteenDirections? =
+                directionInDegrees?.let { SixteenDirections.ofDegrees(it) }
 
             companion object {
-                fun fromJSONObject(o: JSONObject): Wind =
+                fun of(o: JSONObject): Wind =
                     Wind(
-                        getDouble(o, "speed"),
-                        optDouble(o, "deg")
+                        o.getDouble("speed"),
+                        o.optDouble("deg")
                     )
             }
         }
@@ -94,13 +94,10 @@ class OpenWeatherMap {
             val cloudsInPercent: Double
         ) {
             companion object {
-                fun fromJSONObjectOrNull(o: JSONObject?): Clouds? =
-                    if (o != null)
-                        Clouds(
-                            getDouble(o, "all")
-                        )
-                    else
-                        null
+                fun of(o: JSONObject): Clouds =
+                    Clouds(
+                        o.getDouble("all")
+                    )
             }
         }
 
@@ -109,31 +106,20 @@ class OpenWeatherMap {
             val amountPer3HourInInMilliMeter: Double?
         ) {
             companion object {
-                fun fromJSONObjectOrNull(o: JSONObject?): Precipitation? =
-                    if (o != null)
-                        Precipitation(
-                            optDouble(o, "1h"),
-                            optDouble(o, "3h")
-                        )
-                    else
-                        null
+                fun of(o: JSONObject): Precipitation =
+                    Precipitation(
+                        o.optDouble("1h"),
+                        o.optDouble("3h")
+                    )
             }
         }
 
-        class UltravioletIndex private constructor(
-            val value: Double,
-            val rank: UltravioletIndexRank
-        ) {
+        class UltravioletIndex private constructor(val value: Double) {
+            val rank: UltravioletIndexRank = UltravioletIndexRank.of(value)
 
             companion object {
-                fun fromValue(value: Double): UltravioletIndex =
-                    when {
-                        value < 3.0 -> UltravioletIndex(value, UltravioletIndexRank.LOW)
-                        value < 6.0 -> UltravioletIndex(value, UltravioletIndexRank.MODERATE)
-                        value < 8.0 -> UltravioletIndex(value, UltravioletIndexRank.HIGH)
-                        value < 11.0 -> UltravioletIndex(value, UltravioletIndexRank.VERY_HIGH)
-                        else -> UltravioletIndex(value, UltravioletIndexRank.EXTREME)
-                    }
+                fun of(value: Double): UltravioletIndex =
+                    UltravioletIndex(value)
             }
         }
 
@@ -151,226 +137,103 @@ class OpenWeatherMap {
 
             fun getDescription(context: Context): String =
                 context.getString(descriptionResourceId)
-        }
 
-        protected abstract fun saveToCache(context: Context)
-
-        protected fun saveToCache(context: Context, prefKey: String) {
-            val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
-            prefs.putString(prefKey, sourceText)
-            prefs.apply()
+            companion object {
+                fun of(value: Double): UltravioletIndexRank =
+                    when {
+                        value < 3.0 -> LOW
+                        value < 6.0 -> MODERATE
+                        value < 8.0 -> HIGH
+                        value < 11.0 -> VERY_HIGH
+                        else -> EXTREME
+                    }
+            }
         }
 
         companion object {
-            private val directions: Array<SixteenDirections> =
-                arrayOf(
-                    SixteenDirections.N,
-                    SixteenDirections.NNE,
-                    SixteenDirections.NNE,
-                    SixteenDirections.NE,
-                    SixteenDirections.NE,
-                    SixteenDirections.ENE,
-                    SixteenDirections.ENE,
-                    SixteenDirections.E,
-                    SixteenDirections.E,
-                    SixteenDirections.ESE,
-                    SixteenDirections.ESE,
-                    SixteenDirections.SE,
-                    SixteenDirections.SE,
-                    SixteenDirections.SSE,
-                    SixteenDirections.SSE,
-                    SixteenDirections.S,
-                    SixteenDirections.S,
-                    SixteenDirections.SSW,
-                    SixteenDirections.SSW,
-                    SixteenDirections.SW,
-                    SixteenDirections.SW,
-                    SixteenDirections.WSW,
-                    SixteenDirections.WSW,
-                    SixteenDirections.W,
-                    SixteenDirections.W,
-                    SixteenDirections.WNW,
-                    SixteenDirections.WNW,
-                    SixteenDirections.NW,
-                    SixteenDirections.NW,
-                    SixteenDirections.NNW,
-                    SixteenDirections.NNW,
-                    SixteenDirections.N
-                )
+            protected class ApiCache(private val key: String) {
+                fun save(context: Context, sourceText: String) {
+                    context.getSharedPreferences(PREFS_NAME, 0).edit().also { prefs ->
+                        prefs.putString(key, sourceText)
+                        prefs.apply()
+                    }
+                }
+
+                fun load(context: Context): String =
+                    context.getSharedPreferences(PREFS_NAME, 0)
+                        .getString(key, null).let { it ?: "" }
+            }
+
+            protected class LastRequestedDateTime(private val key: String) {
+                fun setValue(context: Context, dateTime: DateTime) {
+                    context.getSharedPreferences(PREFS_NAME, 0).edit().also { prefs ->
+                        prefs.putLong(key, dateTime.epochMilliSeconds)
+                        prefs.apply()
+                    }
+                }
+
+                fun getValue(context: Context): DateTime =
+                    DateTime.fromEpochMilliSeconds(
+                        context.getSharedPreferences(PREFS_NAME, 0)
+                            .getLong(key, 0)
+                    )
+            }
 
             @JvmStatic
             protected fun <T : WeatherData> getInstance(
                 context: Context,
                 scope: CoroutineScope,
-                timeStampKey: String,
+                latestRequestedDateTime: LastRequestedDateTime,
+                apiCache: ApiCache,
                 url: Uri,
-                callback: (T) -> Unit,
-                downloadedJSONStringParser: (String) -> T,
-                cacheLoader: () -> T?
+                onCompleted: (T, DateTime) -> Unit,
+                onFailed: (Exception) -> Unit,
+                jsonStringParser: (String, Boolean) -> T
             ) {
                 val now = DateTime.now()
-                if (now - getLatestRequestDateTime(context, timeStampKey) < minimumInterval) {
-                    val cache = cacheLoader()
-                    if (cache != null) {
-                        callback(cache)
-                    } else {
-                        getCurrentFromServer(
-                            scope,
-                            context,
-                            timeStampKey,
-                            url,
-                            now,
-                            callback,
-                            downloadedJSONStringParser
-                        )
-                    }
-                } else {
-                    getCurrentFromServer(
-                        scope,
-                        context,
-                        timeStampKey,
-                        url,
-                        now,
-                        callback,
-                        downloadedJSONStringParser
-                    )
-                }
-            }
-
-            private fun <T : WeatherData> getCurrentFromServer(
-                scope: CoroutineScope,
-                context: Context,
-                timeStampKey: String,
-                url: Uri,
-                now: DateTime,
-                callback: (T) -> Unit,
-                downloadedJSONStringParser: (String) -> T
-            ) {
-                setLatestRequestDateTime(context, timeStampKey, now)
-                AsyncUtility.downloadString(scope, url) { text ->
-                    val data = try {
-                        downloadedJSONStringParser(text)
+                val latestRequested = latestRequestedDateTime.getValue(context)
+                val minimumInterval = TimeDuration.ofSeconds(
+                    context.resources.getInteger(
+                        R.integer.open_weather_map_minimum_interval_seconds
+                    ).toDouble()
+                )
+                if (now - latestRequested < minimumInterval) {
+                    val cache = try {
+                        jsonStringParser(apiCache.load(context), true)
                     } catch (ex: Exception) {
+                        if (Log.isLoggable(TAG, Log.ERROR)) {
+                            Log.e(TAG, ex.message, ex)
+                        }
+                        onFailed(ex)
                         null
                     }
-                    if (data != null) {
-                        data.saveToCache(context)
-                        callback(data)
-                    }
+                    if (cache != null)
+                        onCompleted(cache, latestRequested)
+                } else {
+                    latestRequestedDateTime.setValue(context, now)
+                    AsyncUtility.downloadString(scope, url, { text ->
+                        val data = try {
+                            jsonStringParser(text, false)
+                        } catch (ex: Exception) {
+                            if (Log.isLoggable(TAG, Log.ERROR)) {
+                                Log.e(TAG, ex.message, ex)
+                            }
+                            onFailed(ex)
+                            null
+                        }
+                        if (data != null) {
+                            apiCache.save(context, data.sourceText)
+                            onCompleted(data, now)
+                        }
+                    }, { ex ->
+                        if (Log.isLoggable(TAG, Log.ERROR)) {
+                            Log.e(TAG, ex.message, ex)
+                            onFailed(ex)
+                        }
+                    })
                 }
             }
-
-            private fun getLatestRequestDateTime(
-                context: Context,
-                timeStampKey: String
-            ): DateTime =
-                context.getSharedPreferences(PREFS_NAME, 0).let { prefs ->
-                    DateTime.fromEpochSeconds(prefs.getLong(timeStampKey, 0))
-                }
-
-            private fun setLatestRequestDateTime(
-                context: Context,
-                timeStampKey: String,
-                dateTime: DateTime
-            ) {
-                val prefs = context.getSharedPreferences(PREFS_NAME, 0).edit()
-                prefs.putLong(timeStampKey, dateTime.epochSeconds)
-                prefs.apply()
-            }
-
-            @JvmStatic
-            protected fun loadFromCache(context: Context, cacheKey: String): String? =
-                context.getSharedPreferences(PREFS_NAME, 0)
-                    .getString(cacheKey, null)
-
-            @Suppress("SameParameterValue")
-            @JvmStatic
-            protected fun getArrayOfJSONObject(o: JSONObject, name: String): Array<JSONObject> =
-                try {
-                    val array = o.getJSONArray(name)
-                    val result = mutableListOf<JSONObject>()
-                    for (index in 0 until array.length()) {
-                        result.add(array.getJSONObject(index))
-                    }
-                    result.toTypedArray()
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getArrayOfJSONObject('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getJSONObject(o: JSONObject, name: String): JSONObject =
-                try {
-                    o.getJSONObject(name)
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getJSONObject('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun optJSONObject(o: JSONObject, name: String): JSONObject? =
-                try {
-                    if (o.has(name))
-                        o.getJSONObject(name)
-                    else
-                        null
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.optJSONObject('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getInt(o: JSONObject, name: String): Int =
-                try {
-                    o.getInt(name)
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getLong('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getLong(o: JSONObject, name: String): Long =
-                try {
-                    o.getLong(name)
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getLong('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getString(o: JSONObject, name: String): String =
-                try {
-                    o.getString(name)
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getString('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getDouble(o: JSONObject, name: String): Double =
-                try {
-                    o.getDouble(name)
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.getDouble('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun optDouble(o: JSONObject, name: String): Double? =
-                try {
-                    if (o.has(name))
-                        o.getDouble(name)
-                    else
-                        null
-                } catch (ex: Exception) {
-                    throw Exception("JSONObject.optDouble('$name') is failed: source=$o")
-                }
-
-            @JvmStatic
-            protected fun getDirection(degree: Double): SixteenDirections? =
-                directions[
-                        (floor(degree / 360 * 32).toInt() % 32)
-                            .let {
-                                if (it >= 0)
-                                    it
-                                else
-                                    it + 32
-                            }]
         }
-
     }
 
     class CurrentWeatherData private constructor(
@@ -387,27 +250,37 @@ class OpenWeatherMap {
         val lastUpdated: DateTime,
         val timeZone: TimeZone
     ) : WeatherData(sourceText, isCached) {
-        override fun saveToCache(context: Context) {
-            saveToCache(context, PREF_KEY_CACHE_CURRENT_WEATHER_DATA)
-        }
-
         companion object {
+            private val latestRequestedDateTime: WeatherData.Companion.LastRequestedDateTime by lazy {
+                WeatherData.Companion.LastRequestedDateTime(
+                    PREF_KEY_LATEST_REQUEST_CURRENT_WEATHER_DATA
+                )
+            }
+
+            private val apiCache: WeatherData.Companion.ApiCache by lazy {
+                WeatherData.Companion.ApiCache(PREF_KEY_CACHE_CURRENT_WEATHER_DATA)
+            }
+
             fun getInstance(
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
                 latitude: Double,
                 longitude: Double,
-                callback: (CurrentWeatherData) -> Unit
+                onCompleted: (CurrentWeatherData, DateTime) -> Unit,
+                onFailed: (Exception) -> Unit
             ) {
                 getInstance(
                     context,
                     scope,
-                    PREF_KEY_LATEST_REQUEST_CURRENT_WEATHER_DATA,
+                    latestRequestedDateTime,
+                    apiCache,
                     buildRequest(context, locale, latitude, longitude),
-                    callback,
-                    { sourceText -> fromJSONString(sourceText, false) },
-                    { loadFromCache(context) })
+                    onCompleted,
+                    onFailed,
+                    { sourceText, isCached ->
+                        of(sourceText, isCached)
+                    })
             }
 
             private fun buildRequest(
@@ -431,8 +304,8 @@ class OpenWeatherMap {
                     it.build()
                 }
 
-            private fun fromJSONString(sourceText: String, isCached: Boolean): CurrentWeatherData =
-                fromJSONObject(
+            private fun of(sourceText: String, isCached: Boolean): CurrentWeatherData =
+                of(
                     sourceText,
                     try {
                         JSONObject(sourceText)
@@ -442,7 +315,7 @@ class OpenWeatherMap {
                     isCached
                 )
 
-            private fun fromJSONObject(
+            private fun of(
                 sourceText: String,
                 o: JSONObject,
                 isCached: Boolean
@@ -450,35 +323,28 @@ class OpenWeatherMap {
                 CurrentWeatherData(
                     sourceText,
                     isCached,
-                    Coord.fromJSONObject(getJSONObject(o, "coord")),
-                    Sys.fromJSONObject(getJSONObject(o, "sys")),
-                    Main.fromJSONObject(getJSONObject(o, "main")),
-                    getArrayOfJSONObject(o, "weather").map { Weather.fromJSONObject(it) }
+                    Coord.of(o.getJSONObject("coord")),
+                    Sys.of(o.getJSONObject("sys")),
+                    Main.of(o.getJSONObject("main")),
+                    o.getJSONArray("weather")
+                        .toIterableOfJSONObject()
+                        .map { Weather.of(it) }
                         .toTypedArray(),
-                    Wind.fromJSONObject(getJSONObject(o, "wind")),
-                    Clouds.fromJSONObjectOrNull(optJSONObject(o, "clouds")),
-                    Precipitation.fromJSONObjectOrNull(optJSONObject(o, "rain")),
-                    Precipitation.fromJSONObjectOrNull(optJSONObject(o, "snow")),
-                    DateTime.fromEpochSeconds(getLong(o, "dt")),
-                    TimeZone.ofTotalSeconds(getInt(o, "timezone"))
+                    Wind.of(o.getJSONObject("wind")),
+                    o.optJSONObject("clouds")?.let { Clouds.of(it) },
+                    o.optJSONObject("rain")?.let { Precipitation.of(it) },
+                    o.optJSONObject("snow")?.let { Precipitation.of(it) },
+                    DateTime.fromEpochSeconds(o.getLong("dt")),
+                    TimeZone.ofTotalSeconds(o.getInt("timezone"))
                 )
-
-            private fun loadFromCache(context: Context): CurrentWeatherData? =
-                loadFromCache(context, PREF_KEY_CACHE_CURRENT_WEATHER_DATA)?.let { sourceText ->
-                    try {
-                        fromJSONString(sourceText, true)
-                    } catch (ex: Exception) {
-                        null
-                    }
-                }
         }
 
         class Sys private constructor(val sunrise: DateTime, val sunset: DateTime) {
             companion object {
-                fun fromJSONObject(o: JSONObject): Sys =
+                fun of(o: JSONObject): Sys =
                     Sys(
-                        DateTime.fromEpochSeconds(getLong(o, "sunrise")),
-                        DateTime.fromEpochSeconds(getLong(o, "sunset"))
+                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
+                        DateTime.fromEpochSeconds(o.getLong("sunset"))
                     )
             }
         }
@@ -494,10 +360,6 @@ class OpenWeatherMap {
         val hourly: Array<CurrentOrHourly>,
         val daily: Array<Daily>
     ) : WeatherData(sourceText, isCached) {
-        override fun saveToCache(context: Context) {
-            saveToCache(context, PREF_KEY_CACHE_ONE_CALL)
-        }
-
         /**
          * @param directionInDegrees 北から吹く風は 0° 。時計回りに増えていく。
          */
@@ -506,8 +368,8 @@ class OpenWeatherMap {
             val directionInDegrees: Double?,
             val gustInMeterPerSecond: Double?
         ) {
-            val direction: SixteenDirections?
-                get() = directionInDegrees?.let { getDirection(it) }
+            val direction: SixteenDirections? =
+                directionInDegrees?.let { SixteenDirections.ofDegrees(it) }
         }
 
         /**
@@ -531,27 +393,29 @@ class OpenWeatherMap {
             val snowFall: Precipitation?
         ) {
             companion object {
-                fun fromJSONObject(o: JSONObject): CurrentOrHourly =
+                fun of(o: JSONObject): CurrentOrHourly =
                     CurrentOrHourly(
-                        DateTime.fromEpochSeconds(getLong(o, "dt")),
-                        getArrayOfJSONObject(o, "weather").map { Weather.fromJSONObject(it) }
+                        DateTime.fromEpochSeconds(o.getLong("dt")),
+                        o.getJSONArray("weather")
+                            .toIterableOfJSONObject()
+                            .map { Weather.of(it) }
                             .toTypedArray(),
-                        getDouble(o, "temp"),
-                        getDouble(o, "feels_like"),
-                        getDouble(o, "humidity"),
-                        optDouble(o, "dew_point"),
-                        getDouble(o, "clouds"),
+                        o.getDouble("temp"),
+                        o.getDouble("feels_like"),
+                        o.getDouble("humidity"),
+                        o.optDouble("dew_point"),
+                        o.getDouble("clouds"),
                         WindOfOneShot(
-                            getDouble(o, "wind_speed"),
-                            optDouble(o, "wind_deg"),
-                            optDouble(o, "wind_gust")
+                            o.getDouble("wind_speed"),
+                            o.optDouble("wind_deg"),
+                            o.optDouble("wind_gust")
                         ),
-                        DateTime.fromEpochSeconds(getLong(o, "sunrise")),
-                        DateTime.fromEpochSeconds(getLong(o, "sunset")),
-                        UltravioletIndex.fromValue((getDouble(o, "uvi"))),
-                        optDouble(o, "visibility"),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "rain")),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "snow"))
+                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
+                        DateTime.fromEpochSeconds(o.getLong("sunset")),
+                        UltravioletIndex.of((o.getDouble("uvi"))),
+                        o.optDouble("visibility"),
+                        o.optJSONObject("rain")?.let { Precipitation.of(it) },
+                        o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
             }
         }
@@ -585,14 +449,14 @@ class OpenWeatherMap {
                 val maximumCelsius: Double
             ) {
                 companion object {
-                    fun fromJSONObject(o: JSONObject): Temperature =
+                    fun of(o: JSONObject): Temperature =
                         Temperature(
-                            getDouble(o, "morn"),
-                            getDouble(o, "day"),
-                            getDouble(o, "eve"),
-                            getDouble(o, "night"),
-                            getDouble(o, "min"),
-                            getDouble(o, "max")
+                            o.getDouble("morn"),
+                            o.getDouble("day"),
+                            o.getDouble("eve"),
+                            o.getDouble("night"),
+                            o.getDouble("min"),
+                            o.getDouble("max")
                         )
                 }
             }
@@ -604,59 +468,73 @@ class OpenWeatherMap {
                 val night: Double
             ) {
                 companion object {
-                    fun fromJSONObject(o: JSONObject): FeelsLikeTemperature =
+                    fun of(o: JSONObject): FeelsLikeTemperature =
                         FeelsLikeTemperature(
-                            getDouble(o, "morn"),
-                            getDouble(o, "day"),
-                            getDouble(o, "eve"),
-                            getDouble(o, "night")
+                            o.getDouble("morn"),
+                            o.getDouble("day"),
+                            o.getDouble("eve"),
+                            o.getDouble("night")
                         )
                 }
             }
 
             companion object {
-                fun fromJSONObject(o: JSONObject): Daily =
+                fun of(o: JSONObject): Daily =
                     Daily(
-                        DateTime.fromEpochSeconds(getLong(o, "dt")),
-                        getArrayOfJSONObject(o, "weather").map { Weather.fromJSONObject(it) }
+                        DateTime.fromEpochSeconds(o.getLong("dt")),
+                        o.getJSONArray("weather")
+                            .toIterableOfJSONObject()
+                            .map { Weather.of(it) }
                             .toTypedArray(),
-                        Temperature.fromJSONObject(getJSONObject(o, "temp")),
-                        FeelsLikeTemperature.fromJSONObject(getJSONObject(o, "feels_like")),
-                        getDouble(o, "humidity"),
-                        optDouble(o, "dew_point"),
-                        getDouble(o, "clouds"),
+                        Temperature.of(o.getJSONObject("temp")),
+                        FeelsLikeTemperature.of(o.getJSONObject("feels_like")),
+                        o.getDouble("humidity"),
+                        o.optDouble("dew_point"),
+                        o.getDouble("clouds"),
                         WindOfOneShot(
-                            getDouble(o, "wind_speed"),
-                            optDouble(o, "wind_deg"),
-                            optDouble(o, "wind_gust")
+                            o.getDouble("wind_speed"),
+                            o.optDouble("wind_deg"),
+                            o.optDouble("wind_gust")
                         ),
-                        DateTime.fromEpochSeconds(getLong(o, "sunrise")),
-                        DateTime.fromEpochSeconds(getLong(o, "sunset")),
-                        UltravioletIndex.fromValue((getDouble(o, "uvi"))),
-                        optDouble(o, "visibility"),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "rain")),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "snow"))
+                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
+                        DateTime.fromEpochSeconds(o.getLong("sunset")),
+                        UltravioletIndex.of((o.getDouble("uvi"))),
+                        o.optDouble("visibility"),
+                        o.optJSONObject("rain")?.let { Precipitation.of(it) },
+                        o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
             }
         }
 
         companion object {
+            private val latestRequestedDateTime: WeatherData.Companion.LastRequestedDateTime by lazy {
+                WeatherData.Companion.LastRequestedDateTime(
+                    PREF_KEY_LATEST_REQUEST_ONE_CALL
+                )
+            }
+
+            private val apiCache: WeatherData.Companion.ApiCache by lazy {
+                WeatherData.Companion.ApiCache(PREF_KEY_CACHE_ONE_CALL)
+            }
+
             fun getInstance(
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
                 latitude: Double,
                 longitude: Double,
-                callback: (OneCall) -> Unit
+                onCompleted: (OneCall, DateTime) -> Unit,
+                onFailed: (Exception) -> Unit
             ) {
                 getInstance(
                     context,
                     scope,
-                    PREF_KEY_LATEST_REQUEST_ONE_CALL,
+                    latestRequestedDateTime,
+                    apiCache,
                     buildRequest(context, locale, latitude, longitude),
-                    callback,
-                    { sourceText -> fromJSONString(sourceText, false) },
-                    { loadFromCache(context) })
+                    onCompleted,
+                    onFailed,
+                    { sourceText, isCache -> fromJSONString(sourceText, isCache) })
             }
 
             private fun buildRequest(
@@ -681,7 +559,7 @@ class OpenWeatherMap {
                 }
 
             private fun fromJSONString(sourceText: String, isCached: Boolean): OneCall =
-                fromJSONObject(
+                of(
                     sourceText,
                     try {
                         JSONObject(sourceText)
@@ -691,7 +569,7 @@ class OpenWeatherMap {
                     isCached
                 )
 
-            private fun fromJSONObject(
+            private fun of(
                 sourceText: String,
                 o: JSONObject,
                 isCached: Boolean
@@ -699,23 +577,18 @@ class OpenWeatherMap {
                 OneCall(
                     sourceText,
                     isCached,
-                    getDouble(o, "lat"),
-                    getDouble(o, "lon"),
-                    TimeZone.of(getString(o, "timezone")),
-                    CurrentOrHourly.fromJSONObject(getJSONObject(o, "current")),
-                    getArrayOfJSONObject(o, "hourly").map { CurrentOrHourly.fromJSONObject(it) }
+                    o.getDouble("lat"),
+                    o.getDouble("lon"),
+                    TimeZone.of(o.getString("timezone")),
+                    CurrentOrHourly.of(o.getJSONObject("current")),
+                    o.getJSONArray("hourly")
+                        .toIterableOfJSONObject()
+                        .map { CurrentOrHourly.of(it) }
                         .toTypedArray(),
-                    getArrayOfJSONObject(o, "daily").map { Daily.fromJSONObject(it) }
+                    o.getJSONArray("daily")
+                        .toIterableOfJSONObject()
+                        .map { Daily.of(it) }
                         .toTypedArray())
-
-            private fun loadFromCache(context: Context): OneCall? =
-                loadFromCache(context, PREF_KEY_CACHE_ONE_CALL)?.let { sourceText ->
-                    try {
-                        fromJSONString(sourceText, true)
-                    } catch (ex: Exception) {
-                        null
-                    }
-                }
         }
     }
 
@@ -725,19 +598,15 @@ class OpenWeatherMap {
         val city: City,
         val forecasts: Array<Forecast>
     ) : WeatherData(sourceText, isCached) {
-        override fun saveToCache(context: Context) {
-            saveToCache(context, PREF_KEY_CACHE_FIVE_DAY_WEATHER_FORECAST)
-        }
-
         class City private constructor(
             val coord: Coord,
             val timeZone: TimeZone
         ) {
             companion object {
-                fun fromJSONObject(o: JSONObject): City =
+                fun of(o: JSONObject): City =
                     City(
-                        Coord.fromJSONObject(getJSONObject(o, "coord")),
-                        TimeZone.ofTotalSeconds(getInt(o, "timezone"))
+                        Coord.of(o.getJSONObject("coord")),
+                        TimeZone.ofTotalSeconds(o.getInt("timezone"))
                     )
             }
         }
@@ -752,37 +621,51 @@ class OpenWeatherMap {
             val forecasted: DateTime
         ) {
             companion object {
-                fun fromJSONObject(o: JSONObject): Forecast =
+                fun of(o: JSONObject): Forecast =
                     Forecast(
-                        Main.fromJSONObject(getJSONObject(o, "main")),
-                        getArrayOfJSONObject(o, "weather").map { Weather.fromJSONObject(it) }
+                        Main.of(o.getJSONObject("main")),
+                        o.getJSONArray("weather")
+                            .toIterableOfJSONObject()
+                            .map { Weather.of(it) }
                             .toTypedArray(),
-                        Wind.fromJSONObject(getJSONObject(o, "wind")),
-                        Clouds.fromJSONObjectOrNull(optJSONObject(o, "clouds")),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "rain")),
-                        Precipitation.fromJSONObjectOrNull(optJSONObject(o, "snow")),
-                        DateTime.fromEpochSeconds(getLong(o, "dt"))
+                        Wind.of(o.getJSONObject("wind")),
+                        o.optJSONObject("clouds")?.let { Clouds.of(it) },
+                        o.optJSONObject("rain")?.let { Precipitation.of(it) },
+                        o.optJSONObject("snow")?.let { Precipitation.of(it) },
+                        DateTime.fromEpochSeconds(o.getLong("dt"))
                     )
             }
         }
 
         companion object {
+            private val latestRequestedDateTime: WeatherData.Companion.LastRequestedDateTime by lazy {
+                WeatherData.Companion.LastRequestedDateTime(
+                    PREF_KEY_LATEST_REQUEST_FIVE_DAY_WEATHER_FORECAST
+                )
+            }
+
+            private val apiCache: WeatherData.Companion.ApiCache by lazy {
+                WeatherData.Companion.ApiCache(PREF_KEY_CACHE_FIVE_DAY_WEATHER_FORECAST)
+            }
+
             fun getInstance(
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
                 latitude: Double,
                 longitude: Double,
-                callback: (FiveDayWeatherForecast) -> Unit
+                onCompleted: (FiveDayWeatherForecast, DateTime) -> Unit,
+                onFailed: (Exception) -> Unit
             ) {
                 getInstance(
                     context,
                     scope,
-                    PREF_KEY_LATEST_REQUEST_FIVE_DAY_WEATHER_FORECAST,
+                    latestRequestedDateTime,
+                    apiCache,
                     buildRequest(context, locale, latitude, longitude),
-                    callback,
-                    { sourceText -> fromJSONString(sourceText, false) },
-                    { loadFromCache(context) })
+                    onCompleted,
+                    onFailed,
+                    { sourceText, isCache -> fromJSONString(sourceText, isCache) })
             }
 
             private fun buildRequest(
@@ -810,7 +693,7 @@ class OpenWeatherMap {
                 sourceText: String,
                 isCached: Boolean
             ): FiveDayWeatherForecast =
-                fromJSONObject(
+                of(
                     sourceText,
                     try {
                         JSONObject(sourceText)
@@ -820,7 +703,7 @@ class OpenWeatherMap {
                     isCached
                 )
 
-            private fun fromJSONObject(
+            private fun of(
                 sourceText: String,
                 o: JSONObject,
                 isCached: Boolean
@@ -828,25 +711,16 @@ class OpenWeatherMap {
                 FiveDayWeatherForecast(
                     sourceText,
                     isCached,
-                    City.fromJSONObject(getJSONObject(o, "city")),
-                    getArrayOfJSONObject(o, "list").map { Forecast.fromJSONObject(it) }
+                    City.of(o.getJSONObject("city")),
+                    o.getJSONArray("list")
+                        .toIterableOfJSONObject()
+                        .map { Forecast.of(it) }
                         .toTypedArray())
-
-            private fun loadFromCache(context: Context): FiveDayWeatherForecast? =
-                loadFromCache(
-                    context,
-                    PREF_KEY_CACHE_FIVE_DAY_WEATHER_FORECAST
-                )?.let { sourceText ->
-                    try {
-                        fromJSONString(sourceText, true)
-                    } catch (ex: Exception) {
-                        null
-                    }
-                }
         }
     }
 
     companion object {
+        private const val TAG = "OpenWeatherMap"
         private const val PREFS_NAME = "com.palmtreesoftware.experimentandroid5_1"
         private const val PREF_KEY_LATEST_REQUEST_CURRENT_WEATHER_DATA = "latest-request-weather"
         private const val PREF_KEY_LATEST_REQUEST_ONE_CALL = "latest-request-onecall"
@@ -855,7 +729,5 @@ class OpenWeatherMap {
         private const val PREF_KEY_CACHE_CURRENT_WEATHER_DATA = "cache-weather"
         private const val PREF_KEY_CACHE_ONE_CALL = "cache-onecall"
         private const val PREF_KEY_CACHE_FIVE_DAY_WEATHER_FORECAST = "cache-forecast"
-        private val minimumInterval: TimeDuration = TimeDuration.fromMinutes(10.0)
-
     }
 }

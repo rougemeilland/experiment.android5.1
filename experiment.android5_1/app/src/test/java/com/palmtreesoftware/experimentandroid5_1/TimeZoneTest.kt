@@ -48,6 +48,22 @@ internal class TimeZoneTest {
     }
 
     @Test
+    fun getShortName() {
+        arrayOf(
+            Pair("GMT", "GMT"),
+            Pair("UTC", "UTC"),
+            Pair("Asia/Tokyo", "JST"),
+            Pair("America/New_York", "EST"),
+            Pair("America/Los_Angeles", "PST"),
+            Pair("Europe/Berlin", "CET"),
+            Pair("Europe/Paris", "CET"),
+            Pair("Europe/London", "WET")
+        ).forEach {
+            assertEquals(it.second, TimeZone.of(it.first).shortName)
+        }
+    }
+
+    @Test
     fun testEquals() {
         assertEquals(true, TimeZone.ofTotalSeconds(0) == TimeZone.GMT)
         assertEquals(true, TimeZone.of(0, 0) == TimeZone.GMT)

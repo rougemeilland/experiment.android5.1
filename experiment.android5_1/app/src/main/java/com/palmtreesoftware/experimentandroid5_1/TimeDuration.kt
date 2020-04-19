@@ -114,24 +114,24 @@ class TimeDuration private constructor(val tickCounts: Long) {
     companion object {
         val ZERO: TimeDuration = TimeDuration(0)
 
-        fun fromTickCounts(tickCount: Long): TimeDuration = TimeDuration(tickCount)
+        fun ofTickCounts(tickCount: Long): TimeDuration = TimeDuration(tickCount)
 
-        fun fromMilliSeconds(milliSeconds: Double): TimeDuration =
+        fun ofMilliSeconds(milliSeconds: Double): TimeDuration =
             TimeDuration(milliSeconds.toLong())
 
-        fun fromSeconds(seconds: Double): TimeDuration =
+        fun ofSeconds(seconds: Double): TimeDuration =
             TimeDuration((seconds * 1000).toLong())
 
-        fun fromMinutes(seconds: Double): TimeDuration =
+        fun ofMinutes(seconds: Double): TimeDuration =
             TimeDuration((seconds * (1000.0 * 60)).toLong())
 
-        fun fromHours(seconds: Double): TimeDuration =
+        fun ofHours(seconds: Double): TimeDuration =
             TimeDuration((seconds * (1000.0 * 60 * 60)).toLong())
 
-        fun fromDays(seconds: Double): TimeDuration =
+        fun ofDays(seconds: Double): TimeDuration =
             TimeDuration((seconds * (1000.0 * 60 * 60 * 24)).toLong())
 
-        fun fromWeeks(seconds: Double): TimeDuration =
+        fun ofWeeks(seconds: Double): TimeDuration =
             TimeDuration((seconds * (1000.0 * 60 * 60 * 24 * 7)).toLong())
     }
 }

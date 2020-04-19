@@ -1,5 +1,8 @@
 package com.palmtreesoftware.experimentandroid5_1
 
+import org.json.JSONArray
+import org.json.JSONObject
+
 // equivalent to 'floor(this.toDouble() / divisor).toInt()'
 fun Int.divideFloor(divisor: Int): Int =
     this.div(divisor).let { q ->
@@ -167,6 +170,9 @@ fun <ELEMENT_TYPE_1, ELEMENT_TYPE_2, RESULT_ELEMENT_TYPE : Any> Array<ELEMENT_TY
         }
     }.flatten()
 }
+
+fun JSONArray.toIterableOfJSONObject(): Iterable<JSONObject> =
+    (0 until length()).map { index -> getJSONObject(index) }
 
 operator fun Int.times(multiplicand: TimeDuration): TimeDuration =
     multiplicand.times(this)

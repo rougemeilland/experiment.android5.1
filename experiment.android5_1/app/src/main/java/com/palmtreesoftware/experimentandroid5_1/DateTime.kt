@@ -65,7 +65,7 @@ abstract class DateTime protected constructor() {
             DateTimeSDK26(dateTimeUTC.plus(java.time.Duration.ofMillis(duration.tickCounts)))
 
         override operator fun minus(dateTime: DateTime): TimeDuration =
-            TimeDuration.fromTickCounts(
+            TimeDuration.ofTickCounts(
                 java.time.Duration.between(
                     (dateTime as DateTimeSDK26).dateTimeUTC,
                     this.dateTimeUTC
@@ -144,7 +144,7 @@ abstract class DateTime protected constructor() {
                 })
 
         override operator fun minus(dateTime: DateTime): TimeDuration =
-            TimeDuration.fromTickCounts(
+            TimeDuration.ofTickCounts(
                 this.dateTimeUTC.timeInMillis -
                         (dateTime as DateTimeSDK22).dateTimeUTC.timeInMillis
             )

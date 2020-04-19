@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--以下の2つはIDのみ予約-->
+    <string name="time_zone_short_name_NONE" translatable="false" />
+    <string name="time_zone_short_name_DEFAULT" translatable="false" />
+
+    <string-array name="time_zone_selecter_view_selection_items">
+        <item>-!System default</item>
+        <item>GMT!Greenwich Mean Time</item>
+        <item>Asia/Tokyo!Japan Standard Time</item>
+        <item>America/New_York!Eastern Standard Time</item>
+        <item>America/Los_Angeles!Pacific Standard Time</item>
+        <item>Europe/Berlin!Central European Standard Time</item>
+        <item>Europe/London!Western European Standard Time</item>
+        <item>#!Enter the time difference from GMT</item>
+    </string-array>
+</resources>

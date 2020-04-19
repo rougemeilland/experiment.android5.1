@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ultraviolet_index_rank_name_low">Low</string>
+    <string name="ultraviolet_index_rank_name_moderate">Moderate</string>
+    <string name="ultraviolet_index_rank_name_high">High</string>
+    <string name="ultraviolet_index_rank_name_very_high">Very high</string>
+    <string name="ultraviolet_index_rank_name_extreme">Extreme</string>
+</resources>

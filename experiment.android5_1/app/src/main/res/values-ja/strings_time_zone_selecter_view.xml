@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="time_zone_selecter_view_selection_items">
+        <item>-!システムのデフォルト</item>
+        <item>GMT!グリニッジ標準時(GMT)</item>
+        <item>Asia/Tokyo!日本標準時(JST)</item>
+        <item>America/New_York!アメリカ東部標準時(EST)</item>
+        <item>America/Los_Angeles!アメリカ太平洋標準時(PST)</item>
+        <item>Europe/Berlin!中央ヨーロッパ標準時(CET)</item>
+        <item>Europe/London!西ヨーロッパ標準時(WET)</item>
+        <item>#!GMTとの時差を入力する</item>
+    </string-array>
+</resources>

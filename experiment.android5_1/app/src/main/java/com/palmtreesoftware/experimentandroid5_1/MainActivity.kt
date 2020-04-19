@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 
 class MainActivity : AppCompatActivity() {
     //TODO("MODE_CHANGED_ACTION の受信時に、ロケーションサービスの再起動")
+
+    private val TAG = "MainActivity"
 
     private class WeatherInfo(val iconUrl: Uri, var iconImage: Bitmap?, val weatherName: String)
 
@@ -40,10 +43,15 @@ class MainActivity : AppCompatActivity() {
                         this@MainActivity,
                         scope,
                         currentLatitude,
-                        currentLongitude
-                    ) { address ->
-                        textview_city.text = address.locality
-                    }
+                        currentLongitude, { address ->
+                            if (address != null)
+                                textview_city.text = address.locality
+                        }, { ex ->
+                            if (Log.isLoggable(TAG, Log.ERROR)) {
+                                Log.e(TAG, ex.message, ex)
+                            }
+                        }
+                    )
                     requestCurrentWeatherInfo(currentLatitude, currentLongitude)
                 }
             }
@@ -196,6 +204,9 @@ class MainActivity : AppCompatActivity() {
                         locationListener
                     )
                 } catch (ex: Exception) {
+                    if (Log.isLoggable(TAG, Log.ERROR)) {
+                        Log.e(TAG, ex.message, ex)
+                    }
                     throw ex
                 }
             }
@@ -214,23 +225,27 @@ class MainActivity : AppCompatActivity() {
             scope,
             java.util.Locale.getDefault(),
             latitude,
-            longitude
-        ) { current ->
-            updateWeatherView(current)
-            handler.removeCallbacks(imageUpdateRunnable)
-            if (weatherInfos.isEmpty()) {
-                weathwe_icon_image.setImageBitmap(null)
-                weathwe_name.text = ""
-            } else {
-                requestToUpdateIconImage()
+            longitude, { current, _ ->
+                updateWeatherView(current)
+                handler.removeCallbacks(imageUpdateRunnable)
+                if (weatherInfos.isEmpty()) {
+                    weathwe_icon_image.setImageBitmap(null)
+                    weathwe_name.text = ""
+                } else {
+                    requestToUpdateIconImage()
+                }
+                resetOpenWeatherPollingTimer(
+                    if (current.isCached)
+                        minimumWeatherPollingIntervalMilliSeconds
+                    else
+                        maximumWeatherPollingIntervalMilliSeconds
+                )
+            }, { ex ->
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, ex.message, ex)
+                }
             }
-            resetOpenWeatherPollingTimer(
-                if (current.isCached)
-                    minimumWeatherPollingIntervalMilliSeconds
-                else
-                    maximumWeatherPollingIntervalMilliSeconds
-            )
-        }
+        )
     }
 
     private fun updateWeatherView(current: OpenWeatherMap.CurrentWeatherData) {
@@ -240,13 +255,19 @@ class MainActivity : AppCompatActivity() {
             this,
             scope,
             current.coord.latitude,
-            current.coord.longitude
-        ) { address ->
-            textview_address_observation.text =
-                with(address) {
-                    (0..maxAddressLineIndex).map { getAddressLine(it) }
-                }.joinToString("\n")
-        }
+            current.coord.longitude, { address ->
+                if (address != null) {
+                    textview_address_observation.text =
+                        with(address) {
+                            (0..maxAddressLineIndex).map { getAddressLine(it) }
+                        }.joinToString("\n")
+                }
+            }, { ex ->
+                if (Log.isLoggable(TAG, Log.ERROR)) {
+                    Log.e(TAG, ex.message, ex)
+                }
+            }
+        )
         current.sys.let {
             if (it.sunrise >= it.sunset) {
                 textview_sunrise_or_sunset_label_1.text = "日の入り"
@@ -276,6 +297,10 @@ class MainActivity : AppCompatActivity() {
                 it.iconUrl,
                 { bitmap ->
                     it.iconImage = bitmap
+                }, { ex ->
+                    if (Log.isLoggable(TAG, Log.ERROR)) {
+                        Log.e(TAG, ex.message, ex)
+                    }
                 }
             )
         }

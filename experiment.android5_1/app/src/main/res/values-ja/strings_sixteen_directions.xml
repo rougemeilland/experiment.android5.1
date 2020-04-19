@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sixteen_directions_description_N">北</string>
+    <string name="sixteen_directions_description_NNE">北北東</string>
+    <string name="sixteen_directions_description_NE">北東</string>
+    <string name="sixteen_directions_description_ENE">東北東</string>
+    <string name="sixteen_directions_description_E">東</string>
+    <string name="sixteen_directions_description_ESE">島南東</string>
+    <string name="sixteen_directions_description_SE">南東</string>
+    <string name="sixteen_directions_description_SSE">南南東</string>
+    <string name="sixteen_directions_description_S">南</string>
+    <string name="sixteen_directions_description_SSW">南南西</string>
+    <string name="sixteen_directions_description_SW">南西</string>
+    <string name="sixteen_directions_description_WSW">西南西</string>
+    <string name="sixteen_directions_description_W">西</string>
+    <string name="sixteen_directions_description_WNW">西北西</string>
+    <string name="sixteen_directions_description_NW">北西</string>
+    <string name="sixteen_directions_description_NNW">北北西</string>
+</resources>

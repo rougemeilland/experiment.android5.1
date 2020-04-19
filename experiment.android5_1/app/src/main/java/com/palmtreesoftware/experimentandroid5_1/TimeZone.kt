@@ -1,20 +1,17 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 
 abstract class TimeZone protected constructor(val id: String) {
     protected abstract class SymbolicTimeZone private constructor(
-        private val timeZoneId: String,
-        private val shortNameResourceId: Int
+        timeZoneId: String
     ) : TimeZone(timeZoneId) {
         @RequiresApi(Build.VERSION_CODES.O)
         private class TimeZoneSDK26 private constructor(
             private val o: java.time.ZoneId,
-            timeZoneId: String,
-            shortNameResourceId: Int
-        ) : SymbolicTimeZone(timeZoneId, shortNameResourceId) {
+            timeZoneId: String
+        ) : SymbolicTimeZone(timeZoneId) {
             override val rawObject: Any
                 get() = o
 
@@ -26,25 +23,22 @@ abstract class TimeZone protected constructor(val id: String) {
                     java.time.ZoneId.systemDefault().let { defaultTimeZone ->
                         TimeZoneSDK26(
                             defaultTimeZone,
-                            defaultTimeZone.id,
-                            mapTimeZoneIdToResourceId(defaultTimeZone.id)
+                            defaultTimeZone.id
                         )
                     }
 
                 fun createInstance(timeZoneId: String): TimeZone =
                     TimeZoneSDK26(
                         java.time.ZoneId.of(timeZoneId),
-                        timeZoneId,
-                        mapTimeZoneIdToResourceId(timeZoneId)
+                        timeZoneId
                     )
             }
         }
 
         private class TimeZoneSDK22 private constructor(
             private val o: java.util.TimeZone,
-            timeZoneId: String,
-            shortNameResourceId: Int
-        ) : SymbolicTimeZone(timeZoneId, shortNameResourceId) {
+            timeZoneId: String
+        ) : SymbolicTimeZone(timeZoneId) {
             override val rawObject: Any
                 get() = o
 
@@ -56,8 +50,7 @@ abstract class TimeZone protected constructor(val id: String) {
                     java.util.TimeZone.getDefault().let { defaultTimeZone ->
                         TimeZoneSDK22(
                             defaultTimeZone,
-                            defaultTimeZone.id,
-                            mapTimeZoneIdToResourceId(defaultTimeZone.id)
+                            defaultTimeZone.id
                         )
                     }
 
@@ -69,8 +62,7 @@ abstract class TimeZone protected constructor(val id: String) {
                         if (timeZoneId == "GMT" || o.id != "GMT")
                             TimeZoneSDK22(
                                 o,
-                                timeZoneId,
-                                mapTimeZoneIdToResourceId(timeZoneId)
+                                timeZoneId
                             )
                         else
                             getDefault()
@@ -80,13 +72,8 @@ abstract class TimeZone protected constructor(val id: String) {
             }
         }
 
-        override fun getTimeZoneShortName(context: Context): String =
-            shortNameResourceId.let {
-                if (it == R.string.time_zone_short_name_NONE)
-                    timeZoneId
-                else
-                    context.getString(it)
-            }
+        override val shortName: String =
+            mapTimeZoneIdToShortName(timeZoneId)
 
         override fun setToForm(form: TimeZoneForm) {
             if (id == getDefaultTimeZoneId())
@@ -123,7 +110,7 @@ abstract class TimeZone protected constructor(val id: String) {
 
     protected abstract class NumericTimeZone private constructor(
         timeZoneId: String,
-        private val shortTimeZoneName: String,
+        shortTimeZoneName: String,
         private val hour: Int,
         private val minute: Int
     ) : TimeZone(timeZoneId) {
@@ -182,7 +169,8 @@ abstract class TimeZone protected constructor(val id: String) {
             }
         }
 
-        override fun getTimeZoneShortName(context: Context): String = shortTimeZoneName
+        override val shortName: String =
+            shortTimeZoneName
 
         override fun setToForm(form: TimeZoneForm) {
             form.set(hour, minute)
@@ -244,7 +232,7 @@ abstract class TimeZone protected constructor(val id: String) {
         }
     }
 
-    abstract fun getTimeZoneShortName(context: Context): String
+    abstract val shortName: String
     abstract fun setToForm(form: TimeZoneForm)
     internal abstract val rawObject: Any
 
@@ -265,6 +253,17 @@ abstract class TimeZone protected constructor(val id: String) {
 
         private val timeDifferenceExpressionPattern =
             Regex("^GMT([+-])?([0-9][0-9]):([0-9][0-9])(:([0-9][0-9]))?$")
+
+        private val shortNameMap = arrayOf(
+            Pair("GMT", "GMT"),
+            Pair("Asia/Tokyo", "JST"),
+            Pair("America/New_York", "EST"),
+            Pair("America/Los_Angeles", "PST"),
+            Pair("Europe/Berlin", "CET"),
+            Pair("Europe/Paris", "CET"),
+            Pair("Europe/London", "WET")
+        )
+            .toMap()
 
         fun getDefault(): TimeZone =
             SymbolicTimeZone.getDefault()
@@ -344,15 +343,10 @@ abstract class TimeZone protected constructor(val id: String) {
                 }
             }
 
-        private fun mapTimeZoneIdToResourceId(timeZoneId: String): Int = when (timeZoneId) {
-            SymbolicTimeZone.getDefaultTimeZoneId() -> R.string.time_zone_short_name_DEFAULT
-            "GMT" -> R.string.time_zone_short_name_GMT
-            "Asia/Tokyo" -> R.string.time_zone_short_name_JST
-            "America/New_York" -> R.string.time_zone_short_name_EST
-            "America/Los_Angeles" -> R.string.time_zone_short_name_PST
-            "Europe/Berlin" -> R.string.time_zone_short_name_CET
-            "Europe/Lisbon" -> R.string.time_zone_short_name_WET
-            else -> R.string.time_zone_short_name_NONE
-        }
+        private fun mapTimeZoneIdToShortName(timeZoneId: String): String =
+            if (timeZoneId == SymbolicTimeZone.getDefaultTimeZoneId())
+                ""
+            else
+                shortNameMap[timeZoneId] ?: timeZoneId
     }
 }

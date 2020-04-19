@@ -4,90 +4,61 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#ffeeee"
     tools:context=".TestActivity">
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TableLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <TableRow>
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="タイムゾーン"
-                    tools:ignore="HardcodedText" />
+                <TableRow>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="タイムゾーン"
+                        tools:ignore="HardcodedText" />
 
-                    <Spinner
-                        android:id="@+id/testActivityTimeZoneId"
+                    <com.palmtreesoftware.experimentandroid5_1.TimeZoneSelecterView
+                        android:id="@+id/testActivityTimeZone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
+                </TableRow>
 
-                    <LinearLayout
-                        android:id="@+id/testActivityTimeDifference"
+                <TableRow>
+
+                    <TextView
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="実行結果"
+                        tools:ignore="HardcodedText" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:text="GMT"
-                            tools:ignore="HardcodedText" />
+                    <TextView
+                        android:id="@+id/testActivityResult"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:fontFamily="monospace"
+                        android:textSize="30sp" />
+                </TableRow>
+            </TableLayout>
 
-                        <NumberPicker
-                            android:id="@+id/testActivityHour"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:text=":"
-                            tools:ignore="HardcodedText" />
-
-                        <NumberPicker
-                            android:id="@+id/testActivityMinute"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </TableRow>
-
-            <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="実行結果"
-                    tools:ignore="HardcodedText" />
-
-                <TextView
-                    android:id="@+id/testActivityResult"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:fontFamily="monospace"
-                    android:textSize="30sp" />
-            </TableRow>
-        </TableLayout>
+            <com.palmtreesoftware.experimentandroid5_1.CurrentWeatherView
+                android:id="@+id/textActivityCurrentWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
