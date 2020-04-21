@@ -3,67 +3,51 @@ package com.palmtreesoftware.experimentandroid5_1
 import org.json.JSONArray
 import org.json.JSONObject
 
-// equivalent to 'floor(this.toDouble() / divisor).toInt()'
-fun Int.divideFloor(divisor: Int): Int =
+// divisor >= 0 : equivalent to 'floor(this.toDouble() / divisor).toLong()'
+// divisor < 0 : equivalent to 'ceil(this.toDouble() / divisor).toLong()'
+fun Int.divideRound(divisor: Int): Int =
+// 計算コストを下げるために this.rem(divisor) の計算を削除できないか？
+// => どのような計算方法を採用するにしろ、「 this が divisorで割り切れるかどうか 」の判別は不可避なので、
+//    this.rem(divisor) は削除できない。
     this.div(divisor).let { q ->
-        if (divisor >= 0) {
-            if (this.rem(divisor) >= 0)
-                q
-            else
-                q - 1
-        } else {
-            if (this.rem(divisor) <= 0)
-                q
-            else
-                q - 1
+        when {
+            this.rem(divisor) >= 0 -> q
+            divisor >= 0 -> q - 1
+            else -> q + 1
         }
     }
 
-// equivalent to 'u - u.divideFloor(v) * v'
+// equivalent to 'u - u.divideRound(v) * v'
 fun Int.modulo(divisor: Int): Int =
     this.rem(divisor).let { r ->
-        if (divisor >= 0) {
-            if (r < 0)
-                r + divisor
-            else
-                r
-        } else {
-            if (r > 0)
-                r + divisor
-            else
-                r
+        when {
+            r >= 0 -> r
+            divisor >= 0 -> r + divisor
+            else -> r - divisor
         }
     }
 
-// equivalent to 'floor(this.toDouble() / divisor).toLong()'
-fun Long.divideFloor(divisor: Long): Long =
+// divisor >= 0 : equivalent to 'floor(this.toDouble() / divisor).toLong()'
+// divisor < 0 : equivalent to 'ceil(this.toDouble() / divisor).toLong()'
+fun Long.divideRound(divisor: Long): Long =
+// 計算コストを下げるために this.rem(divisor) の計算を削除できないか？
+// => どのような計算方法を採用するにしろ、「 this が divisorで割り切れるかどうか 」の判別は不可避なので、
+//    this.rem(divisor) は削除できない。
     this.div(divisor).let { q ->
-        if (divisor >= 0) {
-            if (this.rem(divisor) >= 0)
-                q
-            else
-                q - 1
-        } else {
-            if (this.rem(divisor) <= 0)
-                q
-            else
-                q - 1
+        when {
+            this.rem(divisor) >= 0 -> q
+            divisor >= 0 -> q - 1
+            else -> q + 1
         }
     }
 
-// equivalent to 'u - u.divideFloor(v) * v'
+// equivalent to 'u - u.divideRound(v) * v'
 fun Long.modulo(divisor: Long): Long =
     this.rem(divisor).let { r ->
-        if (divisor >= 0) {
-            if (r < 0)
-                r + divisor
-            else
-                r
-        } else {
-            if (r > 0)
-                r + divisor
-            else
-                r
+        when {
+            r >= 0 -> r
+            divisor >= 0 -> r + divisor
+            else -> r - divisor
         }
     }
 
@@ -174,11 +158,5 @@ fun <ELEMENT_TYPE_1, ELEMENT_TYPE_2, RESULT_ELEMENT_TYPE : Any> Array<ELEMENT_TY
 fun JSONArray.toIterableOfJSONObject(): Iterable<JSONObject> =
     (0 until length()).map { index -> getJSONObject(index) }
 
-operator fun Int.times(multiplicand: TimeDuration): TimeDuration =
-    multiplicand.times(this)
-
 operator fun Long.times(multiplicand: TimeDuration): TimeDuration =
-    multiplicand.times(this)
-
-operator fun Double.times(multiplicand: TimeDuration): TimeDuration =
     multiplicand.times(this)

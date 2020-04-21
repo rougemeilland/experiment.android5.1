@@ -15,13 +15,14 @@ class AsyncUtility {
     companion object {
         fun getAddressFromLocation(
             context: Context,
+            locale: Locale,
             scope: CoroutineScope,
             latitude: Double,
             longitude: Double,
             onCompleted: (Address?) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
-            val geocorder = Geocoder(context, Locale.getDefault())
+            val geocorder = Geocoder(context, locale)
             scope.launch {
                 try {
                     geocoderAsync(geocorder, latitude, longitude, onCompleted, onFailed)

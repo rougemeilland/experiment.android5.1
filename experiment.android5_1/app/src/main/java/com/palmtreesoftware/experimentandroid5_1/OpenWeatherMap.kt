@@ -40,8 +40,8 @@ class OpenWeatherMap {
                         o.getDouble("temp_max"),
                         o.getDouble("humidity"),
                         o.getDouble("pressure"),
-                        o.optDouble("sea_level"),
-                        o.optDouble("grnd_level")
+                        o.optDouble("sea_level").let { if (it.isNaN()) null else it },
+                        o.optDouble("grnd_level").let { if (it.isNaN()) null else it }
                     )
             }
         }
@@ -82,7 +82,7 @@ class OpenWeatherMap {
                 fun of(o: JSONObject): Wind =
                     Wind(
                         o.getDouble("speed"),
-                        o.optDouble("deg")
+                        o.optDouble("deg").let { if (it.isNaN()) null else it }
                     )
             }
         }
@@ -102,14 +102,14 @@ class OpenWeatherMap {
         }
 
         class Precipitation private constructor(
-            val amountPer1HourInInMilliMeter: Double?,
-            val amountPer3HourInInMilliMeter: Double?
+            val amountOnLast1HourInMilliMeter: Double?,
+            val amountOnLast3HourInMilliMeter: Double?
         ) {
             companion object {
                 fun of(o: JSONObject): Precipitation =
                     Precipitation(
-                        o.optDouble("1h"),
-                        o.optDouble("3h")
+                        o.optDouble("1h").let { if (it.isNaN()) null else it },
+                        o.optDouble("3h").let { if (it.isNaN()) null else it }
                     )
             }
         }
@@ -173,7 +173,7 @@ class OpenWeatherMap {
                 }
 
                 fun getValue(context: Context): DateTime =
-                    DateTime.fromEpochMilliSeconds(
+                    DateTime.ofEpochMilliSeconds(
                         context.getSharedPreferences(PREFS_NAME, 0)
                             .getLong(key, 0)
                     )
@@ -195,7 +195,7 @@ class OpenWeatherMap {
                 val minimumInterval = TimeDuration.ofSeconds(
                     context.resources.getInteger(
                         R.integer.open_weather_map_minimum_interval_seconds
-                    ).toDouble()
+                    ).toLong()
                 )
                 if (now - latestRequested < minimumInterval) {
                     val cache = try {
@@ -334,7 +334,7 @@ class OpenWeatherMap {
                     o.optJSONObject("clouds")?.let { Clouds.of(it) },
                     o.optJSONObject("rain")?.let { Precipitation.of(it) },
                     o.optJSONObject("snow")?.let { Precipitation.of(it) },
-                    DateTime.fromEpochSeconds(o.getLong("dt")),
+                    DateTime.ofEpochSeconds(o.getLong("dt")),
                     TimeZone.ofTotalSeconds(o.getInt("timezone"))
                 )
         }
@@ -343,8 +343,8 @@ class OpenWeatherMap {
             companion object {
                 fun of(o: JSONObject): Sys =
                     Sys(
-                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
-                        DateTime.fromEpochSeconds(o.getLong("sunset"))
+                        DateTime.ofEpochSeconds(o.getLong("sunrise")),
+                        DateTime.ofEpochSeconds(o.getLong("sunset"))
                     )
             }
         }
@@ -395,7 +395,7 @@ class OpenWeatherMap {
             companion object {
                 fun of(o: JSONObject): CurrentOrHourly =
                     CurrentOrHourly(
-                        DateTime.fromEpochSeconds(o.getLong("dt")),
+                        DateTime.ofEpochSeconds(o.getLong("dt")),
                         o.getJSONArray("weather")
                             .toIterableOfJSONObject()
                             .map { Weather.of(it) }
@@ -403,17 +403,17 @@ class OpenWeatherMap {
                         o.getDouble("temp"),
                         o.getDouble("feels_like"),
                         o.getDouble("humidity"),
-                        o.optDouble("dew_point"),
+                        o.optDouble("dew_point").let { if (it.isNaN()) null else it },
                         o.getDouble("clouds"),
                         WindOfOneShot(
                             o.getDouble("wind_speed"),
-                            o.optDouble("wind_deg"),
-                            o.optDouble("wind_gust")
+                            o.optDouble("wind_deg").let { if (it.isNaN()) null else it },
+                            o.optDouble("wind_gust").let { if (it.isNaN()) null else it }
                         ),
-                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
-                        DateTime.fromEpochSeconds(o.getLong("sunset")),
+                        DateTime.ofEpochSeconds(o.getLong("sunrise")),
+                        DateTime.ofEpochSeconds(o.getLong("sunset")),
                         UltravioletIndex.of((o.getDouble("uvi"))),
-                        o.optDouble("visibility"),
+                        o.optDouble("visibility").let { if (it.isNaN()) null else it },
                         o.optJSONObject("rain")?.let { Precipitation.of(it) },
                         o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
@@ -481,7 +481,7 @@ class OpenWeatherMap {
             companion object {
                 fun of(o: JSONObject): Daily =
                     Daily(
-                        DateTime.fromEpochSeconds(o.getLong("dt")),
+                        DateTime.ofEpochSeconds(o.getLong("dt")),
                         o.getJSONArray("weather")
                             .toIterableOfJSONObject()
                             .map { Weather.of(it) }
@@ -489,17 +489,17 @@ class OpenWeatherMap {
                         Temperature.of(o.getJSONObject("temp")),
                         FeelsLikeTemperature.of(o.getJSONObject("feels_like")),
                         o.getDouble("humidity"),
-                        o.optDouble("dew_point"),
+                        o.optDouble("dew_point").let { if (it.isNaN()) null else it },
                         o.getDouble("clouds"),
                         WindOfOneShot(
                             o.getDouble("wind_speed"),
-                            o.optDouble("wind_deg"),
-                            o.optDouble("wind_gust")
+                            o.optDouble("wind_deg").let { if (it.isNaN()) null else it },
+                            o.optDouble("wind_gust").let { if (it.isNaN()) null else it }
                         ),
-                        DateTime.fromEpochSeconds(o.getLong("sunrise")),
-                        DateTime.fromEpochSeconds(o.getLong("sunset")),
+                        DateTime.ofEpochSeconds(o.getLong("sunrise")),
+                        DateTime.ofEpochSeconds(o.getLong("sunset")),
                         UltravioletIndex.of((o.getDouble("uvi"))),
-                        o.optDouble("visibility"),
+                        o.optDouble("visibility").let { if (it.isNaN()) null else it },
                         o.optJSONObject("rain")?.let { Precipitation.of(it) },
                         o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
@@ -632,7 +632,7 @@ class OpenWeatherMap {
                         o.optJSONObject("clouds")?.let { Clouds.of(it) },
                         o.optJSONObject("rain")?.let { Precipitation.of(it) },
                         o.optJSONObject("snow")?.let { Precipitation.of(it) },
-                        DateTime.fromEpochSeconds(o.getLong("dt"))
+                        DateTime.ofEpochSeconds(o.getLong("dt"))
                     )
             }
         }

@@ -1,21 +1,14 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-import android.content.Context
+
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Handler
-import android.util.AttributeSet
 import android.util.Log
-import android.view.View
-import android.widget.FrameLayout
-import kotlinx.android.synthetic.main.vertical_weather_symbol_view.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
-// TODO("画像の幅がこのコントロールの幅を無視してすごく大きく表示される。原因調査。")
-
-class VerticalWeatherSymbolView(context: Context, attributeSet: AttributeSet) :
-    FrameLayout(context, attributeSet) {
+abstract class WeatherSymbolContainer {
     private class WeatherInfo(val iconUrl: Uri, var iconImage: Bitmap?, val description: String)
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -25,9 +18,8 @@ class VerticalWeatherSymbolView(context: Context, attributeSet: AttributeSet) :
     private val weatherInfoItems: MutableList<WeatherInfo> = mutableListOf()
     private var currentWeatherViewIndex = 0
 
-    init {
-        View.inflate(context, R.layout.vertical_weather_symbol_view, this)
-    }
+    abstract fun onReset()
+    abstract fun onUpdate(image: Bitmap?, description: String)
 
     var dataSource: Array<Pair<Uri, String>>
         get() =
@@ -63,13 +55,13 @@ class VerticalWeatherSymbolView(context: Context, attributeSet: AttributeSet) :
             imageUpdateHandler.removeCallbacks(imageUpdateRunnable)
             when (weatherInfoItems.size) {
                 0 -> {
-                    weather_symbol_view_image.setImageBitmap(null)
-                    weather_symbol_view_image.contentDescription = ""
-                    weather_symbol_view_description.text = ""
+                    onReset()
                 }
                 1 -> {
                     val weatherInfo = weatherInfoItems[0]
-                    setView(weatherInfoItems[0])
+                    weatherInfoItems[0].let {
+                        onUpdate(it.iconImage, it.description)
+                    }
                     if (weatherInfo.iconImage == null) {
                         imageUpdateHandler.postDelayed(
                             imageUpdateRunnable,
@@ -80,7 +72,9 @@ class VerticalWeatherSymbolView(context: Context, attributeSet: AttributeSet) :
                 else -> {
                     if (currentWeatherViewIndex >= weatherInfoItems.count())
                         currentWeatherViewIndex = 0
-                    setView(weatherInfoItems[currentWeatherViewIndex])
+                    weatherInfoItems[currentWeatherViewIndex].let {
+                        onUpdate(it.iconImage, it.description)
+                    }
                     ++currentWeatherViewIndex
                     imageUpdateHandler.postDelayed(
                         imageUpdateRunnable,
@@ -90,13 +84,6 @@ class VerticalWeatherSymbolView(context: Context, attributeSet: AttributeSet) :
             }
         }
         imageUpdateHandler.post(imageUpdateRunnable)
-    }
-
-    private fun setView(weatherInfo: WeatherInfo) {
-        if (weatherInfo.iconImage != null)
-            weather_symbol_view_image.setImageBitmap(weatherInfo.iconImage)
-        weather_symbol_view_image.contentDescription = weatherInfo.description
-        weather_symbol_view_description.text = weatherInfo.description
     }
 
     companion object {

@@ -1,25 +1,26 @@
 package com.palmtreesoftware.experimentandroid5_1
 
 class TimeDuration private constructor(val tickCounts: Long) {
-    val milliSeconds: Double
-        get() = tickCounts.toDouble()
+    val milliSeconds: Long
+        get() = tickCounts
 
-    val seconds: Double
-        get() = tickCounts / 1000.0
+    val seconds: Long
+        get() = tickCounts.divideRound(1000)
 
-    val minutes: Double
-        get() = tickCounts / (1000.0 * 60)
+    val minutes: Long
+        get() = tickCounts.divideRound(1000 * 60)
 
-    val hours: Double
-        get() = tickCounts / (1000.0 * 60 * 60)
+    val hours: Long
+        get() = tickCounts.divideRound(1000 * 60 * 60)
 
-    val days: Double
-        get() = tickCounts / (1000.0 * 60 * 60 * 24)
+    val days: Long
+        get() = tickCounts.divideRound(1000 * 60 * 60 * 24)
 
-    val weeks: Double
-        get() = tickCounts / (1000.0 * 60 * 60 * 24 * 7)
+    val weeks: Long
+        get() = tickCounts.divideRound(1000 * 60 * 60 * 24 * 7)
 
-    operator fun plus(dateTime: DateTime): DateTime = dateTime.plus(this)
+    operator fun plus(dateTime: DateTime): DateTime =
+        dateTime.plus(this)
 
     operator fun plus(duration: TimeDuration): TimeDuration =
         TimeDuration(tickCounts + duration.tickCounts)
@@ -27,26 +28,56 @@ class TimeDuration private constructor(val tickCounts: Long) {
     operator fun minus(duration: TimeDuration): TimeDuration =
         TimeDuration(tickCounts - duration.tickCounts)
 
-    operator fun times(multiplicand: Int): TimeDuration =
-        TimeDuration(tickCounts * multiplicand)
-
     operator fun times(multiplicand: Long): TimeDuration =
         TimeDuration(tickCounts * multiplicand)
 
-    operator fun times(multiplicand: Double): TimeDuration =
-        TimeDuration((tickCounts * multiplicand).toLong())
+    operator fun div(divisor: Long): TimeDuration =
+        TimeDuration(tickCounts.divideRound(divisor))
 
-    operator fun div(divisor: Int): TimeDuration =
-        TimeDuration(tickCounts / divisor)
+    operator fun compareTo(other: TimeDuration): Int =
+        tickCounts.compareTo(other.tickCounts)
 
-    operator fun div(divisor: Double): TimeDuration =
-        TimeDuration((tickCounts / divisor).toLong())
+    operator fun unaryPlus(): TimeDuration =
+        TimeDuration(tickCounts)
 
-    operator fun compareTo(other: TimeDuration): Int = tickCounts.compareTo(other.tickCounts)
+    operator fun unaryMinus(): TimeDuration =
+        TimeDuration(-tickCounts)
 
-    operator fun unaryPlus(): TimeDuration = TimeDuration(tickCounts)
+    fun plusMilliSeconds(milliSeconds: Long): TimeDuration =
+        TimeDuration(tickCounts + milliSeconds)
 
-    operator fun unaryMinus(): TimeDuration = TimeDuration(-tickCounts)
+    fun plusSeconds(seconds: Long): TimeDuration =
+        plusMilliSeconds(seconds * 1000)
+
+    fun plusMinutes(minutes: Long): TimeDuration =
+        plusMilliSeconds(minutes * (1000 * 60))
+
+    fun plusHours(hours: Long): TimeDuration =
+        plusMilliSeconds(hours * (1000 * 60 * 60))
+
+    fun plusDays(days: Long): TimeDuration =
+        plusMilliSeconds(days * (1000 * 60 * 60 * 24))
+
+    fun plusWeeks(weeks: Long): TimeDuration =
+        plusMilliSeconds(weeks * (1000 * 60 * 60 * 24 * 7))
+
+    fun minusMilliSeconds(milliSeconds: Long): TimeDuration =
+        TimeDuration(tickCounts - milliSeconds)
+
+    fun minusSeconds(seconds: Long): TimeDuration =
+        minusMilliSeconds(seconds * 1000)
+
+    fun minusMinutes(minutes: Long): TimeDuration =
+        minusMilliSeconds(minutes * (1000 * 60))
+
+    fun minusHours(hours: Long): TimeDuration =
+        minusMilliSeconds(hours * (1000 * 60 * 60))
+
+    fun minusDays(days: Long): TimeDuration =
+        minusMilliSeconds(days * (1000 * 60 * 60 * 24))
+
+    fun minusWeeks(weeks: Long): TimeDuration =
+        minusMilliSeconds(weeks * (1000 * 60 * 60 * 24 * 7))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -112,26 +143,34 @@ class TimeDuration private constructor(val tickCounts: Long) {
     }
 
     companion object {
+        @JvmStatic
         val ZERO: TimeDuration = TimeDuration(0)
 
+        @JvmStatic
         fun ofTickCounts(tickCount: Long): TimeDuration = TimeDuration(tickCount)
 
-        fun ofMilliSeconds(milliSeconds: Double): TimeDuration =
-            TimeDuration(milliSeconds.toLong())
+        @JvmStatic
+        fun ofMilliSeconds(milliSeconds: Long): TimeDuration =
+            TimeDuration(milliSeconds)
 
-        fun ofSeconds(seconds: Double): TimeDuration =
-            TimeDuration((seconds * 1000).toLong())
+        @JvmStatic
+        fun ofSeconds(seconds: Long): TimeDuration =
+            TimeDuration(seconds * 1000)
 
-        fun ofMinutes(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.0 * 60)).toLong())
+        @JvmStatic
+        fun ofMinutes(seconds: Long): TimeDuration =
+            TimeDuration(seconds * (1000 * 60))
 
-        fun ofHours(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.0 * 60 * 60)).toLong())
+        @JvmStatic
+        fun ofHours(seconds: Long): TimeDuration =
+            TimeDuration(seconds * (1000 * 60 * 60))
 
-        fun ofDays(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.0 * 60 * 60 * 24)).toLong())
+        @JvmStatic
+        fun ofDays(seconds: Long): TimeDuration =
+            TimeDuration(seconds * (1000 * 60 * 60 * 24))
 
-        fun ofWeeks(seconds: Double): TimeDuration =
-            TimeDuration((seconds * (1000.0 * 60 * 60 * 24 * 7)).toLong())
+        @JvmStatic
+        fun ofWeeks(seconds: Long): TimeDuration =
+            TimeDuration(seconds * (1000 * 60 * 60 * 24 * 7))
     }
 }

@@ -208,7 +208,7 @@ class ZonedDateTimeTest {
         // month のテスト
         Month.values().forEach { month ->
             assertEquals(
-                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00.000Z', timeZone='GMT')".format(month.value),
+                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00Z', timeZone='GMT')".format(month.value),
                 ZonedDateTime.of(
                     2020,
                     month,
@@ -589,7 +589,7 @@ class ZonedDateTimeTest {
         // month のテスト
         Month.values().forEach { month ->
             assertEquals(
-                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00.000Z', timeZone='GMT')".format(month.value),
+                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00Z', timeZone='GMT')".format(month.value),
                 ZonedDateTime.of(
                     2020,
                     month,
@@ -612,7 +612,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -628,7 +628,7 @@ class ZonedDateTimeTest {
             TimeZone.GMT
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -644,7 +644,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -660,7 +660,7 @@ class ZonedDateTimeTest {
             TimeZone.of("UTC")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000Z', timeZone='UTC')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03Z', timeZone='UTC')",
                 it.toString()
             )
             assertEquals("UTC", it.timeZone.id)
@@ -676,7 +676,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Europe/London")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000+01:00', timeZone='Europe/London')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03+01:00', timeZone='Europe/London')",
                 it.toString()
             )
             assertEquals("Europe/London", it.timeZone.id)
@@ -692,7 +692,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Asia/Tokyo")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T01:02:03.000+09:00', timeZone='Asia/Tokyo')",
+                "ZonedDateTime(dateTime='2020-04-10T01:02:03+09:00', timeZone='Asia/Tokyo')",
                 it.toString()
             )
             assertEquals("Asia/Tokyo", it.timeZone.id)
@@ -708,7 +708,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -724,7 +724,7 @@ class ZonedDateTimeTest {
             TimeZone.GMT
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -740,7 +740,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -756,7 +756,7 @@ class ZonedDateTimeTest {
             TimeZone.of("UTC")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='UTC')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03Z', timeZone='UTC')",
                 it.toString()
             )
             assertEquals("UTC", it.timeZone.id)
@@ -772,7 +772,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Europe/London")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000Z', timeZone='Europe/London')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03Z', timeZone='Europe/London')",
                 it.toString()
             )
             assertEquals("Europe/London", it.timeZone.id)
@@ -788,7 +788,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Asia/Tokyo")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T01:02:03.000+09:00', timeZone='Asia/Tokyo')",
+                "ZonedDateTime(dateTime='2020-01-10T01:02:03+09:00', timeZone='Asia/Tokyo')",
                 it.toString()
             )
             assertEquals("Asia/Tokyo", it.timeZone.id)
@@ -858,7 +858,7 @@ class ZonedDateTimeTest {
         // month のテスト
         Month.values().forEach { month ->
             assertEquals(
-                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00.000Z', timeZone='GMT')".format(month.value),
+                "ZonedDateTime(dateTime='2020-%02d-01T00:00:00Z', timeZone='GMT')".format(month.value),
                 ZonedDateTime.of(
                     2020,
                     month,
@@ -875,7 +875,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -888,7 +888,7 @@ class ZonedDateTimeTest {
             TimeZone.GMT
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -901,7 +901,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -914,7 +914,7 @@ class ZonedDateTimeTest {
             TimeZone.of("UTC")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000Z', timeZone='UTC')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00Z', timeZone='UTC')",
                 it.toString()
             )
             assertEquals("UTC", it.timeZone.id)
@@ -927,7 +927,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Europe/London")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000+01:00', timeZone='Europe/London')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00+01:00', timeZone='Europe/London')",
                 it.toString()
             )
             assertEquals("Europe/London", it.timeZone.id)
@@ -940,7 +940,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Asia/Tokyo")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-04-10T00:00:00.000+09:00', timeZone='Asia/Tokyo')",
+                "ZonedDateTime(dateTime='2020-04-10T00:00:00+09:00', timeZone='Asia/Tokyo')",
                 it.toString()
             )
             assertEquals("Asia/Tokyo", it.timeZone.id)
@@ -953,7 +953,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT+00:00")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -966,7 +966,7 @@ class ZonedDateTimeTest {
             TimeZone.GMT
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -979,7 +979,7 @@ class ZonedDateTimeTest {
             TimeZone.of("GMT")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00Z', timeZone='GMT')",
                 it.toString()
             )
             assertEquals("GMT", it.timeZone.id)
@@ -992,7 +992,7 @@ class ZonedDateTimeTest {
             TimeZone.of("UTC")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='UTC')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00Z', timeZone='UTC')",
                 it.toString()
             )
             assertEquals("UTC", it.timeZone.id)
@@ -1005,7 +1005,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Europe/London")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000Z', timeZone='Europe/London')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00Z', timeZone='Europe/London')",
                 it.toString()
             )
             assertEquals("Europe/London", it.timeZone.id)
@@ -1018,7 +1018,7 @@ class ZonedDateTimeTest {
             TimeZone.of("Asia/Tokyo")
         ).also {
             assertEquals(
-                "ZonedDateTime(dateTime='2020-01-10T00:00:00.000+09:00', timeZone='Asia/Tokyo')",
+                "ZonedDateTime(dateTime='2020-01-10T00:00:00+09:00', timeZone='Asia/Tokyo')",
                 it.toString()
             )
             assertEquals("Asia/Tokyo", it.timeZone.id)
@@ -1028,7 +1028,7 @@ class ZonedDateTimeTest {
 
     @Test
     fun ofDateTimeTimeZone() {
-        DateTime.fromEpochMilliSeconds(1586480523004).also { dateTime ->
+        DateTime.ofEpochMilliSeconds(1586480523004).also { dateTime ->
             ZonedDateTime.of(dateTime, TimeZone.GMT).also { zonedDateTime ->
                 assertEquals(
                     "ZonedDateTime(dateTime='2020-04-10T01:02:03.004Z', timeZone='GMT')",
@@ -1078,7 +1078,7 @@ class ZonedDateTimeTest {
                 assertEquals(1586480523004, zonedDateTime.epochMilliSeconds)
             }
         }
-        DateTime.fromEpochMilliSeconds(0).also { dateTime ->
+        DateTime.ofEpochMilliSeconds(0).also { dateTime ->
             ZonedDateTime.of(dateTime, TimeZone.GMT).also { zonedDateTime ->
                 assertEquals(1970, zonedDateTime.year)
                 assertEquals(Month.JANUARY, zonedDateTime.month)
@@ -1116,7 +1116,7 @@ class ZonedDateTimeTest {
                 assertEquals(0, zonedDateTime.epochMilliSeconds)
             }
         }
-        DateTime.fromEpochMilliSeconds(-1).also { dateTime ->
+        DateTime.ofEpochMilliSeconds(-1).also { dateTime ->
             ZonedDateTime.of(dateTime, TimeZone.GMT).also { zonedDateTime ->
                 assertEquals(1969, zonedDateTime.year)
                 assertEquals(Month.DECEMBER, zonedDateTime.month)
@@ -2037,22 +2037,89 @@ class ZonedDateTimeTest {
         }
     }
 
+
     @Test
     fun toDateTime() {
-        arrayOf(TimeZone.GMT, TimeZone.of("GMT+01:00"), TimeZone.of("GMT-01:00"))
-            .forEach { timeZone ->
-                ZonedDateTime.of(
-                    1970,
-                    Month.JANUARY,
-                    1,
-                    0,
-                    0,
-                    0,
-                    timeZone
-                ).let {
-                    assertEquals(it.epochMilliSeconds, it.toDateTime().epochMilliSeconds)
-                }
+        assertEquals(
+            1587340800000L,
+            ZonedDateTime.of(2020, Month.APRIL, 20, 0, 0, 0, 0, TimeZone.GMT)
+                .toDateTime().epochMilliSeconds
+        )
+        assertEquals(
+            1587427199999L,
+            ZonedDateTime.of(2020, Month.APRIL, 20, 23, 59, 59, 999, TimeZone.GMT)
+                .toDateTime().epochMilliSeconds
+        )
+        assertEquals(
+            1587337200000L,
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                20,
+                0,
+                0,
+                0,
+                0,
+                TimeZone.of("GMT+01:00")
+            ).toDateTime().epochMilliSeconds
+        )
+        assertEquals(
+            1587423599999L,
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                20,
+                23,
+                59,
+                59,
+                999,
+                TimeZone.of("GMT+01:00")
+            ).toDateTime().epochMilliSeconds
+        )
+        assertEquals(
+            1587344400000L,
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                20,
+                0,
+                0,
+                0,
+                0,
+                TimeZone.of("GMT-01:00")
+            ).toDateTime().epochMilliSeconds
+        )
+        assertEquals(
+            1587430799999L,
+            ZonedDateTime.of(
+                2020,
+                Month.APRIL,
+                20,
+                23,
+                59,
+                59,
+                999,
+                TimeZone.of("GMT-01:00")
+            ).toDateTime().epochMilliSeconds
+        )
+    }
+
+    @Test
+    fun atStartOfDay() {
+        arrayOf(
+            TimeZone.GMT,
+            TimeZone.of("GMT+01:00"),
+            TimeZone.of("GMT-01:00")
+        ).forEach { timeZone ->
+            val expected =
+                ZonedDateTime.of(2020, Month.APRIL, 20, 0, 0, 0, 0, timeZone)
+            arrayOf(
+                ZonedDateTime.of(2020, Month.APRIL, 20, 0, 0, 0, 0, timeZone),
+                ZonedDateTime.of(2020, Month.APRIL, 20, 23, 59, 59, 59, timeZone)
+            ).forEach { actual ->
+                assertEquals(expected.toDateTime(), actual.atStartOfDay(), "timeZone=$timeZone")
             }
+        }
     }
 
     @Test
@@ -2117,23 +2184,23 @@ class ZonedDateTimeTest {
     fun testToString() {
         arrayOf(
             Pair(
-                "ZonedDateTime(dateTime='1970-01-01T00:00:00.000Z', timeZone='GMT')",
+                "ZonedDateTime(dateTime='1970-01-01T00:00:00Z', timeZone='GMT')",
                 TimeZone.GMT
             ),
             Pair(
-                "ZonedDateTime(dateTime='1970-01-01T00:00:00.000+01:00', timeZone='GMT+01:00')",
+                "ZonedDateTime(dateTime='1970-01-01T00:00:00+01:00', timeZone='GMT+01:00')",
                 TimeZone.of("GMT+01:00")
             ),
             Pair(
-                "ZonedDateTime(dateTime='1970-01-01T00:00:00.000-01:00', timeZone='GMT-01:00')",
+                "ZonedDateTime(dateTime='1970-01-01T00:00:00-01:00', timeZone='GMT-01:00')",
                 TimeZone.of("GMT-01:00")
             ),
             Pair(
-                "ZonedDateTime(dateTime='1970-01-01T00:00:00.000+09:00', timeZone='Asia/Tokyo')",
+                "ZonedDateTime(dateTime='1970-01-01T00:00:00+09:00', timeZone='Asia/Tokyo')",
                 TimeZone.of("Asia/Tokyo")
             ),
             Pair(
-                "ZonedDateTime(dateTime='1970-01-01T00:00:00.000Z', timeZone='UTC')",
+                "ZonedDateTime(dateTime='1970-01-01T00:00:00Z', timeZone='UTC')",
                 TimeZone.of("UTC")
             )
         ).forEach { param ->

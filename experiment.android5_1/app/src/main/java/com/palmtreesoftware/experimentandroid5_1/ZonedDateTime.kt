@@ -4,15 +4,17 @@ import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 
-// TODO("年月日のみ扱えることができ、時分秒ミリ秒は扱えない、ZonedDateクラスの新設")
-// TODO("ZonedDateTime と ZonedDate の間の相互変換手段の用意")
-
 abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     @RequiresApi(Build.VERSION_CODES.O)
     private class ZonedDateTimeSDK26 private constructor(
         private val dateTimeLocal: java.time.ZonedDateTime,
         timeZone: TimeZone
     ) : ZonedDateTime(timeZone) {
+        init {
+            if (dateTimeLocal.zone.id != timeZone.id)
+                throw Exception(javaClass.canonicalName + ".init(): dateTimeLocal.zone.id != timeZone.id")
+        }
+
         private val dateLocal: java.time.LocalDate = dateTimeLocal.toLocalDate()
 
         override val epochSeconds: Long
@@ -64,21 +66,6 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         override val milliSecond: Int
             get() = dateTimeLocal.get(java.time.temporal.ChronoField.MILLI_OF_SECOND)
 
-        override fun toDateTime(): DateTime =
-            DateTime.of(
-                dateTimeLocal
-                    .withZoneSameInstant(gmt)
-                    .toLocalDateTime()
-            )
-
-        override fun format(dateFormatString: String, locale: java.util.Locale): String =
-            dateTimeLocal.format(
-                java.time.format.DateTimeFormatter.ofPattern(
-                    dateFormatString,
-                    locale
-                )
-            )
-
         override fun equals(other: Any?): Boolean {
             if (this === other)
                 return true
@@ -96,10 +83,36 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
             "ZonedDateTime(dateTime='${dateTimeLocal
                 .format(
                     java.time.format.DateTimeFormatter.ofPattern(
-                        dateTimeFormatOfISO8601,
+                        if (dateTimeLocal.get(java.time.temporal.ChronoField.MILLI_OF_SECOND) == 0)
+                            dateTimeFormatOfISO8601
+                        else
+                            dateTimeFormatOfISO8601ContainingMilliSecond,
                         java.util.Locale.ENGLISH
                     )
                 )}', timeZone='${dateTimeLocal.zone.id}')"
+
+        override fun toDateTime(): DateTime =
+            DateTime.of(
+                dateTimeLocal
+                    .withZoneSameInstant(gmt)
+                    .toLocalDateTime()
+            )
+
+        override fun atStartOfDay(): DateTime =
+            DateTime.of(
+                dateLocal
+                    .atStartOfDay(timeZone.rawObject as java.time.ZoneId)
+                    .withZoneSameInstant(gmt)
+                    .toLocalDateTime()
+            )
+
+        override fun format(dateFormatString: String, locale: java.util.Locale): String =
+            dateTimeLocal.format(
+                java.time.format.DateTimeFormatter.ofPattern(
+                    dateFormatString,
+                    locale
+                )
+            )
 
         companion object {
             private val gmt by lazy { java.time.ZoneId.of("GMT") }
@@ -190,9 +203,14 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         private val dateTimeLocal: java.util.Calendar,
         timeZone: TimeZone
     ) : ZonedDateTime(timeZone) {
+        init {
+            if (dateTimeLocal.timeZone.id != timeZone.id)
+                throw Exception(javaClass.canonicalName + ".init(): dateTimeLocal.timeZone.id != timeZone.id")
+        }
+
         override val epochSeconds: Long
             get() =
-                dateTimeLocal.timeInMillis.divideFloor(1000)
+                dateTimeLocal.timeInMillis.divideRound(1000)
 
         override val epochMilliSeconds: Long
             get() = dateTimeLocal.timeInMillis
@@ -245,19 +263,6 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         override val milliSecond: Int
             get() = dateTimeLocal.get(java.util.Calendar.MILLISECOND)
 
-        override fun toDateTime(): DateTime =
-            DateTime.of(java.util.Calendar.getInstance().also {
-                it.clear()
-                it.timeZone = gmt
-                it.timeInMillis = dateTimeLocal.timeInMillis
-            })
-
-        @SuppressLint("SimpleDateFormat")
-        override fun format(dateFormatString: String, locale: java.util.Locale): String =
-            java.text.SimpleDateFormat(dateFormatString, locale)
-                .apply { timeZone = dateTimeLocal.timeZone }
-                .format(dateTimeLocal.time)
-
         override fun equals(other: Any?): Boolean {
             if (this === other)
                 return true
@@ -277,11 +282,46 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         @SuppressLint("SimpleDateFormat")
         override fun toString(): String =
             "ZonedDateTime(dateTime='${java.text.SimpleDateFormat(
-                dateTimeFormatOfISO8601,
+                if (dateTimeLocal.get(java.util.Calendar.MILLISECOND) == 0)
+                    dateTimeFormatOfISO8601
+                else
+                    dateTimeFormatOfISO8601ContainingMilliSecond,
                 java.util.Locale.ENGLISH
             )
                 .apply { timeZone = dateTimeLocal.timeZone }
                 .format(dateTimeLocal.time)}', timeZone='${dateTimeLocal.timeZone.id}')"
+
+        override fun toDateTime(): DateTime =
+            DateTime.of(java.util.Calendar.getInstance().also {
+                it.clear()
+                it.timeZone = gmt
+                it.timeInMillis = dateTimeLocal.timeInMillis
+            })
+
+        override fun atStartOfDay(): DateTime =
+            DateTime.of(
+                java.util.Calendar.getInstance().also {
+                    it.clear()
+                    it.timeZone = gmt
+                    it.timeInMillis = (getCalendar(
+                        dateTimeLocal.get(java.util.Calendar.YEAR),
+                        dateTimeLocal.get(java.util.Calendar.MONTH),
+                        dateTimeLocal.get(java.util.Calendar.DAY_OF_MONTH),
+                        0,
+                        0,
+                        0,
+                        0,
+                        dateTimeLocal.timeZone
+                    )
+                        ?: throw Exception("${javaClass.canonicalName}.atStartOfDay(): Cannot create Calendar: year=$year, month=$month, day=$dayOfMonth"))
+                        .timeInMillis
+                })
+
+        @SuppressLint("SimpleDateFormat")
+        override fun format(dateFormatString: String, locale: java.util.Locale): String =
+            java.text.SimpleDateFormat(dateFormatString, locale)
+                .apply { timeZone = dateTimeLocal.timeZone }
+                .format(dateTimeLocal.time)
 
         companion object {
             private val gmt by lazy { java.util.TimeZone.getTimeZone("GMT") }
@@ -308,40 +348,19 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 milliSecond: Int,
                 timeZone: TimeZone
             ): ZonedDateTime =
-                ZonedDateTimeSDK22(
-                    java.util.Calendar.getInstance().apply {
-                        clear()
-                        set(java.util.Calendar.YEAR, year)
-                        set(java.util.Calendar.MONTH, mapMonthToNative(month))
-                        set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth)
-                        // Calendar.HOUR は 12 時間制の値なので間違えないこと
-                        set(java.util.Calendar.HOUR_OF_DAY, hour)
-                        set(java.util.Calendar.MINUTE, minute)
-                        set(java.util.Calendar.SECOND, second)
-                        set(java.util.Calendar.MILLISECOND, milliSecond)
-                        this.timeZone = timeZone.rawObject as java.util.TimeZone
-                    },
-                    timeZone
-                ).also {
-                    // Calendar の構築時にパラメタの検査をしていないらしく、範囲外のパラメタを与えると
-                    // 意図しない日時の Calendar ができることがあるので、
-                    // 生成された Calendar オブジェクトの各コンポーネントを検査して与えた値と異なっていたら
-                    // パラメタエラーとしている
-                    // 例: 2020年1月0日を指定した場合 -> Calendar の year は 2019 、
-                    // month は DECEMBER 、dayOfMonth は 31 になる
-                    if (it.year != year ||
-                        it.month != month ||
-                        it.dayOfMonth != dayOfMonth ||
-                        it.hour != hour ||
-                        it.minute != minute ||
-                        it.second != second ||
-                        it.milliSecond != milliSecond
-                    ) {
-                        throw IllegalArgumentException(
-                            "ZonedDatetime.of(): Any parameter is out of range"
-                        )
-                    }
+                getCalendar(
+                    year,
+                    mapMonthToNative(month),
+                    dayOfMonth,
+                    hour,
+                    minute,
+                    second,
+                    milliSecond,
+                    timeZone.rawObject as java.util.TimeZone
+                )?.let {
+                    ZonedDateTimeSDK22(it, timeZone)
                 }
+                    ?: throw IllegalArgumentException("ZonedDateTime.of(): Any parameter is out of range")
 
             fun getLengthOfMonth(year: Int, month: Month): Int =
                 java.util.Calendar.getInstance().apply {
@@ -388,6 +407,48 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                     Month.NOVEMBER -> java.util.Calendar.NOVEMBER
                     Month.DECEMBER -> java.util.Calendar.DECEMBER
                 }
+
+            private fun getCalendar(
+                year: Int,
+                month: Int,
+                dayOfMonth: Int,
+                hour: Int,
+                minute: Int,
+                second: Int,
+                milliSecond: Int,
+                timeZone: java.util.TimeZone
+            ): java.util.Calendar? =
+                java.util.Calendar.getInstance().apply {
+                    clear()
+                    set(java.util.Calendar.YEAR, year)
+                    set(java.util.Calendar.MONTH, month)
+                    set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth)
+                    // Calendar.HOUR は 12 時間制の値なので間違えないこと
+                    set(java.util.Calendar.HOUR_OF_DAY, hour)
+                    set(java.util.Calendar.MINUTE, minute)
+                    set(java.util.Calendar.SECOND, second)
+                    set(java.util.Calendar.MILLISECOND, milliSecond)
+                    this.timeZone = timeZone
+                }.let { newInstance ->
+                    // Calendar の構築時にパラメタの検査をしていないらしく、範囲外のパラメタを与えると
+                    // 意図しない日時の Calendar ができることがあるので、
+                    // 生成された Calendar オブジェクトの各コンポーネントを検査して与えた値と異なっていたら
+                    // パラメタエラーとしている
+                    // 例: 2020年1月0日を指定した場合 -> Calendar の year は 2019 、
+                    // month は DECEMBER 、dayOfMonth は 31 になる
+                    if (newInstance.get(java.util.Calendar.YEAR) == year &&
+                        newInstance.get(java.util.Calendar.MONTH) == month &&
+                        newInstance.get(java.util.Calendar.DAY_OF_MONTH) == dayOfMonth &&
+                        newInstance.get(java.util.Calendar.HOUR_OF_DAY) == hour &&
+                        newInstance.get(java.util.Calendar.MINUTE) == minute &&
+                        newInstance.get(java.util.Calendar.SECOND) == second &&
+                        newInstance.get(java.util.Calendar.MILLISECOND) == milliSecond
+                    ) {
+                        newInstance
+                    } else {
+                        null
+                    }
+                }
         }
     }
 
@@ -404,17 +465,24 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
     abstract val minute: Int
     abstract val second: Int
     abstract val milliSecond: Int
-    abstract fun toDateTime(): DateTime
-    abstract fun format(dateFormatString: String, locale: java.util.Locale): String
     abstract override fun toString(): String
+    abstract override fun equals(other: Any?): Boolean
+    abstract override fun hashCode(): Int
+    abstract fun toDateTime(): DateTime
+    abstract fun atStartOfDay(): DateTime
+    abstract fun format(dateFormatString: String, locale: java.util.Locale): String
 
     fun format(dateFormatString: String): String =
         format(dateFormatString, java.util.Locale.getDefault())
 
     companion object {
-        internal val dateTimeFormatOfISO8601 =
+        internal val dateTimeFormatOfISO8601ContainingMilliSecond =
             "yyyy-MM-dd'T'HH:mm:ss.SSS$timeZoneFormatSpecOfISO8601"
 
+        internal val dateTimeFormatOfISO8601 =
+            "yyyy-MM-dd'T'HH:mm:ss$timeZoneFormatSpecOfISO8601"
+
+        @JvmStatic
         val timeZoneFormatSpecOfISO8601: String
             get() =
                 Platform.sdK26Depended(
@@ -424,6 +492,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                         ZonedDateTimeSDK22.TimeZoneFormatSpecOfISO8601
                     })
 
+        @JvmStatic
         fun of(dateTime: DateTime, timeZone: TimeZone): ZonedDateTime =
             Platform.sdK26Depended({
                 ZonedDateTimeSDK26.of(dateTime, timeZone)
@@ -431,6 +500,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 ZonedDateTimeSDK22.of(dateTime, timeZone)
             })
 
+        @JvmStatic
         fun of(
             year: Int,
             month: Month,
@@ -465,6 +535,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 )
             })
 
+        @JvmStatic
         fun of(
             year: Int,
             month: Month,
@@ -476,6 +547,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         ): ZonedDateTime =
             of(year, month, dayOfMonth, hour, minute, second, 0, timeZone)
 
+        @JvmStatic
         fun of(
             year: Int,
             month: Month,
@@ -484,6 +556,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
         ): ZonedDateTime =
             of(year, month, dayOfMonth, 0, 0, 0, 0, timeZone)
 
+        @JvmStatic
         fun getLengthOfMonth(year: Int, month: Month): Int =
             Platform.sdK26Depended({
                 ZonedDateTimeSDK26.getLengthOfMonth(year, month)
@@ -491,6 +564,7 @@ abstract class ZonedDateTime protected constructor(val timeZone: TimeZone) {
                 ZonedDateTimeSDK22.getLengthOfMonth(year, month)
             })
 
+        @JvmStatic
         fun getLengthOfYear(year: Int): Int =
             Platform.sdK26Depended({
                 ZonedDateTimeSDK26.getLengthOfYear(year)

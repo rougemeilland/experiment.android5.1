@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
                     currentLongitude = location.longitude
                     AsyncUtility.getAddressFromLocation(
                         this@MainActivity,
+                        Locale.getDefault(),
                         scope,
                         currentLatitude,
                         currentLongitude, { address ->
@@ -253,6 +255,7 @@ class MainActivity : AppCompatActivity() {
             current.lastUpdated.atZone(TimeZone.getDefault()).format("HH:mm:ss")
         AsyncUtility.getAddressFromLocation(
             this,
+            Locale.getDefault(),
             scope,
             current.coord.latitude,
             current.coord.longitude, { address ->

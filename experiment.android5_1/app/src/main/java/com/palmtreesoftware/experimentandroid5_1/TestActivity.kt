@@ -8,6 +8,8 @@ import java.util.*
 
 class TestActivity : AppCompatActivity() {
 
+    // TODO("現在位置取得&パーミッション取得のコードのカプセル化を検討する")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)

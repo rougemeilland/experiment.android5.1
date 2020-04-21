@@ -4,62 +4,18 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 
 abstract class DateTime protected constructor() {
-    abstract val epochSeconds: Long
-    abstract val epochMilliSeconds: Long
-    abstract operator fun plus(duration: TimeDuration): DateTime
-    abstract operator fun minus(dateTime: DateTime): TimeDuration
-    abstract operator fun minus(duration: TimeDuration): DateTime
-    abstract operator fun compareTo(other: DateTime): Int
-    abstract override fun equals(other: Any?): Boolean
-    abstract override fun hashCode(): Int
-    abstract override fun toString(): String
-    abstract val rawObject: Any
-
-    fun atZone(timeZone: TimeZone): ZonedDateTime =
-        ZonedDateTime.of(this, timeZone)
-
-    companion object {
-        fun now(): DateTime =
-            Platform.sdK26Depended({
-                DateTimeSDK26.now()
-            }, {
-                DateTimeSDK22.now()
-            })
-
-        fun fromEpochMilliSeconds(milliSseconds: Long): DateTime =
-            Platform.sdK26Depended({
-                DateTimeSDK26.fromEpochMilliSeconds(milliSseconds)
-            }, {
-                DateTimeSDK22.fromEpochMilliSeconds(milliSseconds)
-            })
-
-        fun fromEpochSeconds(seconds: Long): DateTime =
-            fromEpochMilliSeconds(seconds * 1000)
-
-        @RequiresApi(Build.VERSION_CODES.O)
-        internal fun of(dateTime: java.time.LocalDateTime): DateTime =
-            DateTimeSDK26.of(dateTime)
-
-        internal fun of(dateTime: java.util.Calendar): DateTime =
-            DateTimeSDK22.of(dateTime)
-
-        val EPOCH: DateTime by lazy {
-            fromEpochMilliSeconds(0)
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
     private class DateTimeSDK26 private constructor(
         private val dateTimeUTC: java.time.LocalDateTime
     ) : DateTime() {
+        override val rawObject: Any
+            get() = dateTimeUTC
+
         override val epochSeconds: Long
             get() = dateTimeUTC.toInstant(java.time.ZoneOffset.UTC).epochSecond
 
         override val epochMilliSeconds: Long
             get() = dateTimeUTC.toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
-
-        override val rawObject: Any
-            get() = dateTimeUTC
 
         override operator fun plus(duration: TimeDuration): DateTime =
             DateTimeSDK26(dateTimeUTC.plus(java.time.Duration.ofMillis(duration.tickCounts)))
@@ -93,14 +49,54 @@ abstract class DateTime protected constructor() {
 
         override fun toString(): String =
             "DateTime(dateTime='${dateTimeUTC
-                .atZone(gmt)
-                .format(
-                    java.time.format.DateTimeFormatter.ofPattern(
-                        ZonedDateTime.dateTimeFormatOfISO8601,
-                        java.util.Locale.ENGLISH
+                .atZone(gmt).let {
+                    it.format(
+                        java.time.format.DateTimeFormatter.ofPattern(
+                            if (it.get(java.time.temporal.ChronoField.MILLI_OF_SECOND) == 0)
+                                ZonedDateTime.dateTimeFormatOfISO8601
+                            else
+                                ZonedDateTime.dateTimeFormatOfISO8601ContainingMilliSecond,
+                            java.util.Locale.ENGLISH
+                        )
                     )
-                )}', epochMilliSeconds='${dateTimeUTC.toInstant(java.time.ZoneOffset.UTC)
+                }}', epochMilliSeconds='${dateTimeUTC.toInstant(java.time.ZoneOffset.UTC)
                 .toEpochMilli()}')"
+
+        override fun plusMilliSeconds(milliSeconds: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusNanos(milliSeconds * (1000 * 1000)))
+
+        override fun plusSeconds(seconds: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusSeconds(seconds))
+
+        override fun plusMinutes(minutes: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusMinutes(minutes))
+
+        override fun plusHours(hours: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusHours(hours))
+
+        override fun plusDays(days: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusDays(days))
+
+        override fun plusWeeks(weeks: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.plusWeeks(weeks))
+
+        override fun minusMilliSeconds(milliSeconds: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusNanos(milliSeconds * (1000 * 1000)))
+
+        override fun minusSeconds(seconds: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusSeconds(seconds))
+
+        override fun minusMinutes(minutes: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusMinutes(minutes))
+
+        override fun minusHours(hours: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusHours(hours))
+
+        override fun minusDays(days: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusDays(days))
+
+        override fun minusWeeks(weeks: Long): DateTime =
+            DateTimeSDK26(dateTimeUTC.minusWeeks(weeks))
 
         companion object {
             private val gmt by lazy { java.time.ZoneId.of("GMT") }
@@ -108,10 +104,10 @@ abstract class DateTime protected constructor() {
             fun now(): DateTime =
                 DateTimeSDK26(java.time.LocalDateTime.now(gmt))
 
-            fun fromEpochMilliSeconds(milliSseconds: Long): DateTime =
+            fun ofEpochMilliSeconds(milliSseconds: Long): DateTime =
                 DateTimeSDK26(
                     java.time.LocalDateTime.ofEpochSecond(
-                        milliSseconds.divideFloor(1000),
+                        milliSseconds.divideRound(1000),
                         milliSseconds.modulo(1000).toInt() * (1000 * 1000),
                         java.time.ZoneOffset.UTC
                     )
@@ -129,9 +125,12 @@ abstract class DateTime protected constructor() {
                 throw Exception(javaClass.canonicalName + ".init: dateTimeUTC must be 'GMT'")
         }
 
+        override val rawObject: Any
+            get() = dateTimeUTC
+
         override val epochSeconds: Long
             get() =
-                dateTimeUTC.timeInMillis.divideFloor(1000)
+                dateTimeUTC.timeInMillis.divideRound(1000)
 
         override val epochMilliSeconds: Long
             get() = dateTimeUTC.timeInMillis
@@ -174,14 +173,58 @@ abstract class DateTime protected constructor() {
 
         override fun toString(): String =
             "DateTime(dateTime='${java.text.SimpleDateFormat(
-                ZonedDateTime.dateTimeFormatOfISO8601,
+                if (dateTimeUTC.get(java.util.Calendar.MILLISECOND) == 0)
+                    ZonedDateTime.dateTimeFormatOfISO8601
+                else
+                    ZonedDateTime.dateTimeFormatOfISO8601ContainingMilliSecond,
                 java.util.Locale.ENGLISH
             )
                 .apply { timeZone = gmt }
                 .format(dateTimeUTC.time)}', epochMilliSeconds='${dateTimeUTC.timeInMillis}')"
 
-        override val rawObject: Any
-            get() = dateTimeUTC
+        override fun plusMilliSeconds(milliSeconds: Long): DateTime =
+            DateTimeSDK22(
+                java.util.Calendar.getInstance().also {
+                    it.timeZone = dateTimeUTC.timeZone
+                    it.timeInMillis = dateTimeUTC.timeInMillis + milliSeconds
+                })
+
+        override fun plusSeconds(seconds: Long): DateTime =
+            plusMilliSeconds(seconds * 1000)
+
+        override fun plusMinutes(minutes: Long): DateTime =
+            plusMilliSeconds(minutes * (1000 * 60))
+
+        override fun plusHours(hours: Long): DateTime =
+            plusMilliSeconds(hours * (1000 * 60 * 60))
+
+        override fun plusDays(days: Long): DateTime =
+            plusMilliSeconds(days * (1000 * 60 * 60 * 24))
+
+        override fun plusWeeks(weeks: Long): DateTime =
+            plusMilliSeconds(weeks * (1000 * 60 * 60 * 24 * 7))
+
+        override fun minusMilliSeconds(milliSeconds: Long): DateTime =
+            DateTimeSDK22(
+                java.util.Calendar.getInstance().also {
+                    it.timeZone = dateTimeUTC.timeZone
+                    it.timeInMillis = dateTimeUTC.timeInMillis - milliSeconds
+                })
+
+        override fun minusSeconds(seconds: Long): DateTime =
+            minusMilliSeconds(seconds * 1000)
+
+        override fun minusMinutes(minutes: Long): DateTime =
+            minusMilliSeconds(minutes * (1000 * 60))
+
+        override fun minusHours(hours: Long): DateTime =
+            minusMilliSeconds(hours * (1000 * 60 * 60))
+
+        override fun minusDays(days: Long): DateTime =
+            minusMilliSeconds(days * (1000 * 60 * 60 * 24))
+
+        override fun minusWeeks(weeks: Long): DateTime =
+            minusMilliSeconds(weeks * (1000 * 60 * 60 * 24 * 7))
 
         companion object {
             private val gmt by lazy { java.util.TimeZone.getTimeZone("GMT") }
@@ -189,7 +232,7 @@ abstract class DateTime protected constructor() {
             fun now(): DateTime =
                 DateTimeSDK22(java.util.Calendar.getInstance(gmt))
 
-            fun fromEpochMilliSeconds(
+            fun ofEpochMilliSeconds(
                 milliSseconds: Long
             ): DateTime =
                 DateTimeSDK22(
@@ -202,4 +245,71 @@ abstract class DateTime protected constructor() {
                 DateTimeSDK22(dateTime)
         }
     }
+
+    abstract val rawObject: Any
+    abstract val epochSeconds: Long
+    abstract val epochMilliSeconds: Long
+    abstract operator fun plus(duration: TimeDuration): DateTime
+    abstract operator fun minus(dateTime: DateTime): TimeDuration
+    abstract operator fun minus(duration: TimeDuration): DateTime
+    abstract operator fun compareTo(other: DateTime): Int
+    abstract override fun equals(other: Any?): Boolean
+    abstract override fun hashCode(): Int
+    abstract override fun toString(): String
+    abstract fun plusMilliSeconds(milliSeconds: Long): DateTime
+    abstract fun plusSeconds(seconds: Long): DateTime
+    abstract fun plusMinutes(minutes: Long): DateTime
+    abstract fun plusHours(hours: Long): DateTime
+    abstract fun plusDays(days: Long): DateTime
+    abstract fun plusWeeks(weeks: Long): DateTime
+    abstract fun minusMilliSeconds(milliSeconds: Long): DateTime
+    abstract fun minusSeconds(seconds: Long): DateTime
+    abstract fun minusMinutes(minutes: Long): DateTime
+    abstract fun minusHours(hours: Long): DateTime
+    abstract fun minusDays(days: Long): DateTime
+    abstract fun minusWeeks(weeks: Long): DateTime
+
+    fun atZone(timeZone: TimeZone): ZonedDateTime =
+        ZonedDateTime.of(this, timeZone)
+
+    fun atStartOfDay(timeZone: TimeZone): DateTime =
+        ZonedDateTime.of(this, timeZone)
+            .atStartOfDay()
+
+    companion object {
+        @JvmStatic
+        fun now(): DateTime =
+            Platform.sdK26Depended({
+                DateTimeSDK26.now()
+            }, {
+                DateTimeSDK22.now()
+            })
+
+        @JvmStatic
+        fun ofEpochMilliSeconds(milliSseconds: Long): DateTime =
+            Platform.sdK26Depended({
+                DateTimeSDK26.ofEpochMilliSeconds(milliSseconds)
+            }, {
+                DateTimeSDK22.ofEpochMilliSeconds(milliSseconds)
+            })
+
+        @JvmStatic
+        fun ofEpochSeconds(seconds: Long): DateTime =
+            ofEpochMilliSeconds(seconds * 1000)
+
+        @JvmStatic
+        @RequiresApi(Build.VERSION_CODES.O)
+        internal fun of(dateTime: java.time.LocalDateTime): DateTime =
+            DateTimeSDK26.of(dateTime)
+
+        @JvmStatic
+        internal fun of(dateTime: java.util.Calendar): DateTime =
+            DateTimeSDK22.of(dateTime)
+
+        @JvmStatic
+        val EPOCH: DateTime by lazy {
+            ofEpochMilliSeconds(0)
+        }
+    }
+
 }

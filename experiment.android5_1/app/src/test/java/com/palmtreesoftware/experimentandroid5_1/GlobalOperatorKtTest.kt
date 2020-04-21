@@ -2,6 +2,7 @@ package com.palmtreesoftware.experimentandroid5_1
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.math.ceil
 import kotlin.math.floor
 
 internal class GlobalOperatorKtTest {
@@ -227,12 +228,15 @@ internal class GlobalOperatorKtTest {
     }
 
     @Test
-    fun divideFloorInt() {
+    fun divideRoundInt() {
         arrayOf(11, 10, 9, 0, -9, -10, -11).crossMap(arrayOf(10, -10)) { u, v ->
             assertEquals(
-                floor(u.toDouble().div(v)).toInt(),
-                u.divideFloor(v),
-                "$u.divideFloor($v)"
+                if (v >= 0)
+                    floor(u.toDouble().div(v)).toInt()
+                else
+                    ceil(u.toDouble().div(v)).toInt(),
+                u.divideRound(v),
+                "$u.divideRound($v)"
             )
         }
     }
@@ -241,7 +245,10 @@ internal class GlobalOperatorKtTest {
     fun moduloInt() {
         arrayOf(11, 10, 9, 0, -9, -10, -11).crossMap(arrayOf(10, -10)) { u, v ->
             assertEquals(
-                u - floor(u.toDouble().div(v)).toInt() * v,
+                u - (if (v >= 0)
+                    floor(u.toDouble().div(v)).toInt()
+                else
+                    ceil(u.toDouble().div(v)).toInt()) * v,
                 u.modulo(v),
                 "$u.modulo($v)"
             )
@@ -252,9 +259,12 @@ internal class GlobalOperatorKtTest {
     fun divideFloorLong() {
         arrayOf(11L, 10L, 9L, 0L, -9L, -10L, -11L).crossMap(arrayOf(10L, -10L)) { u, v ->
             assertEquals(
-                floor(u.toDouble().div(v)).toLong(),
-                u.divideFloor(v),
-                "$u.divideFloor($v)"
+                if (v >= 0)
+                    floor(u.toDouble().div(v)).toLong()
+                else
+                    ceil(u.toDouble().div(v)).toLong(),
+                u.divideRound(v),
+                "$u.divideRound($v)"
             )
         }
     }
@@ -263,7 +273,12 @@ internal class GlobalOperatorKtTest {
     fun moduloLong() {
         arrayOf(11L, 10L, 9L, 0L, -9L, -10L, -11L).crossMap(arrayOf(10L, -10L)) { u, v ->
             assertEquals(
-                u - floor(u.toDouble().div(v)).toLong() * v,
+                u - (
+                        if (v >= 0)
+                            floor(u.toDouble().div(v)).toLong()
+                        else
+                            ceil(u.toDouble().div(v)).toLong()
+                        ) * v,
                 u.modulo(v),
                 "$u.modulo($v)"
             )
@@ -272,8 +287,8 @@ internal class GlobalOperatorKtTest {
 
     @Test
     fun timesTimeDuration() {
-        assertEquals(3000, (3 * TimeDuration.ofTickCounts(1000)).tickCounts)
-        assertEquals(3000, (3L * TimeDuration.ofTickCounts(1000)).tickCounts)
-        assertEquals(3000, (3.0 * TimeDuration.ofTickCounts(1000)).tickCounts)
+        assertEquals(-3000L, (-3L * TimeDuration.ofTickCounts(1000)).tickCounts)
+        assertEquals(0L, (0L * TimeDuration.ofTickCounts(1000)).tickCounts)
+        assertEquals(3000L, (3L * TimeDuration.ofTickCounts(1000)).tickCounts)
     }
 }
