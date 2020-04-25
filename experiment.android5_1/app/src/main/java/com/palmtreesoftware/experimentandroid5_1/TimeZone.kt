@@ -183,8 +183,8 @@ abstract class TimeZone protected constructor(val id: String) {
             private const val shortGmtFormat = "%s%02d%02d"
             private const val shortGmtFormatContainingSecond = "%s%02d%02d%02d"
 
-            fun of(hour: Int, minute: Int, second: Int): TimeZone {
-                return if (hour == 0 && minute == 0 && second == 0)
+            fun of(hour: Int, minute: Int, second: Int): TimeZone =
+                if (hour == 0 && minute == 0 && second == 0)
                     GMT
                 else {
                     val (formatText, shortNameFormatText) =
@@ -228,7 +228,6 @@ abstract class TimeZone protected constructor(val id: String) {
                     } else
                         throw IllegalArgumentException("${TimeZone::class.java.canonicalName}.of(): parameter is out of range: hour=$hour, minute=$minute, second=$second")
                 }
-            }
         }
     }
 

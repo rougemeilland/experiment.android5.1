@@ -15,12 +15,12 @@ class TimeZoneSelecterView(context: Context, attributeSet: AttributeSet) :
 
     private class SelectionItem(val index: Int, val value: String, val text: String)
 
-    private val selection_item_pattern = Regex("^([^!]+)!([^!]+)$")
+    private val selectionItemPattern = Regex("^([^!]+)!([^!]+)$")
 
     private val selectionItems: Array<SelectionItem> =
         context.resources.getStringArray(R.array.time_zone_selecter_view_selection_items)
             .mapIndexedNotNull { index, sourceText ->
-                selection_item_pattern.matchEntire(sourceText)?.let { match ->
+                selectionItemPattern.matchEntire(sourceText)?.let { match ->
                     SelectionItem(
                         index,
                         match.destructured.component1(),
@@ -40,22 +40,22 @@ class TimeZoneSelecterView(context: Context, attributeSet: AttributeSet) :
             get() =
                 (timeZoneSelecterViewTimeZoneId.selectedItem as SelectionItem).value == "-"
 
-        override fun getSymbol(): String? {
-            return (timeZoneSelecterViewTimeZoneId.selectedItem as SelectionItem).let {
-                if (it.value == "-") null
-                else if (it.value == "#") null
-                else it.value
+        override fun getSymbol(): String? =
+            (timeZoneSelecterViewTimeZoneId.selectedItem as SelectionItem).run {
+                when (value) {
+                    "-" -> null
+                    "#" -> null
+                    else -> value
+                }
             }
-        }
 
-        override fun getTimeDifference(): Triple<Int, Int, Int>? {
-            return timeZoneSelecterViewHour.value.let { hour ->
+        override fun getTimeDifference(): Triple<Int, Int, Int>? =
+            timeZoneSelecterViewHour.value.let { hour ->
                 if (hour >= 13)
                     Triple(hour - 13, timeZoneSelecterViewMinute.value, 0)
                 else
                     Triple(hour - 12, -timeZoneSelecterViewMinute.value, -0)
             }
-        }
 
         override fun reset() {
             setDefault()
@@ -116,21 +116,19 @@ class TimeZoneSelecterView(context: Context, attributeSet: AttributeSet) :
                 position: Int,
                 convertView: View?,
                 parent: ViewGroup
-            ): View {
-                return (super.getView(position, convertView, parent) as TextView).also {
+            ): View =
+                (super.getView(position, convertView, parent) as TextView).also {
                     it.text = getItem(position)?.text
                 }
-            }
 
             override fun getDropDownView(
                 position: Int,
                 convertView: View?,
                 parent: ViewGroup
-            ): View {
-                return (super.getDropDownView(position, convertView, parent) as TextView).also {
+            ): View =
+                (super.getDropDownView(position, convertView, parent) as TextView).also {
                     it.text = getItem(position)?.text
                 }
-            }
         }
 
         timeZoneSelecterViewTimeZoneId.onItemSelectedListener = object :
@@ -163,9 +161,11 @@ class TimeZoneSelecterView(context: Context, attributeSet: AttributeSet) :
             // NumberPicker に対して何らかの操作をすると正しく表示される。
             // formatter を使用せずに、フォーマット済みの表示文字列の配列を displayedValues に与えることによって回避
             displayedValues = (-13..14).map {
-                if (it < -1) "%+03d".format(it + 1)
-                else if (it == -1) "-00"
-                else "%+03d".format(it)
+                when {
+                    it < -1 -> "%+03d".format(it + 1)
+                    it == -1 -> "-00"
+                    else -> "%+03d".format(it)
+                }
             }.toTypedArray()
             minValue = 0
             maxValue = displayedValues.size - 1

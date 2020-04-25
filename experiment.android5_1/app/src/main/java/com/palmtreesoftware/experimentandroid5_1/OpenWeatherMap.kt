@@ -1,8 +1,11 @@
 package com.palmtreesoftware.experimentandroid5_1
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.CoroutineScope
 import org.json.JSONObject
 
@@ -11,12 +14,14 @@ class OpenWeatherMap {
         val sourceText: String,
         val isCached: Boolean
     ) {
-        class Coord private constructor(val latitude: Double, val longitude: Double) {
+        class Coord private constructor(val coordinates: Coordinates) {
             companion object {
                 fun of(o: JSONObject): Coord =
                     Coord(
-                        o.getDouble("lat"),
-                        o.getDouble("lon")
+                        Coordinates(
+                            o.getDouble("lat"),
+                            o.getDouble("lon")
+                        )
                     )
             }
         }
@@ -40,23 +45,23 @@ class OpenWeatherMap {
                         o.getDouble("temp_max"),
                         o.getDouble("humidity"),
                         o.getDouble("pressure"),
-                        o.optDouble("sea_level").let { if (it.isNaN()) null else it },
-                        o.optDouble("grnd_level").let { if (it.isNaN()) null else it }
+                        o.optDouble("sea_level").run { if (isNaN()) null else this },
+                        o.optDouble("grnd_level").run { if (isNaN()) null else this }
                     )
             }
         }
 
         class Weather private constructor(
             val description: String,
-            val icon: String
+            private val icon: String
         ) {
             val iconUrl: Uri
                 get() =
-                    Uri.Builder().let { uri ->
-                        uri.scheme("https")
-                        uri.authority("openweathermap.org")
-                        uri.path("/img/wn/$icon.png")
-                        uri.build()
+                    Uri.Builder().run {
+                        scheme("https")
+                        authority("openweathermap.org")
+                        path("/img/wn/$icon.png")
+                        build()
                     }
 
             companion object {
@@ -82,7 +87,7 @@ class OpenWeatherMap {
                 fun of(o: JSONObject): Wind =
                     Wind(
                         o.getDouble("speed"),
-                        o.optDouble("deg").let { if (it.isNaN()) null else it }
+                        o.optDouble("deg").run { if (isNaN()) null else this }
                     )
             }
         }
@@ -108,8 +113,8 @@ class OpenWeatherMap {
             companion object {
                 fun of(o: JSONObject): Precipitation =
                     Precipitation(
-                        o.optDouble("1h").let { if (it.isNaN()) null else it },
-                        o.optDouble("3h").let { if (it.isNaN()) null else it }
+                        o.optDouble("1h").run { if (isNaN()) null else this },
+                        o.optDouble("3h").run { if (isNaN()) null else this }
                     )
             }
         }
@@ -190,6 +195,12 @@ class OpenWeatherMap {
                 onFailed: (Exception) -> Unit,
                 jsonStringParser: (String, Boolean) -> T
             ) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.INTERNET
+                    ) != PackageManager.PERMISSION_GRANTED
+                )
+                    throw Exception("${AsyncUtility::class.java.canonicalName}.getAddressFromLocation(): Not granted Manifest.permission.INTERNET")
                 val now = DateTime.now()
                 val latestRequested = latestRequestedDateTime.getValue(context)
                 val minimumInterval = TimeDuration.ofSeconds(
@@ -265,8 +276,7 @@ class OpenWeatherMap {
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double,
+                coordinates: Coordinates,
                 onCompleted: (CurrentWeatherData, DateTime) -> Unit,
                 onFailed: (Exception) -> Unit
             ) {
@@ -275,7 +285,7 @@ class OpenWeatherMap {
                     scope,
                     latestRequestedDateTime,
                     apiCache,
-                    buildRequest(context, locale, latitude, longitude),
+                    buildRequest(context, locale, coordinates),
                     onCompleted,
                     onFailed,
                     { sourceText, isCached ->
@@ -286,22 +296,21 @@ class OpenWeatherMap {
             private fun buildRequest(
                 context: Context,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double
+                coordinates: Coordinates
             ): Uri =
-                Uri.Builder().let {
-                    it.scheme("https")
-                    it.authority("api.openweathermap.org")
-                    it.path("/data/2.5/weather")
-                    it.appendQueryParameter(
+                Uri.Builder().run {
+                    scheme("https")
+                    authority("api.openweathermap.org")
+                    path("/data/2.5/weather")
+                    appendQueryParameter(
                         "appid",
                         context.getString(R.string.openWeatherMapApiKey)
                     )
-                    it.appendQueryParameter("units", "metric")
-                    it.appendQueryParameter("lang", locale.language)
-                    it.appendQueryParameter("lat", latitude.toString())
-                    it.appendQueryParameter("lon", longitude.toString())
-                    it.build()
+                    appendQueryParameter("units", "metric")
+                    appendQueryParameter("lang", locale.language)
+                    appendQueryParameter("lat", coordinates.latitude.toString())
+                    appendQueryParameter("lon", coordinates.longitude.toString())
+                    build()
                 }
 
             private fun of(sourceText: String, isCached: Boolean): CurrentWeatherData =
@@ -353,8 +362,7 @@ class OpenWeatherMap {
     class OneCall private constructor(
         sourceText: String,
         isCached: Boolean,
-        val latitude: Double,
-        val longitude: Double,
+        val coordinates: Coordinates,
         val timeZone: TimeZone,
         val current: CurrentOrHourly,
         val hourly: Array<CurrentOrHourly>,
@@ -403,17 +411,17 @@ class OpenWeatherMap {
                         o.getDouble("temp"),
                         o.getDouble("feels_like"),
                         o.getDouble("humidity"),
-                        o.optDouble("dew_point").let { if (it.isNaN()) null else it },
+                        o.optDouble("dew_point").run { if (isNaN()) null else this },
                         o.getDouble("clouds"),
                         WindOfOneShot(
                             o.getDouble("wind_speed"),
-                            o.optDouble("wind_deg").let { if (it.isNaN()) null else it },
-                            o.optDouble("wind_gust").let { if (it.isNaN()) null else it }
+                            o.optDouble("wind_deg").run { if (isNaN()) null else this },
+                            o.optDouble("wind_gust").run { if (isNaN()) null else this }
                         ),
                         DateTime.ofEpochSeconds(o.getLong("sunrise")),
                         DateTime.ofEpochSeconds(o.getLong("sunset")),
                         UltravioletIndex.of((o.getDouble("uvi"))),
-                        o.optDouble("visibility").let { if (it.isNaN()) null else it },
+                        o.optDouble("visibility").run { if (isNaN()) null else this },
                         o.optJSONObject("rain")?.let { Precipitation.of(it) },
                         o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
@@ -489,17 +497,17 @@ class OpenWeatherMap {
                         Temperature.of(o.getJSONObject("temp")),
                         FeelsLikeTemperature.of(o.getJSONObject("feels_like")),
                         o.getDouble("humidity"),
-                        o.optDouble("dew_point").let { if (it.isNaN()) null else it },
+                        o.optDouble("dew_point").run { if (isNaN()) null else this },
                         o.getDouble("clouds"),
                         WindOfOneShot(
                             o.getDouble("wind_speed"),
-                            o.optDouble("wind_deg").let { if (it.isNaN()) null else it },
-                            o.optDouble("wind_gust").let { if (it.isNaN()) null else it }
+                            o.optDouble("wind_deg").run { if (isNaN()) null else this },
+                            o.optDouble("wind_gust").run { if (isNaN()) null else this }
                         ),
                         DateTime.ofEpochSeconds(o.getLong("sunrise")),
                         DateTime.ofEpochSeconds(o.getLong("sunset")),
                         UltravioletIndex.of((o.getDouble("uvi"))),
-                        o.optDouble("visibility").let { if (it.isNaN()) null else it },
+                        o.optDouble("visibility").run { if (isNaN()) null else this },
                         o.optJSONObject("rain")?.let { Precipitation.of(it) },
                         o.optJSONObject("snow")?.let { Precipitation.of(it) }
                     )
@@ -521,8 +529,7 @@ class OpenWeatherMap {
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double,
+                coordinates: Coordinates,
                 onCompleted: (OneCall, DateTime) -> Unit,
                 onFailed: (Exception) -> Unit
             ) {
@@ -531,7 +538,7 @@ class OpenWeatherMap {
                     scope,
                     latestRequestedDateTime,
                     apiCache,
-                    buildRequest(context, locale, latitude, longitude),
+                    buildRequest(context, locale, coordinates),
                     onCompleted,
                     onFailed,
                     { sourceText, isCache -> fromJSONString(sourceText, isCache) })
@@ -540,22 +547,21 @@ class OpenWeatherMap {
             private fun buildRequest(
                 context: Context,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double
+                coordinates: Coordinates
             ): Uri =
-                Uri.Builder().let {
-                    it.scheme("https")
-                    it.authority("api.openweathermap.org")
-                    it.path("/data/2.5/onecall")
-                    it.appendQueryParameter(
+                Uri.Builder().run {
+                    scheme("https")
+                    authority("api.openweathermap.org")
+                    path("/data/2.5/onecall")
+                    appendQueryParameter(
                         "appid",
                         context.getString(R.string.openWeatherMapApiKey)
                     )
-                    it.appendQueryParameter("units", "metric")
-                    it.appendQueryParameter("lang", locale.language)
-                    it.appendQueryParameter("lat", latitude.toString())
-                    it.appendQueryParameter("lon", longitude.toString())
-                    it.build()
+                    appendQueryParameter("units", "metric")
+                    appendQueryParameter("lang", locale.language)
+                    appendQueryParameter("lat", coordinates.latitude.toString())
+                    appendQueryParameter("lon", coordinates.longitude.toString())
+                    build()
                 }
 
             private fun fromJSONString(sourceText: String, isCached: Boolean): OneCall =
@@ -577,8 +583,10 @@ class OpenWeatherMap {
                 OneCall(
                     sourceText,
                     isCached,
-                    o.getDouble("lat"),
-                    o.getDouble("lon"),
+                    Coordinates(
+                        o.getDouble("lat"),
+                        o.getDouble("lon")
+                    ),
                     TimeZone.of(o.getString("timezone")),
                     CurrentOrHourly.of(o.getJSONObject("current")),
                     o.getJSONArray("hourly")
@@ -652,8 +660,7 @@ class OpenWeatherMap {
                 context: Context,
                 scope: CoroutineScope,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double,
+                coordinates: Coordinates,
                 onCompleted: (FiveDayWeatherForecast, DateTime) -> Unit,
                 onFailed: (Exception) -> Unit
             ) {
@@ -662,7 +669,7 @@ class OpenWeatherMap {
                     scope,
                     latestRequestedDateTime,
                     apiCache,
-                    buildRequest(context, locale, latitude, longitude),
+                    buildRequest(context, locale, coordinates),
                     onCompleted,
                     onFailed,
                     { sourceText, isCache -> fromJSONString(sourceText, isCache) })
@@ -671,22 +678,21 @@ class OpenWeatherMap {
             private fun buildRequest(
                 context: Context,
                 locale: java.util.Locale,
-                latitude: Double,
-                longitude: Double
+                coordinates: Coordinates
             ): Uri =
-                Uri.Builder().let {
-                    it.scheme("https")
-                    it.authority("api.openweathermap.org")
-                    it.path("/data/2.5/forecast")
-                    it.appendQueryParameter(
+                Uri.Builder().run {
+                    scheme("https")
+                    authority("api.openweathermap.org")
+                    path("/data/2.5/forecast")
+                    appendQueryParameter(
                         "appid",
                         context.getString(R.string.openWeatherMapApiKey)
                     )
-                    it.appendQueryParameter("units", "metric")
-                    it.appendQueryParameter("lang", locale.language)
-                    it.appendQueryParameter("lat", latitude.toString())
-                    it.appendQueryParameter("lon", longitude.toString())
-                    it.build()
+                    appendQueryParameter("units", "metric")
+                    appendQueryParameter("lang", locale.language)
+                    appendQueryParameter("lat", coordinates.latitude.toString())
+                    appendQueryParameter("lon", coordinates.longitude.toString())
+                    build()
                 }
 
             private fun fromJSONString(

@@ -3,62 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#ffeeee"
+    android:orientation="vertical"
     tools:context=".TestActivity">
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+        <TextView
+            android:id="@+id/testActivityState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-            <TableLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TableRow>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="タイムゾーン"
-                        tools:ignore="HardcodedText" />
-
-                    <com.palmtreesoftware.experimentandroid5_1.TimeZoneSelecterView
-                        android:id="@+id/testActivityTimeZone"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </TableRow>
-
-                <TableRow>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="実行結果"
-                        tools:ignore="HardcodedText" />
-
-                    <TextView
-                        android:id="@+id/testActivityResult"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:fontFamily="monospace"
-                        android:textSize="30sp" />
-                </TableRow>
-            </TableLayout>
-
-            <com.palmtreesoftware.experimentandroid5_1.CurrentWeatherView
-                android:id="@+id/textActivityCurrentWeather"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
@@ -75,12 +33,21 @@
             tools:ignore="ButtonStyle,HardcodedText" />
 
         <Button
-            android:id="@+id/testActivityRun"
+            android:id="@+id/testActivityRun1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            android:text="実行"
+            android:text="データの収集"
+            tools:ignore="ButtonStyle,HardcodedText" />
+
+        <Button
+            android:id="@+id/testActivityRun2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="データの分析"
             tools:ignore="ButtonStyle,HardcodedText" />
 
         <Button

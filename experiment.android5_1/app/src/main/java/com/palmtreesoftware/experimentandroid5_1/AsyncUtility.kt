@@ -1,54 +1,65 @@
 package com.palmtreesoftware.experimentandroid5_1
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
 import android.net.Uri
-import kotlinx.coroutines.*
+import androidx.core.app.ActivityCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStreamReader
 import java.net.URL
 import java.util.*
 
-class AsyncUtility {
+abstract class AsyncUtility {
     companion object {
         fun getAddressFromLocation(
             context: Context,
             locale: Locale,
             scope: CoroutineScope,
-            latitude: Double,
-            longitude: Double,
+            coordinates: Coordinates,
             onCompleted: (Address?) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
-            val geocorder = Geocoder(context, locale)
-            scope.launch {
-                try {
-                    geocoderAsync(geocorder, latitude, longitude, onCompleted, onFailed)
-                } catch (ex: Exception) {
-                    onFailed(ex)
-                    scope.coroutineContext.cancelChildren()
+            try {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.INTERNET
+                    ) != PackageManager.PERMISSION_GRANTED
+                )
+                    throw Exception("${AsyncUtility::class.java.canonicalName}.getAddressFromLocation(): Not granted Manifest.permission.INTERNET")
+                val geocorder = Geocoder(context, locale)
+                scope.launch {
+                    geocoderAsync(geocorder, coordinates, onCompleted, onFailed)
                 }
+            } catch (ex: Exception) {
+                onFailed(ex)
             }
         }
 
         @Suppress("BlockingMethodInNonBlockingContext")
         private suspend fun geocoderAsync(
             geocoder: Geocoder,
-            latitude: Double,
-            longitude: Double,
+            coordinates: Coordinates,
             onCompleted: (Address?) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
             try {
-                val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+                val addresses =
+                    geocoder.getFromLocation(coordinates.latitude, coordinates.longitude, 1)
                 withContext(Dispatchers.Main) {
                     onCompleted(if (addresses.isEmpty()) null else addresses[0])
                 }
             } catch (ex: Exception) {
-                onFailed(ex)
-                return
+                withContext(Dispatchers.Main) {
+                    onFailed(ex)
+                }
             }
         }
 
@@ -58,14 +69,13 @@ class AsyncUtility {
             onCompleted: (String) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
-            val url = URL(uri.toString())
-            scope.launch {
-                try {
+            try {
+                val url = URL(uri.toString())
+                scope.launch {
                     downloadStringAsync(url, onCompleted, onFailed)
-                } catch (ex: Exception) {
-                    onFailed(ex)
-                    scope.coroutineContext.cancelChildren()
                 }
+            } catch (ex: Exception) {
+                onFailed(ex)
             }
         }
 
@@ -75,20 +85,21 @@ class AsyncUtility {
             onCompleted: (String) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
-            val text =
-                try {
+            try {
+                val text =
                     InputStreamReader(
                         url.openConnection().getInputStream(),
                         "UTF-8"
                     ).use {
                         it.readText()
                     }
-                } catch (ex: Exception) {
-                    onFailed(ex)
-                    return
+                withContext(Dispatchers.Main) {
+                    onCompleted(text)
                 }
-            withContext(Dispatchers.Main) {
-                onCompleted(text)
+            } catch (ex: Exception) {
+                withContext(Dispatchers.Main) {
+                    onFailed(ex)
+                }
             }
         }
 
@@ -98,13 +109,12 @@ class AsyncUtility {
             onCompleted: (Bitmap) -> Unit,
             onFailed: (Exception) -> Unit
         ) {
-            scope.launch {
-                try {
+            try {
+                scope.launch {
                     downloadImageAsync(URL(uri.toString()), onCompleted, onFailed)
-                } catch (ex: Exception) {
-                    onFailed(ex)
-                    scope.coroutineContext.cancelChildren()
                 }
+            } catch (ex: Exception) {
+                onFailed(ex)
             }
         }
 
@@ -122,8 +132,9 @@ class AsyncUtility {
                     }
                 }
             } catch (ex: Exception) {
-                onFailed(ex)
-                return
+                withContext(Dispatchers.Main) {
+                    onFailed(ex)
+                }
             }
         }
     }

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Switch
+            android:id="@+id/weatherForecastSettingViewIsWeatherForecastEnabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:switchPadding="8dp"
+            android:text="天気予報を表示する"
+            tools:ignore="HardcodedText" />
+
+        <LinearLayout
+            android:id="@+id/weatherForecastSettingViewMain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Switch
+                    android:id="@+id/weatherForecastSettingViewPowerSaving"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:checked="false"
+                    android:switchPadding="8dp"
+                    android:text="省電力モード"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/weatherForecastSettingViewPowerSavingDescription"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1"
+                    android:text=""
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/weatherForecastSettingViewError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="エラー"
+                android:textColor="@android:color/holo_red_dark"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/weatherForecastSettingViewPermissions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="必要な権限を確認する"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/weatherForecastSettingViewAfterPermissions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="権限の確認を終えたらタッチしてください"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/weatherForecastSettingViewLocationSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="位置情報の設定を確認する"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/weatherForecastSettingViewAfterLocationSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="位置情報の設定の確認を終えたらタッチしてください"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/weatherForecastSettingViewLocationOptionalSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="バッテリーを節約するために (オプション)"
+                android:visibility="visible"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+    </LinearLayout>
+</merge>

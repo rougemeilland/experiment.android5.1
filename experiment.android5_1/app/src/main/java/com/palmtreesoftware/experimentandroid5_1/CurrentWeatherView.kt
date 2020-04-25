@@ -2,6 +2,7 @@ package com.palmtreesoftware.experimentandroid5_1
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.location.Address
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -15,6 +16,62 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
     FrameLayout(context, attributeSet) {
 
     private val scope = CoroutineScope(Dispatchers.Default)
+    private var currentAddress: Address? = null
+    private var observationAddress: Address? = null
+
+    private fun updateAddresses(locale: java.util.Locale) {
+        currentAddress.let { currentAddress ->
+            if (currentAddress != null) {
+                val addressUtility = AddressFormatter.of(locale)
+                currentWeatherViewCity.text =
+                    addressUtility.getLocality(currentAddress).toHankaku()
+                observationAddress.let { observationAddress ->
+                    currentWeatherViewObservationAddress.text =
+                        if (observationAddress != null) {
+                            addressUtility
+                                .omitAddress(currentAddress, observationAddress)
+                                .toHankaku().let { observationAddressText ->
+                                    currentAddress.distanceTo(observationAddress).let { distance ->
+                                        if (distance == null) {
+                                            observationAddressText
+                                        } else {
+                                            "%s\n(現在地から約 %s)".format(
+                                                observationAddressText,
+                                                when {
+                                                    distance >= 1000000.0 ->
+                                                        "%,.0fkm".format(distance / 1000)
+                                                    distance >= 100000.0 ->
+                                                        "%,.1fkm".format(distance / 1000)
+                                                    distance >= 10000.0 ->
+                                                        "%,.2fkm".format(distance / 1000)
+                                                    else ->
+                                                        "%,.0fm".format(distance)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                        } else {
+                            ""
+                        }
+                }
+            } else {
+                currentWeatherViewCity.text = ""
+                observationAddress.let { observationAddress ->
+                    currentWeatherViewObservationAddress.text =
+                        if (observationAddress != null) {
+                            (0 until observationAddress.maxAddressLineIndex)
+                                .joinToString("\n") { index ->
+                                    observationAddress.getAddressLine(index)
+                                }.toHankaku()
+                        } else {
+                            ""
+                        }
+                }
+            }
+        }
+    }
+
     private val weatherSymbolContainer = object : WeatherSymbolContainer() {
         override fun onReset() {
             currentWeatherViewWeatherSymbolImage.setImageBitmap(null)
@@ -37,9 +94,13 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
         resetView()
     }
 
+    fun reset() {
+        resetView()
+    }
+
     fun update(
-        latitude: Double,
-        longitude: Double,
+        coordinates: Coordinates,
+        accuracy: Double,
         locale: java.util.Locale,
         onCompleted: (Boolean, DateTime) -> Unit
     ) {
@@ -47,8 +108,8 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
             context,
             scope,
             locale,
-            latitude,
-            longitude, { current, latestRequested ->
+            coordinates,
+            { current, latestRequested ->
                 updateWeatherView(current, latestRequested)
                 onCompleted(current.isCached, latestRequested)
             }, { ex ->
@@ -62,11 +123,12 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
             context,
             locale,
             scope,
-            latitude,
-            longitude,
+            coordinates,
             { address ->
                 if (address != null) {
-                    currentWeatherViewCity.text = address.locality
+                    currentAddress = address
+                    updateAddresses(locale)
+                    currentWeatherViewCityAccuracy.text = "(精度: %,.0fm)".format(accuracy)
                     currentWeatherViewDataRowCity.visibility = View.VISIBLE
                 } else {
                     currentWeatherViewDataRowCity.visibility = View.GONE
@@ -87,6 +149,7 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
     ) {
         val now = DateTime.now()
         val timeZone = TimeZone.getDefault()
+        val locale = java.util.Locale.getDefault()
 
         currentWeatherViewRequestedDateTime.text = formatTime(latestRequested, now, timeZone)
         currentWeatherViewFromCache.visibility = if (current.isCached) View.VISIBLE else View.GONE
@@ -97,17 +160,13 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
 
         AsyncUtility.getAddressFromLocation(
             context,
-            java.util.Locale.getDefault(),
+            locale,
             scope,
-            current.coord.latitude,
-            current.coord.longitude,
+            current.coord.coordinates,
             { address ->
                 if (address != null) {
-                    // TODO("フル表記の住所が冗長なので、なるべく端末位置からの相対的な情報のみを含めるようにする方向で短縮を試みる。どうやらコードがロケール依存になるのを回避できない模様。")
-                    currentWeatherViewObservationAddress.text =
-                        with(address) {
-                            (0..maxAddressLineIndex).map { getAddressLine(it) }
-                        }.joinToString("\n")
+                    observationAddress = address
+                    updateAddresses(locale)
                     currentWeatherViewDataRowObservationAddress.visibility = View.VISIBLE
                 } else {
                     currentWeatherViewDataRowObservationAddress.visibility = View.GONE
@@ -124,26 +183,26 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
         weatherSymbolContainer.dataSource =
             current.weathers.map { Pair(it.iconUrl, it.description) }.toTypedArray()
         current.main.run {
-            currentWeatherViewTemparature.text = "%.1f℃ (%.1f℃/%.1f℃)".format(
+            currentWeatherViewTemparature.text = "%,.1f℃ (%,.1f℃/%,.1f℃)".format(
                 temperatureInCelsius,
                 maximumTemperatureInCelsius,
                 minimumTemperatureInCelsius
             )
-            currentWeatherViewHumidity.text = "%.0f%%".format(humidityInPercent)
+            currentWeatherViewHumidity.text = "%,.0f%%".format(humidityInPercent)
             currentWeatherViewFeelsLinkTemparature.text =
-                "%.1f℃".format(feelsLinkTemperatureInCelsius)
+                "%,.1f℃".format(feelsLinkTemperatureInCelsius)
             currentWeatherViewPressure.text =
                 pressureOnTheGroundLevelInHectopascal.let { grandLevel ->
                     if (grandLevel != null) {
                         pressureOnTheSeaLevelInHectopascal.let { seaLevel ->
                             if (seaLevel != null) {
-                                "%.0fhPa (現地気圧: %.0fhPa、海面気圧: %.0fhPa)".format(
+                                "%,.0fhPa (現地気圧: %,.0fhPa、海面気圧: %,.0fhPa)".format(
                                     pressureInHectopascal,
                                     grandLevel,
                                     seaLevel
                                 )
                             } else {
-                                "%.0fhPa (現地気圧: %.0fhPa)".format(
+                                "%,.0fhPa (現地気圧: %,.0fhPa)".format(
                                     pressureInHectopascal,
                                     grandLevel
                                 )
@@ -152,9 +211,9 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
                     } else {
                         pressureOnTheSeaLevelInHectopascal.let { seaLevel ->
                             if (seaLevel != null) {
-                                "%.0fhPa (海面気圧: %.0fhPa)".format(pressureInHectopascal, seaLevel)
+                                "%,.0fhPa (海面気圧: %,.0fhPa)".format(pressureInHectopascal, seaLevel)
                             } else {
-                                "%.0fhPa".format(pressureInHectopascal)
+                                "%,.0fhPa".format(pressureInHectopascal)
                             }
                         }
                     }
@@ -165,12 +224,12 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
             current.wind.run {
                 direction.let { direction ->
                     if (direction != null) {
-                        "%sの風、風速%.1fm/s".format(
+                        "%sの風、風速 %,.2fm/s".format(
                             direction.getDescription(context),
                             speedInMeterPerSecond
                         )
                     } else {
-                        "風速%.1fm/s".format(speedInMeterPerSecond)
+                        "風速 %,.2fm/s".format(speedInMeterPerSecond)
                     }
                 }
             }
@@ -181,7 +240,7 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
                 currentWeatherViewDataRowCloudiness.visibility = View.GONE
             else {
                 currentWeatherViewCloudiness.text =
-                    "%.0f%%".format(clouds.cloudsInPercent)
+                    "%,.0f%%".format(clouds.cloudsInPercent)
                 currentWeatherViewDataRowCloudiness.visibility = View.VISIBLE
             }
         }
@@ -199,17 +258,17 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
                         data.amountOnLast3HourInMilliMeter.let { last3Hour ->
                             if (last3Hour != null) {
                                 textView.text =
-                                    "過去1時間: %.0fmm、過去3時間: %.0fmm".format(last1Hour, last3Hour)
+                                    "過去1時間: %,.0fmm、過去3時間: %,.0fmm".format(last1Hour, last3Hour)
                                 dataRow.visibility = View.VISIBLE
                             } else {
-                                textView.text = "過去1時間: %.0fmm".format(last1Hour)
+                                textView.text = "過去1時間: %,.0fmm".format(last1Hour)
                                 dataRow.visibility = View.VISIBLE
                             }
                         }
                     } else {
                         data.amountOnLast3HourInMilliMeter.let { last3Hour ->
                             if (last3Hour != null) {
-                                textView.text = "過去3時間: %.0fmm".format(last3Hour)
+                                textView.text = "過去3時間: %,.0fmm".format(last3Hour)
                                 dataRow.visibility = View.VISIBLE
                             } else {
                                 dataRow.visibility = View.GONE
@@ -275,8 +334,8 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
         private val TAG = "CurrentWeatherView"
 
         @JvmStatic
-        private fun formatTime(dateTime: DateTime, now: DateTime, timeZone: TimeZone): String {
-            return (dateTime - now.atStartOfDay(timeZone)).days.let { days ->
+        private fun formatTime(dateTime: DateTime, now: DateTime, timeZone: TimeZone): String =
+            (dateTime - now.atStartOfDay(timeZone)).days.let { days ->
                 dateTime.atZone(timeZone).format(
                     (when {
                         days >= 2L -> "%d日後の%%s".format(days)
@@ -304,6 +363,5 @@ class CurrentWeatherView(context: Context, attributeSet: AttributeSet) :
                     }).format("HH:mm:ss")
                 )
             }
-        }
     }
 }

@@ -3,172 +3,100 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffeeee"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#99FF33">
+        android:layout_weight="1">
 
-        <TableLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <TableRow>
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="テスト結果" />
-
-                <TextView
-                    android:id="@+id/test_result"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
-
-            <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="計測地点" />
-
-                <TextView
-                    android:id="@+id/textview_address_observation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
-
-            <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="計測日時" />
-
-                <TextView
-                    android:id="@+id/textview_datetime_observation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
-
-            <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="区域" />
-
-                <TextView
-                    android:id="@+id/textview_city"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
-
-            <TableRow>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="天候" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/weathwe_icon_image"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:scaleType="fitXY" />
+                <TableRow>
 
                     <TextView
-                        android:id="@+id/weathwe_name"
-                        android:layout_width="100dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="light snow" />
-                </LinearLayout>
-            </TableRow>
+                        android:layout_gravity="center_vertical"
+                        android:text="タイムゾーン"
+                        tools:ignore="HardcodedText" />
 
-            <TableRow>
+                    <com.palmtreesoftware.experimentandroid5_1.TimeZoneSelecterView
+                        android:id="@+id/mainActivityTimeZone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </TableRow>
 
-                <TextView
-                    android:id="@+id/textview_sunrise_or_sunset_label_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="日の入り" />
+                <TableRow>
 
-                <TextView
-                    android:id="@+id/textview_sunrise_or_sunset_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:text="実行結果"
+                        tools:ignore="HardcodedText" />
 
-            <TableRow>
+                    <TextView
+                        android:id="@+id/mainActivityResult"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:fontFamily="monospace"
+                        android:textSize="30sp" />
+                </TableRow>
+            </TableLayout>
 
-                <TextView
-                    android:id="@+id/textview_sunrise_or_sunset_label_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp"
-                    android:text="日の入り" />
+            <com.palmtreesoftware.experimentandroid5_1.WeatherForecastSettingView
+                android:id="@+id/mainActivityWeatherForecastSettingSetting"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-                <TextView
-                    android:id="@+id/textview_sunrise_or_sunset_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="4dp" />
-            </TableRow>
-        </TableLayout>
+            <com.palmtreesoftware.experimentandroid5_1.CurrentWeatherView
+                android:id="@+id/mainActivityCurrentWeather"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+        </LinearLayout>
     </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/mainActivityCancel"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            android:text="cancel"
+            android:text="キャンセル"
             tools:ignore="ButtonStyle,HardcodedText" />
 
         <Button
-            android:id="@+id/request_permission_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/mainActivityRun"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            android:text="request"
+            android:text="実行"
             tools:ignore="ButtonStyle,HardcodedText" />
 
         <Button
-            android:id="@+id/ok_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/mainActivityOk"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:layout_weight="1"
-            android:text="ok"
+            android:text="OK"
             tools:ignore="ButtonStyle,HardcodedText" />
     </LinearLayout>
 </LinearLayout>

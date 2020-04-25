@@ -15,16 +15,22 @@ class Platform {
         }
 
         fun <RESULT_T> sdK23Depended(
-            greaterThanOrEqual22: () -> RESULT_T,
-            lesserThan22: () -> RESULT_T
+            greaterThanOrEqual23: () -> RESULT_T,
+            lesserThan23: () -> RESULT_T
         ): RESULT_T =
-            sdKDepended(Build.VERSION_CODES.M, greaterThanOrEqual22, lesserThan22)
+            sdKDepended(Build.VERSION_CODES.M, greaterThanOrEqual23, lesserThan23)
 
         fun <RESULT_T> sdK26Depended(
             greaterThanOrEqual26: () -> RESULT_T,
             lesserThan26: () -> RESULT_T
         ): RESULT_T =
             sdKDepended(Build.VERSION_CODES.O, greaterThanOrEqual26, lesserThan26)
+
+        fun <RESULT_T> sdK29Depended(
+            greaterThanOrEqual29: () -> RESULT_T,
+            lesserThan29: () -> RESULT_T
+        ): RESULT_T =
+            sdKDepended(Build.VERSION_CODES.Q, greaterThanOrEqual29, lesserThan29)
 
         private fun <RESULT_T> sdKDepended(
             specifiedSdkVersion: Int,
@@ -45,15 +51,17 @@ class Platform {
             } catch (ex: ClassNotFoundException) {
                 return null
             }
-            val testCompanion = testCodeClass.companionObject
-            if (testCompanion == null)
-                return null
-            // run 関数を探す
-            val testFunction = testCompanion.memberFunctions.firstOrNull { it.name == "run" }
-            if (testFunction == null)
-                return null
-            // run 関数を呼び出す。第一パラメタには companion object のインスタンスを渡さないといけないらしい
-            return testFunction.call(testCompanion.objectInstance).toString()
+            return testCodeClass.companionObject.let { companionObject ->
+                if (companionObject == null)
+                    null
+                else {
+                    // run 関数を探す
+                    companionObject.memberFunctions
+                        .firstOrNull { it.name == "run" }
+                        ?.call(companionObject.objectInstance)
+                        ?.toString()
+                }
+            }
         }
     }
 }

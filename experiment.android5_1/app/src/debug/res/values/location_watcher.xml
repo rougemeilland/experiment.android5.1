@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="location_watcher_location_request_interval_for_normal_mode">10000</integer>
+    <integer name="location_watcher_location_request_interval_for_power_saving_mode">100000
+    </integer>
+    <bool name="location_watcher_use_high_resolution">true</bool>
+</resources>

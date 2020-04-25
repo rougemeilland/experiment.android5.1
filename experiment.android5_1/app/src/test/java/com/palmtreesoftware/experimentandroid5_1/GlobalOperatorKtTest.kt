@@ -291,4 +291,33 @@ internal class GlobalOperatorKtTest {
         assertEquals(0L, (0L * TimeDuration.ofTickCounts(1000)).tickCounts)
         assertEquals(3000L, (3L * TimeDuration.ofTickCounts(1000)).tickCounts)
     }
+
+    @Test
+    fun toHankaku() {
+        assertEquals("ああ !\"#$%&'嗚呼", "ああ　!”＃＄％＆’嗚呼".toHankaku())
+        assertEquals("ああ()*+,-./嗚呼", "ああ（）＊＋，‐．／嗚呼".toHankaku())
+        assertEquals("ああ01234567嗚呼", "ああ０１２３４５６７嗚呼".toHankaku())
+        assertEquals("ああ89:;<=>?嗚呼", "ああ８９：；＜＝＞？嗚呼".toHankaku())
+        assertEquals("ああ@ABCDEFG嗚呼", "ああ＠ＡＢＣＤＥＦＧ嗚呼".toHankaku())
+        assertEquals("ああHIJKLMNO嗚呼", "ああＨＩＪＫＬＭＮＯ嗚呼".toHankaku())
+        assertEquals("ああPQRSTUVW嗚呼", "ああＰＱＲＳＴＵＶＷ嗚呼".toHankaku())
+        assertEquals("ああXYZ[\\]^_嗚呼", "ああＸＹＺ[＼]＾＿嗚呼".toHankaku())
+        assertEquals("ああ`abcdefg嗚呼", "ああ‘ａｂｃｄｅｆｇ嗚呼".toHankaku())
+        assertEquals("ああhijklmno嗚呼", "ああｈｉｊｋｌｍｎｏ嗚呼".toHankaku())
+        assertEquals("ああpqrstuvw嗚呼", "ああｐｑｒｓｔｕｖｗ嗚呼".toHankaku())
+        assertEquals("ああxyz{|}~嗚呼", "ああｘｙｚ｛｜｝～嗚呼".toHankaku())
+
+        assertEquals("ああ !\"#$%&'嗚呼", "ああ !\"#$%&'嗚呼".toHankaku())
+        assertEquals("ああ()*+,-./嗚呼", "ああ()*+,‐./嗚呼".toHankaku())
+        assertEquals("ああ01234567嗚呼", "ああ01234567嗚呼".toHankaku())
+        assertEquals("ああ89:;<=>?嗚呼", "ああ89:;<=>?嗚呼".toHankaku())
+        assertEquals("ああ@ABCDEFG嗚呼", "ああ@ABCDEFG嗚呼".toHankaku())
+        assertEquals("ああHIJKLMNO嗚呼", "ああHIJKLMNO嗚呼".toHankaku())
+        assertEquals("ああPQRSTUVW嗚呼", "ああPQRSTUVW嗚呼".toHankaku())
+        assertEquals("ああXYZ[\\]^_嗚呼", "ああXYZ[\\]^_嗚呼".toHankaku())
+        assertEquals("ああ`abcdefg嗚呼", "ああ‘abcdefg嗚呼".toHankaku())
+        assertEquals("ああhijklmno嗚呼", "ああhijklmno嗚呼".toHankaku())
+        assertEquals("ああpqrstuvw嗚呼", "ああpqrstuvw嗚呼".toHankaku())
+        assertEquals("ああxyz{|}~嗚呼", "ああxyz{|}～嗚呼".toHankaku())
+    }
 }
