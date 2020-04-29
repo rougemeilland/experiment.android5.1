@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="date_time_format_relative_date_time_days_later">%2$d日後の%1$s</string>
+    <string name="date_time_format_relative_date_time_tomorrow">明日の%s</string>
+    <plurals name="date_time_format_relative_date_time_hours_later">
+        <item quantity="other">%d時間後</item>
+    </plurals>
+    <plurals name="date_time_format_relative_date_time_minutes_later">
+        <item quantity="other">%d分後</item>
+    </plurals>
+    <plurals name="date_time_view_format_relative_date_time_minutes_ago">>
+        <item quantity="other">%d分前</item>
+    </plurals>
+    <plurals name="date_time_format_relative_date_time_hours_ago">>
+        <item quantity="other">%d時間前</item>
+    </plurals>
+    <string name="date_time_format_relative_date_time_yesterday">昨日の%s</string>
+    <string name="date_time_format_relative_date_time_days_ago">%2$d日前の%1$s</string>
+    <string name="date_time_format_relative_date_time_time">HH:mm:ss</string>
+</resources>

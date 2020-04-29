@@ -1,6 +1,9 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-class Coordinates(val latitude: Double, val longitude: Double) {
+import android.net.Uri
+import org.json.JSONObject
+
+class Coordinates(val latitude: Double, val longitude: Double) : JSONObjectCompatible {
     init {
         if (latitude.isNaN())
             throw IllegalArgumentException("${javaClass.canonicalName}.init(): latitude must not be NaN")
@@ -11,6 +14,21 @@ class Coordinates(val latitude: Double, val longitude: Double) {
         if (longitude.isInfinite())
             throw IllegalArgumentException("${javaClass.canonicalName}.init(): longitude must not be Infinite")
     }
+
+    fun toGoogleMapUrl(): Uri =
+        Uri.Builder().run {
+            scheme("https")
+            authority("maps.google.co.jp")
+            path("/maps")
+            appendQueryParameter("q", "${"%10f".format(latitude)},${"%10f".format(longitude)}")
+            build()
+        }
+
+    override fun toJSONObject(): JSONObject =
+        JSONObject().apply {
+            put("latitude", latitude)
+            put("longitude", longitude)
+        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other)
@@ -27,5 +45,10 @@ class Coordinates(val latitude: Double, val longitude: Double) {
 
     override fun hashCode(): Int {
         return latitude.hashCode() * 31 + longitude.hashCode()
+    }
+
+    companion object {
+        fun of(o: JSONObject): Coordinates =
+            Coordinates(o.getDouble("latitude"), o.getDouble("longitude"))
     }
 }

@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 secret.xml
+city_list.json # from http://bulk.openweathermap.org/sample/city.list.json.gz
+h3104world_utf8.csv # from https://amano-tec.com/data/world.html

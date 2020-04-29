@@ -1,5 +1,6 @@
 package com.palmtreesoftware.experimentandroid5_1
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 
@@ -275,6 +276,79 @@ abstract class DateTime protected constructor() {
     fun atStartOfDay(timeZone: TimeZone): DateTime =
         ZonedDateTime.of(this, timeZone)
             .atStartOfDay()
+
+    fun formatRelativeTime(context: Context, baseDateTime: DateTime, timeZone: TimeZone): String {
+        val days = minus(baseDateTime.atStartOfDay(timeZone)).days
+        val duration = minus(baseDateTime)
+        val localTime =
+            atZone(timeZone).format(context.getString(R.string.date_time_format_relative_date_time_time))
+        return when {
+            days >= 2L ->
+                context.getString(
+                    R.string.date_time_format_relative_date_time_days_later,
+                    localTime,
+                    days
+                )
+            days == 1L ->
+                context.getString(
+                    R.string.date_time_format_relative_date_time_tomorrow,
+                    localTime
+                )
+            days == 0L -> {
+                when {
+                    duration >= TimeDuration.ofHours(1) -> {
+                        duration.hours.toInt().let {
+                            "$localTime (${context.resources.getQuantityString(
+                                R.plurals.date_time_format_relative_date_time_hours_later,
+                                it,
+                                it
+                            )})"
+                        }
+                    }
+                    duration >= TimeDuration.ofMinutes(1) -> {
+                        duration.minutes.toInt().let {
+                            "$localTime (${context.resources.getQuantityString(
+                                R.plurals.date_time_format_relative_date_time_minutes_later,
+                                it,
+                                it
+                            )})"
+                        }
+                    }
+                    duration > TimeDuration.ofMinutes(-1) -> {
+                        localTime
+                    }
+                    duration > TimeDuration.ofHours(-1) -> {
+                        (-duration).minutes.toInt().let {
+                            "$localTime (${context.resources.getQuantityString(
+                                R.plurals.date_time_view_format_relative_date_time_minutes_ago,
+                                it,
+                                it
+                            )})"
+                        }
+                    }
+                    else ->
+                        (-duration).hours.toInt().let {
+                            "$localTime (${context.resources.getQuantityString(
+                                R.plurals.date_time_format_relative_date_time_hours_ago,
+                                it,
+                                it
+                            )})"
+                        }
+                }
+            }
+            days == -1L ->
+                context.getString(
+                    R.string.date_time_format_relative_date_time_yesterday,
+                    localTime
+                )
+            else ->
+                context.getString(
+                    R.string.date_time_format_relative_date_time_days_ago,
+                    localTime,
+                    -days
+                )
+        }
+    }
 
     companion object {
         @JvmStatic

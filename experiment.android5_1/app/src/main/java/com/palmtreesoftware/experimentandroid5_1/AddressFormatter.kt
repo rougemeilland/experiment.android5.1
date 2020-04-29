@@ -150,10 +150,7 @@ abstract class AddressFormatter {
         override fun omitAddress(currentAddress: Address, targetAddress: Address): String {
             return WorkingState(
                 false,
-                (0..targetAddress.maxAddressLineIndex)
-                    .joinToString("\n") { index ->
-                        targetAddress.getAddressLine(index)
-                    }
+                targetAddress.addressLines.joinToString("\n")
             )
                 // countryName が共通していれば除去
                 .omitLeadingComponent(currentAddress.countryName, targetAddress.countryName, "、")
@@ -196,10 +193,7 @@ abstract class AddressFormatter {
         override fun omitAddress(currentAddress: Address, targetAddress: Address): String =
             WorkingState(
                 false,
-                (0..targetAddress.maxAddressLineIndex)
-                    .joinToString("\n") { index ->
-                        targetAddress.getAddressLine(index)
-                    }
+                targetAddress.addressLines.joinToString("\n")
             )
                 // countryName が共通していれば除去
                 .omitTrailingComponent(
@@ -266,7 +260,6 @@ abstract class AddressFormatter {
     abstract fun omitAddress(currentAddress: Address, targetAddress: Address): String
     abstract fun getLocality(address: Address): String
 
-    // TODO("テストする")
     companion object {
         fun of(locale: Locale): AddressFormatter =
             when (locale.language) {

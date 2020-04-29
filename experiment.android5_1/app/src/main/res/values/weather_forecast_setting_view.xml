@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weather_forecast_setting_view_about_permissions">This app can use the function to display the weather information of the current location. \nTo do so, the following permissions must be granted.\n%s\nPlease grant the above permission on the next screen.\nIf not allowed, the function to display the weather information of the current location cannot be used, but other functions can be used.</string>
+    <string name="weather_forecast_setting_view_internet_permission_friendly_name">Full network access</string>
+    <string name="weather_forecast_setting_view_location_permission_friendly_name">Location</string>
+    <string name="weather_forecast_setting_view_about_permissions_title">About the permissions of this app</string>
+    <string name="weather_forecast_setting_view_next_button_text">Next</string>
+    <string name="weather_forecast_setting_view_about_location_setting">This app can use the function to display the weather information of the current location.\nFor that, the location information function must be available.\nTurn on \"Use location\" on the next screen.\nIf there is a \"Mode\" item, it is recommended to select \"High accuracy\".\nThe operation method may differ depending on the model.</string>
+    <string name="weather_forecast_setting_view_about_location_setting_title">About setting location information</string>
+    <string name="weather_forecast_setting_view_about_optional_location_setting">This app can use the function to display the weather information of the current location.\nNormally, GPS can be used as a device to acquire location information, but it has drawbacks such as relatively high power consumption and often not being able to use indoors, so it can be used with Wi-Fi, Bluetooth, cellular networks, etc. We recommend using together.\nOn the next screen, set the device used to acquire location information.\nThe operation method may differ depending on the model.\ne.g. Touch the \"Mode\" item, touch the \"Wi-Fi and Bluetooth scanning\" item, etc.</string>
+    <string name="weather_forecast_setting_view_about_optional_location_setting_title">To save the battery</string>
+    <string name="weather_forecast_setting_view_error_location_is_disabled">The current location of the device cannot be known because the location information is unavailable.</string>
+    <string name="weather_forecast_setting_view_error_permission_is_not_granted">You cannot use the function to display the weather forecast because you have unauthorized permissions.</string>
+    <string name="weather_forecast_setting_view_power_savng_mode_enabled_description">Power saving mode is on.\nThe weather forecast update interval is about 60 minutes.\nThe accuracy of the location information may be about 10km at worst, so you may feel a little lack of accuracy in some cases.</string>
+    <string name="weather_forecast_setting_view_power_savng_mode_disabled_description">Power saving mode is off.\nThe weather forecast update interval is about 10 minutes.\nLocation information can be expected to be sufficiently accurate for weather forecasts.</string>
+    <string name="weather_forecast_setting_view_enabled_label">Show weather forecast</string>
+    <string name="weather_forecast_setting_view_power_saving_mode_label">Power saving mode</string>
+    <string name="weather_forecast_setting_view_confirm_permission_text">Check the required permissions</string>
+    <string name="weather_forecast_setting_view_touch_after_confirming_permissions_text">Touch after confirming the authority</string>
+    <string name="weather_forecast_setting_view_confirm_location_setting_text">Check location information settings</string>
+    <string name="weather_forecast_setting_view_touch_after_confirming_location_setting_text">Touch after confirming the location information settings.</string>
+    <string name="weather_forecast_setting_view_for_power_saving_text">To save battery (optional)</string>
+</resources>

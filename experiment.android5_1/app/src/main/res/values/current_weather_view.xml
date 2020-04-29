@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="current_weather_view_format_distance_1">%,.0fkm</string>
+    <string name="current_weather_view_format_distance_2">%,.1fkm</string>
+    <string name="current_weather_view_format_distance_3">%,.2fkm</string>
+    <string name="current_weather_view_format_distance_4">%,.0fm</string>
+    <string name="current_weather_view_format_relative_location">%1$s\n(%2$s from current location)</string>
+    <string name="current_weather_view_format_location_accuracy">(accuracy: %,.0fm)</string>
+    <string name="current_weather_view_format_temperature">%1$,.1f℃ (%2$,.1f℃/%3$,.1f℃)</string>
+    <string name="current_weather_view_format_humidity">%,.0f%%</string>
+    <string name="current_weather_view_format_feels_like_temperature">%,.1f℃</string>
+    <string name="current_weather_view_format_pressure_1">%1$,.0fhPa (on the ground level: %2$,.0fhPa、on the sea level: %3$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_2">%1$,.0fhPa (on the ground level: %2$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_3">%1$,.0fhPa (on the sea level: %2$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_4">%,.0fhPa</string>
+    <string name="current_weather_view_format_wind_1">wind: %2$,.2fm/s, %1$s</string>
+    <string name="current_weather_view_format_wind_2">wind: %,.2fm/s</string>
+    <string name="current_weather_view_format_clouds">%,.0f%%</string>
+    <string name="current_weather_view_format_precipitation_1">%1$,.0fmm in the last hour, %2$,.0fmm in the last 3 hours</string>
+    <string name="current_weather_view_format_precipitation_2">%,.0fmm in the last hour</string>
+    <string name="current_weather_view_format_precipitation_3">%,.0fmm in the last 3 hours</string>
+    <string name="current_weather_view_sunset_label">Sunset</string>
+    <string name="current_weather_view_format_sunrise_label">Sunrise</string>
+    <string name="current_weather_view_region_label">Region</string>
+    <string name="current_weather_view_data_acquisition_time_label">Data acquisition time</string>
+    <string name="current_weather_view_data_is_cached_text">(is cached)</string>
+    <string name="current_weather_view_observation_time_label">Observation time</string>
+    <string name="current_weather_view_observation_point_label">Observation point</string>
+    <string name="current_weather_view_weather_label">Weather</string>
+    <string name="current_weather_view_temperature_label">Temperature:</string>
+    <string name="current_weather_view_humidity_label">Humidity:</string>
+    <string name="current_weather_view_feels_like_temperature_label">\"Feels like\" temperature:</string>
+    <string name="current_weather_view_pressure_label">Pressure</string>
+    <string name="current_weather_view_clouds_label">Clouds</string>
+    <string name="current_weather_view_rainfall_label">RainFall</string>
+    <string name="current_weather_view_snowfall_label">Snowfall</string>
+</resources>

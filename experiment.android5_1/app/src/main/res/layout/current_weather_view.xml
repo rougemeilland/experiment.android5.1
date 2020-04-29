@@ -14,7 +14,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="区域" />
+                android:text="@string/current_weather_view_region_label" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="データ取得時刻" />
+                android:text="@string/current_weather_view_data_acquisition_time_label" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="4dp"
-                    android:text="(キャッシュされています)" />
+                    android:text="@string/current_weather_view_data_is_cached_text" />
             </LinearLayout>
         </TableRow>
 
@@ -76,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="観測時刻" />
+                android:text="@string/current_weather_view_observation_time_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewObservationDateTime"
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="観測地点" />
+                android:text="@string/current_weather_view_observation_point_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewObservationAddress"
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="天候" />
+                android:text="@string/current_weather_view_weather_label" />
 
             <LinearLayout
                 android:id="@+id/currentWeatherViewDataRowWeatherSummary"
@@ -138,8 +138,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="20dp"
-                        android:text="晴れ" />
+                        android:layout_marginStart="20dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -151,28 +150,26 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:text="気温:" />
+                        android:text="@string/current_weather_view_temperature_label" />
 
                     <TextView
                         android:id="@+id/currentWeatherViewTemparature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="20.0℃ (22.0℃/12.0℃)" />
+                        android:layout_gravity="center_vertical" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:text="湿度:" />
+                        android:layout_marginStart="10dp"
+                        android:text="@string/current_weather_view_humidity_label" />
 
                     <TextView
                         android:id="@+id/currentWeatherViewHumidity"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="15.0%" />
+                        android:layout_gravity="center_vertical" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -185,22 +182,20 @@
                         android:id="@+id/currentWeatherViewWind"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="北西の風、風速5.0m/s" />
+                        android:layout_gravity="center_vertical" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="10dp"
-                        android:text="体感温度:" />
+                        android:layout_marginStart="10dp"
+                        android:text="@string/current_weather_view_feels_like_temperature_label" />
 
                     <TextView
                         android:id="@+id/currentWeatherViewFeelsLinkTemparature"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:text="15.0℃" />
+                        android:layout_gravity="center_vertical" />
                 </LinearLayout>
             </LinearLayout>
         </TableRow>
@@ -212,14 +207,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="気圧" />
+                android:text="@string/current_weather_view_pressure_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewPressure"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="990.0hPa (現地気圧: 990.0hPa、海面気圧：990.0hPa)" />
+                android:layout_gravity="center_vertical" />
         </TableRow>
 
         <TableRow android:id="@+id/currentWeatherViewDataRowCloudiness">
@@ -229,14 +223,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="雲量" />
+                android:text="@string/current_weather_view_clouds_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewCloudiness"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="10.0%" />
+                android:layout_gravity="center_vertical" />
         </TableRow>
 
         <TableRow android:id="@+id/currentWeatherViewDataRowRainFall">
@@ -246,14 +239,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="降雨量" />
+                android:text="@string/current_weather_view_rainfall_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewRainFall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="過去1時間: 15.0mm、過去3時間: 20.0mm" />
+                android:layout_gravity="center_vertical" />
         </TableRow>
 
         <TableRow android:id="@+id/currentWeatherViewDataRowSnowFall">
@@ -263,14 +255,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="4dp"
-                android:text="降雪量" />
+                android:text="@string/current_weather_view_snowfall_label" />
 
             <TextView
                 android:id="@+id/currentWeatherViewSnowFall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:text="過去1時間: 15.0mm、過去3時間: 20.0mm" />
+                android:layout_gravity="center_vertical" />
         </TableRow>
 
         <TableRow android:id="@+id/currentWeatherViewDataRowSunriseSunset1">
@@ -280,8 +271,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="4dp"
-                android:text="日の入り" />
+                android:layout_margin="4dp" />
 
             <TextView
                 android:id="@+id/currentWeatherViewWeatherSunriseOrSunset1"
@@ -298,8 +288,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_margin="4dp"
-                android:text="日の出" />
+                android:layout_margin="4dp" />
 
             <TextView
                 android:id="@+id/currentWeatherViewWeatherSunriseOrSunset2"

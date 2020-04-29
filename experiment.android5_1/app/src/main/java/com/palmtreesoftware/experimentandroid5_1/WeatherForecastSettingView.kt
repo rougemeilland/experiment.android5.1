@@ -16,6 +16,7 @@ import androidx.annotation.RequiresApi
 import com.google.android.gms.common.api.ResolvableApiException
 import kotlinx.android.synthetic.main.weather_forecast_setting_view.view.*
 
+// 【重要】 文字列リソースにダブルクォートを含めるときは \" とする。 &quot; では削除されてしまう模様。
 
 class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
     FrameLayout(context, attributeSet) {
@@ -56,30 +57,33 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
                 notAllowedPermissions: Array<String>,
                 onContinued: () -> Unit
             ) {
-                val messageText = String.format(
-                    "このアプリでは現在位置の気象情報を表示する機能を使用することができます。\n" +
-                            "そのためには以下の権限が許可されている必要があります。\n%s\n" +
-                            "次に表示される画面で上記の権限を許可してください。\n" +
-                            "許可されない場合は、現在位置の気象情報を表示する機能を使用することができませんが、それ以外の機能は使用できます。",
-                    notAllowedPermissions
-                        .mapNotNull {
-                            when (it) {
-                                Manifest.permission.INTERNET -> "インターネットへのフルアクセス"
-                                Manifest.permission.ACCESS_FINE_LOCATION -> "位置情報"
-                                Manifest.permission.ACCESS_COARSE_LOCATION -> "位置情報"
-                                //Manifest.permission.ACCESS_BACKGROUND_LOCATION -> "位置情報"
-                                else -> null
+
+                val messageText =
+                    activity.getString(
+                        R.string.weather_forecast_setting_view_about_permissions,
+                        notAllowedPermissions
+                            .mapNotNull {
+                                when (it) {
+                                    Manifest.permission.INTERNET -> {
+                                        activity.getString(R.string.weather_forecast_setting_view_internet_permission_friendly_name)
+                                    }
+                                    //Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION -> {
+                                        activity.getString(R.string.weather_forecast_setting_view_location_permission_friendly_name)
+                                    }
+                                    else -> null
+                                }
                             }
-                        }
-                        .distinct()
-                        .joinToString(separator = "\n", prefix = "\n", postfix = "\n") {
-                            String.format("- %s", it)
-                        }
-                )
+                            .distinct()
+                            .joinToString(separator = "\n", prefix = "\n", postfix = "\n") {
+                                String.format("- %s", it)
+                            }
+                    )
                 AlertDialog.Builder(activity)
-                    .setTitle("このアプリの権限について")
+                    .setTitle(R.string.weather_forecast_setting_view_about_permissions_title)
                     .setMessage(messageText)
-                    .setPositiveButton("次へ") { _, _ -> onContinued() }
+                    .setPositiveButton(R.string.weather_forecast_setting_view_next_button_text) { _, _ -> onContinued() }
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
                     .create()
                     .show()
@@ -124,16 +128,10 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
             if (context is Activity) {
                 weatherForecastSettingViewLocationSetting.visibility = View.GONE
                 weatherForecastSettingViewAfterLocationSetting.visibility = View.VISIBLE
-                val messageText =
-                    "このアプリでは現在位置の気象情報を表示する機能を使用することができます。\n" +
-                            "そのためには位置情報の機能が使用できる必要があります。\n%s\n" +
-                            "次に表示される画面で「位置情報の使用」をONにしてください。\n" +
-                            "また、「モード」の項目がある場合は「高精度」を選択することをお勧めします。\n" +
-                            "なお、操作方法は機種によって異なる場合があります。"
                 AlertDialog.Builder(context)
-                    .setTitle("位置情報の設定について")
-                    .setMessage(messageText)
-                    .setPositiveButton("次へ") { _, _ ->
+                    .setTitle(R.string.weather_forecast_setting_view_about_location_setting_title)
+                    .setMessage(R.string.weather_forecast_setting_view_about_location_setting)
+                    .setPositiveButton(R.string.weather_forecast_setting_view_next_button_text) { _, _ ->
                         // 更に位置情報の設定をチェックする
                         if (permissionManager.isAllowedMinimumPermission(context)) {
 
@@ -177,16 +175,10 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
 
         weatherForecastSettingViewLocationOptionalSetting.setOnClickListener {
             if (context is Activity) {
-                val messageText =
-                    "このアプリでは現在位置の気象情報を表示する機能を使用することができます。\n" +
-                            "通常は位置情報を取得する機器としてGPSが利用できますが、電力消費が比較的大きいことや屋内などで利用できないことが多いなどの欠点もあるため、Wi-FiやBluetooth、モバイルネットワークなどとの併用をお勧めします。\n" +
-                            "「続ける」を押して表示される画面で、位置情報を取得するために利用する機器の設定を行ってください。\n" +
-                            "なお、操作方法は機種によって異なる場合があります。\n" +
-                            "例) 「モード」の項目をタッチする、「Wi-FiのスキャンとBluetoothのスキャン」の項目をタッチする、など"
                 AlertDialog.Builder(context)
-                    .setTitle("バッテリーを節約するために")
-                    .setMessage(messageText)
-                    .setPositiveButton("次へ") { _, _ ->
+                    .setTitle(R.string.weather_forecast_setting_view_about_optional_location_setting_title)
+                    .setMessage(R.string.weather_forecast_setting_view_about_optional_location_setting)
+                    .setPositiveButton(R.string.weather_forecast_setting_view_next_button_text) { _, _ ->
                         context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     }
                     .setNegativeButton(android.R.string.cancel) { _, _ -> }
@@ -264,7 +256,8 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
                         // 位置情報の設定に問題がある場合
                         weatherForecastSettingViewLocationSetting.visibility = View.VISIBLE
                         weatherForecastSettingViewLocationOptionalSetting.visibility = View.GONE
-                        weatherForecastSettingViewError.text = "位置情報が利用できないため、端末の現在位置を知ることができません。"
+                        weatherForecastSettingViewError.text =
+                            context.getString(R.string.weather_forecast_setting_view_error_location_is_disabled)
                         weatherForecastSettingViewError.visibility = View.VISIBLE
                     }
                 )
@@ -273,7 +266,8 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
                 weatherForecastSettingViewPermissions.visibility = View.VISIBLE
                 weatherForecastSettingViewLocationSetting.visibility = View.GONE
                 weatherForecastSettingViewLocationOptionalSetting.visibility = View.GONE
-                weatherForecastSettingViewError.text = "許可されていない権限があるため、天気予報を表示する機能が使用できません。"
+                weatherForecastSettingViewError.text =
+                    context.getString(R.string.weather_forecast_setting_view_error_permission_is_not_granted)
                 weatherForecastSettingViewError.visibility = View.VISIBLE
             }
 
@@ -311,10 +305,10 @@ class WeatherForecastSettingView(context: Context, attributeSet: AttributeSet) :
     private fun applyLocationRequestSetting(isChecked: Boolean) {
         if (isChecked) {
             weatherForecastSettingViewPowerSavingDescription.text =
-                "省電力モードがオンになっています。\n天気予報の更新間隔は約60分です。\n位置情報の精度は最悪で約10km程度になる可能性があるため、場合によってはやや精度不足に感じるかもしれません。"
+                context.getString(R.string.weather_forecast_setting_view_power_savng_mode_enabled_description)
         } else {
             weatherForecastSettingViewPowerSavingDescription.text =
-                "省電力モードがオフになっています。\n天気予報の更新間隔は約10分です。\n位置情報は天気予報のためには十分な精度が期待できます。"
+                context.getString(R.string.weather_forecast_setting_view_power_savng_mode_disabled_description)
         }
     }
 

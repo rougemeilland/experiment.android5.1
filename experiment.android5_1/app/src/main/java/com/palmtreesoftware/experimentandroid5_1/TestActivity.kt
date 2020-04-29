@@ -1,453 +1,328 @@
 package com.palmtreesoftware.experimentandroid5_1
 
 import android.app.Activity
+import android.content.Context
 import android.location.Address
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import org.json.JSONArray
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import org.json.JSONException
 import org.json.JSONObject
-import java.util.*
+import java.io.*
+import kotlin.coroutines.CoroutineContext
 
-class TestActivity : AppCompatActivity() {
+// TODO("OpenWeatherMap.OneCall を表示する部品の作成")
+// TODO("OpenWeatherMap.FiveDayWeatherForecast を表示する部品の作成")
+class TestActivity : AppCompatActivity(), CoroutineScope {
 
-    private class AddressSummary private constructor(
-        val addressText: String,
-        val countryName: String?,
-        val postalCode: String?,
-        val adminArea: String?,
-        val subAdminArea: String?,
-        val locality: String?,
-        val subLocality: String?
+    private abstract class AddressResolver(
+        private val sourceFile: File,
+        private val destinationFile: File
     ) {
-        fun getStyle(locales: Array<String>): String {
-            if (countryName == null)
-                throw Exception()
-            if (postalCode == null)
-                throw Exception()
-            return if (
-                addressText.startsWith(
-                    arrayOf(adminArea, subAdminArea, locality, subLocality)
-                        .filter { it != null }
-                        .joinToString(separator = "", prefix = "$countryName、〒$postalCode ")
-                )
-            ) {
-                "ja:<countryName>、〒<postalCode> <adminArea><subAdminArea>?<locality><subLocality>?***"
-            } else if (
-                addressText.endsWith(
-                    arrayOf(subLocality, locality, subAdminArea, adminArea)
-                        .filter { it != null }
-                        .joinToString(", ", postfix = " $postalCode, $countryName")
-                )
+        private var textReader: BufferedReader? = null
+        private var textWriter: PrintWriter? = null
+        private var totalCount: Long = 0
+        private var startTime: DateTime = DateTime.EPOCH
+        private var countofWrittenItems: Long = 0
+        private val skippedItems = LongRangeSet()
+        private var isCancelRequested = false
 
-            ) {
-                "en:***(, <subLocality>)?, <locality>(, <subAdminArea>)?, <adminArea> <postalCode>, <countryName>"
-            } else if (
-                addressText.endsWith(
-                    arrayOf(subLocality, locality, subAdminArea, adminArea)
-                        .filter { it != null }
-                        .joinToString(", ", postfix = " $postalCode\u060C $countryName")
-                )
-
-            ) {
-                "ar:***(, <subLocality>)?, <locality>(, <subAdminArea>)?, <adminArea> <postalCode>&#x60C; <countryName>"
-            } else if (
-                addressText.endsWith(
-                    arrayOf(subLocality, locality, subAdminArea, adminArea)
-                        .filter { it != null }
-                        .joinToString(", ", postfix = " $postalCode$countryName")
-                )
-
-            ) {
-                "zh:***(, <subLocality>)?, <locality>(, <subAdminArea>)?, <adminArea> <postalCode><countryName>"
-            } else if (
-                addressText.endsWith(
-                    arrayOf(subLocality, locality, subAdminArea, adminArea)
-                        .filter { it != null }
-                        .joinToString(", ", postfix = " $postalCode $countryName")
-                )
-
-            ) {
-                "ko:***(, <subLocality>)?, <locality>(, <subAdminArea>)?, <adminArea> <postalCode> <countryName>"
-            } else {
-                throw Exception()
+        fun resolveAddress(context: Context, scope: CoroutineScope) {
+            close()
+            startTime = DateTime.now()
+            totalCount = sourceFile.useLines { it.count() }.toLong()
+            countofWrittenItems = 0
+            skippedItems.clear()
+            textReader = BufferedReader(
+                FileReader(sourceFile)
+            )
+            if (destinationFile.exists()) {
+                destinationFile.useLines { lines ->
+                    lines.forEach { line ->
+                        try {
+                            skippedItems.add(JSONObject(line).getLong("serialNumber"))
+                        } catch (ex: JSONException) {
+                        }
+                    }
+                }
             }
+            textWriter = PrintWriter(BufferedWriter(FileWriter(destinationFile, true)))
+            resolveAddressLoop(context, scope)
         }
 
-        fun toJSONObject(): JSONObject {
-            return JSONObject().apply {
-                put("text", addressText)
-                putOpt("countryName", countryName)
-                putOpt("postalCode", postalCode)
-                putOpt("adminArea", adminArea)
-                putOpt("subAdminArea", subAdminArea)
-                putOpt("locality", locality)
-                putOpt("subLocality", subLocality)
+        private fun resolveAddressLoop(context: Context, scope: CoroutineScope) {
+            if (isCancelRequested) {
+                isCancelRequested = false
+                close()
+                onCancelled()
+                return
             }
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other)
-                return true
-            if (javaClass != other?.javaClass)
-                return false
-            other as AddressSummary
-            if (addressText != other.addressText)
-                return false
-            if (countryName != other.countryName)
-                return false
-            if (postalCode != other.postalCode)
-                return false
-            if (adminArea != other.adminArea)
-                return false
-            if (subAdminArea != other.subAdminArea)
-                return false
-            if (locality != other.locality)
-                return false
-            if (subLocality != other.subLocality)
-                return false
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return (((((addressText.hashCode() * 31 + countryName.hashCode()) * 31 + postalCode.hashCode()) * 31 + adminArea.hashCode()) * 31 + subAdminArea.hashCode()) * 31 + locality.hashCode()) * subLocality.hashCode()
-        }
-
-        override fun toString(): String {
-            return "AddressSummary(addressText='$addressText', countryName='$countryName', postalCode='$postalCode', adminArea='$adminArea', subAdminArea='$subAdminArea', locality='$locality', subLocality='$subLocality')"
-        }
-
-        companion object {
-            fun of(address: Address): AddressSummary {
-                return AddressSummary(
-                    (0..address.maxAddressLineIndex)
-                        .joinToString("\n")
-                        { index ->
-                            address.getAddressLine(index)
+            val data = readJSONObject()
+            if (data == null) {
+                close()
+                onCompleted()
+                return
+            }
+            try {
+                data.let {
+                    val locale = localeOf(it.getJSONObject("locale"))
+                    val coordinates = Coordinates.of(it.getJSONObject("coordinates"))
+                    val serialNumber = it.getLong("serialNumber")
+                    AsyncUtility.getAddressFromLocation(
+                        context,
+                        scope,
+                        locale,
+                        coordinates,
+                        { address ->
+                            writeAddress(address, serialNumber)
+                            reportProgress(context)
+                            resolveAddressLoop(context, scope)
                         },
-                    address.countryName,
-                    address.postalCode,
-                    address.adminArea,
-                    address.subAdminArea,
-                    address.locality,
-                    address.subLocality
-                )
-            }
-
-            fun of(o: JSONObject): AddressSummary {
-                return AddressSummary(
-                    o.getString("text"),
-                    o.optString("countryName", "**null**")
-                        .let { if (it == "**null**") null else it },
-                    o.optString("postalCode", "**null**")
-                        .let { if (it == "**null**") null else it },
-                    o.optString("adminArea", "**null**")
-                        .let { if (it == "**null**") null else it },
-                    o.optString("subAdminArea", "**null**")
-                        .let { if (it == "**null**") null else it },
-                    o.optString("locality", "**null**")
-                        .let { if (it == "**null**") null else it },
-                    o.optString("subLocality", "**null**")
-                        .let { if (it == "**null**") null else it }
-                )
+                        { throwable ->
+                            close()
+                            onFailed(throwable)
+                        }
+                    )
+                }
+            } catch (ex: Throwable) {
+                close()
+                onFailed(ex)
             }
         }
-    }
 
-    private enum class Place {
-        PLACE_1 {
-            override val coordinates: Coordinates
-                get() = Coordinates(37.506846, 139.906269)
-        },
-        PLACE_2 {
-            override val coordinates: Coordinates
-                get() = Coordinates(37.536306, 140.073389)
-        },
-        PLACE_3 {
-            override val coordinates: Coordinates
-                get() = Coordinates(35.475781, 139.609650)
-        },
-        ;
+        private fun close() {
+            textReader?.close()
+            textReader = null
+            textWriter?.close()
+            textWriter = null
+        }
 
-        abstract val coordinates: Coordinates
-    }
+        fun requestToCancel() {
+            isCancelRequested = true
+        }
 
-    private class Result(val locale: Locale, val place: Place, val addressSummary: AddressSummary) {
-        fun toJASONObject(): JSONObject =
-            JSONObject().apply {
-                put("locale", JSONObject().apply {
-                    put("language", locale.language)
-                    put("country", locale.country)
-                })
-                put("place", place.toString())
-                put("address", addressSummary.toJSONObject())
+        private fun readJSONObject(): JSONObject? {
+            textReader.also { reader ->
+                if (reader == null)
+                    throw Exception("internal error")
+                while (true) {
+                    val line = reader.readLine()
+                        ?: return null
+                    val o = JSONObject(line)
+                    if (!skippedItems.contains(o.getLong("serialNumber")))
+                        return o
+                }
             }
+        }
 
-        val localeAndPlace: LocaleAndPlace
-            get() = LocaleAndPlace(locale, place)
+        private fun writeAddress(address: Address?, serialNumber: Long) {
+            if (address != null) {
+                textWriter.also { writer ->
+                    if (writer == null)
+                        throw Exception("internal error")
+                    writer.println(
+                        address.toJSONObject().also {
+                            it.put("serialNumber", serialNumber)
+                        }.toString()
+                    )
+                }
+            }
+            ++countofWrittenItems
+        }
 
-        companion object {
-            fun of(o: JSONObject): Result {
-                return Result(
-                    o.getJSONObject("locale").let { x ->
-                        Locale(x.getString("language"), x.getString("country"))
-                    },
-                    Place.valueOf(o.getString("place")),
-                    AddressSummary.of(o.getJSONObject("address"))
+        private fun reportProgress(context: Context) {
+            if (countofWrittenItems != 0L && countofWrittenItems % 100 == 0L) {
+                val now = DateTime.now()
+                val countOfSkippedItems = skippedItems.count()
+                val endtime =
+                    now + (now - startTime) * (totalCount - countOfSkippedItems - countofWrittenItems) / countofWrittenItems
+
+                progressReporter(
+                    "resolving address... %.02f%% expected to end %s %s%s".format(
+                        ((countofWrittenItems + countOfSkippedItems) * 100.0 / totalCount),
+                        endtime.formatRelativeTime(context, now, TimeZone.getDefault()),
+                        "■".repeat(((countofWrittenItems / 100) % 10).toInt()),
+                        "□".repeat(10 - ((countofWrittenItems / 100) % 10).toInt())
+                    )
                 )
             }
         }
+
+        protected abstract fun progressReporter(progress: String)
+        protected abstract fun onCompleted()
+        protected abstract fun onCancelled()
+        protected abstract fun onFailed(throwable: Throwable)
     }
 
-    private class SummariesOfLocale(
-        val summaryOfPlace1: AddressSummary,
-        val summaryOfPlace2: AddressSummary,
-        val summaryOfPlace3: AddressSummary
-    ) {
-        fun toJSONObject(): JSONObject {
-            return JSONObject().also {
-                it.put("place1", summaryOfPlace1.toJSONObject())
-                it.put("place2", summaryOfPlace2.toJSONObject())
-                it.put("place3", summaryOfPlace3.toJSONObject())
-            }
-        }
+    private val job = Job()
 
-        fun getStyle(locales: Array<String>): String {
-            val style1 = summaryOfPlace1.getStyle(locales)
-            val style2 = summaryOfPlace2.getStyle(locales)
-            val style3 = summaryOfPlace3.getStyle(locales)
-            if (style1 != style2)
-                throw Exception()
-            if (style1 != style3)
-                throw Exception()
-            return style1
-        }
+    private var addressResolver: AddressResolver? = null
 
-        override fun equals(other: Any?): Boolean {
-            if (this === other)
-                return true
-            if (javaClass != other?.javaClass)
-                return false
-            other as SummariesOfLocale
-            if (summaryOfPlace1 != other.summaryOfPlace1)
-                return false
-            if (summaryOfPlace2 != other.summaryOfPlace2)
-                return false
-            if (summaryOfPlace3 != other.summaryOfPlace3)
-                return false
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return ((summaryOfPlace1.hashCode() * 31) + summaryOfPlace2.hashCode()) * 31 + summaryOfPlace3.hashCode()
-        }
-    }
-
-    private class LocaleAndPlace(val locale: Locale, val place: Place) {
-        override fun equals(other: Any?): Boolean {
-            if (this === other)
-                return true
-            if (javaClass != other?.javaClass)
-                return false
-            other as LocaleAndPlace
-            if (locale != other.locale)
-                return false
-            if (place != other.place)
-                return false
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return (locale.hashCode() * 31) + place.hashCode()
-        }
-    }
-
-    private class GroupedResult(
-        val summariesOfLocale: SummariesOfLocale,
-        val locales: Array<String>
-    ) {
-        fun toJSONObject(): JSONObject {
-            return JSONObject().also { o ->
-                o.put("summaries", summariesOfLocale.toJSONObject())
-                o.put(
-                    "locales",
-                    JSONArray()
-                        .also { array ->
-                            locales.forEach { locale ->
-                                array.put(locale)
-                            }
-                        })
-            }
-        }
-    }
-
-    private class AddressStyle(val style: String, val locales: Array<String>) {
-        fun toJSONObject(): JSONObject {
-            return JSONObject().also { o ->
-                o.put("style", style)
-                o.put(
-                    "locales",
-                    JSONArray()
-                        .also { array ->
-                            locales.forEach { locale ->
-                                array.put(locale)
-                            }
-                        })
-            }
-        }
-    }
-
-    private val scope = CoroutineScope(Dispatchers.Default)
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test)
 
-        testActivityOk.setOnClickListener { _ ->
+        testActivityOk.setOnClickListener {
             setResult(Activity.RESULT_OK)
             finishAndRemoveTask()
         }
-        testActivityCancel.setOnClickListener { _ ->
+        testActivityCancel.setOnClickListener {
             setResult(Activity.RESULT_CANCELED)
             finishAndRemoveTask()
         }
-        testActivityRun1.setOnClickListener { _ ->
-            ロケールによる住所表記の検索()
-        }
-        testActivityRun2.setOnClickListener { _ ->
-            データの分析()
-        }
-    }
-
-    @Suppress("NonAsciiCharacters")
-    private fun ロケールによる住所表記の検索() {
-        val requests: Queue<Pair<Locale, Place>> = LinkedList()
-        Locale.getAvailableLocales().forEach { locale ->
-            Place.values().forEach { place ->
-                requests.add(Pair(locale, place))
-            }
-        }
-        work(requests, JSONArray()) { results ->
-            testActivityState.text = "saving"
-            getSharedPreferences(packageName, 0)
-                .edit()
-                .apply {
-                    putString(
-                        "results",
-                        results.toString(2)
-                    )
-                    apply()
-                }
-            testActivityState.text = "completed"
-        }
-    }
-
-    private fun work(
-        requests: Queue<Pair<Locale, Place>>,
-        results: JSONArray,
-        onCompleted: (JSONArray) -> Unit
-    ) {
-        if (requests.isEmpty()) {
-            onCompleted(results)
-            return
-        }
-        testActivityState.text = "working ${requests.size}"
-        requests.remove().let { request ->
-            AsyncUtility.getAddressFromLocation(
+        testActivityRun1.setOnClickListener {
+            AsyncUtility.runAasynchronously(
                 this,
-                request.first,
-                scope,
-                request.second.coordinates,
-                { address ->
-                    if (address == null)
-                        throw Exception("")
-                    else {
-                        results.put(
-                            Result(
-                                request.first,
-                                request.second,
-                                AddressSummary.of(address)
-                            ).toJASONObject()
+                beforeWorking = {
+                    testActivityRun1.isEnabled = false
+                    testActivityState.text = "scanning..."
+                    File(filesDir, "addresses.txt").delete()
+                    File(filesDir, "requests.txt").delete()
+                    ""
+                },
+                worker = { _, progressReporter ->
+                    val dic = resources.getJSONArray(R.raw.city_list).toIterableOfJSONObject()
+                        .map { o ->
+                            Pair(
+                                o.getString("country"),
+                                o.getJSONObject("coord").let {
+                                    Coordinates(it.getDouble("lat"), it.getDouble("lon"))
+                                })
+                        }
+                        .filter { it.first.isNotEmpty() }
+                        .groupBy { it.first }
+                        .map { x -> Pair(x.key, x.value.map { it.second }.toTypedArray()) }
+                        .toMap()
+                    val requests = java.util.Locale.getAvailableLocales()
+                        .filter { it.country.isNotEmpty() }
+                        .mapNotNull { locale ->
+                            dic[locale.country].let { arrayOfCoordinates ->
+                                arrayOfCoordinates?.map { Pair(locale, it) }
+                            }
+                        }.flatten()
+                        .union(
+                            java.util.Locale.getAvailableLocales()
+                                .crossMap(resources.getCommaSeparatedValues(
+                                    R.raw.h3104world_utf8,
+                                    DelimiterOfCSV.TAB
+                                )
+                                    .drop(1)
+                                    .map {
+                                        Coordinates(
+                                            it.getDoule(7),
+                                            it.getDoule(8)
+                                        )
+                                    }) { locale, coordinates -> Pair(locale, coordinates) }
                         )
-                        work(requests, results, onCompleted)
+                    PrintWriter(
+                        BufferedWriter(FileWriter(File(filesDir, "requests.txt")))
+                    ).use { textWriter ->
+                        var count = 0L
+                        requests.forEach { request ->
+                            textWriter.println(JSONObject().apply {
+                                put("serialNumber", count)
+                                put("locale", request.first.toJSONObject())
+                                put("coordinates", request.second.toJSONObject())
+                            }.toString())
+                            ++count
+                            if (count % 1000 == 0L)
+                                progressReporter("writing ${",%d".format(count)}")
+                        }
+                        "${count} items saved"
                     }
                 },
-                { ex ->
-                    throw ex
+                progress = { progress ->
+                    progress as String
+                    testActivityState.text = progress
+                },
+                afterWorking = { result ->
+                    testActivityRun1.isEnabled = true
+                    testActivityState.text = result
+                },
+                onFailed = { throwable ->
+                    testActivityRun1.isEnabled = true
+                    testActivityState.text = "error: ${throwable.message}"
+                    if (Log.isLoggable(TAG, Log.ERROR)) {
+                        Log.e(TAG, throwable.message, throwable)
+                    }
                 }
             )
         }
+        testActivityRun2.setOnClickListener {
+            TODO("動作確認をする。特に一度キャンセルして再実行したときの挙動が変だった。")
+            AsyncUtility.runAasynchronously(
+                this,
+                beforeWorking = {
+                    testActivityRun2.isEnabled = false
+                    testActivityRun3.isEnabled = true
+                    ""
+                },
+                worker = { _, progressReporter ->
+                    progressReporter("scanning...")
+                    addressResolver = object : AddressResolver(
+                        File(filesDir, "requests.txt"),
+                        File(filesDir, "addresses.txt")
+                    ) {
+                        override fun progressReporter(progress: String) {
+                            testActivityState.text = progress
+                        }
+
+                        override fun onCompleted() {
+                            testActivityRun2.isEnabled = true
+                            testActivityRun3.isEnabled = false
+                            testActivityState.text = "Completed!!"
+                        }
+
+                        override fun onCancelled() {
+                            testActivityRun2.isEnabled = true
+                            testActivityRun3.isEnabled = false
+                            testActivityState.text = "Cancelled."
+                        }
+
+                        override fun onFailed(throwable: Throwable) {
+                            testActivityRun2.isEnabled = true
+                            testActivityRun3.isEnabled = false
+                            testActivityState.text = "error: ${throwable.message}"
+                            if (Log.isLoggable(TAG, Log.ERROR)) {
+                                Log.e(TAG, throwable.message, throwable)
+                            }
+                        }
+                    }.also {
+                        it.resolveAddress(this, this)
+                    }
+                },
+                progress = { progress ->
+                    progress as String
+                    testActivityState.text = progress
+                },
+                onFailed = { throwable ->
+                    testActivityRun2.isEnabled = true
+                    if (Log.isLoggable(TAG, Log.ERROR)) {
+                        Log.e(TAG, throwable.message, throwable)
+                    }
+                }
+            )
+        }
+        testActivityRun3.setOnClickListener {
+            addressResolver?.requestToCancel()
+        }
     }
 
-    @Suppress("NonAsciiCharacters")
-    private fun データの分析() {
-        val map = JSONArray(
-            getSharedPreferences(packageName, 0)
-                .getString("results", "[]")
-        ).let { array ->
-            (0..(array.length() - 1))
-                .map { index -> array.getJSONObject(index) }
-        }
-            .map { Result.of(it) }
-            .map { Pair(it.localeAndPlace, it) }
-            .toMap()
-        map.keys.groupBy { it.locale }.keys.map { locale ->
-            SummariesOfLocale(
-                map[LocaleAndPlace(
-                    locale,
-                    Place.PLACE_1
-                )].let { it ?: throw Exception() }.addressSummary,
-                map[LocaleAndPlace(
-                    locale,
-                    Place.PLACE_2
-                )].let { it ?: throw Exception() }.addressSummary,
-                map[LocaleAndPlace(
-                    locale,
-                    Place.PLACE_3
-                )].let { it ?: throw Exception() }.addressSummary
-            ) to locale.let {
-                arrayOf(it.language, it.country).filter { it.isNotEmpty() }.joinToString("_")
-            }
-        }
-            .groupBy { it.first }
-            .map { item ->
-                GroupedResult(
-                    item.key,
-                    item.value.map { it.second }.toTypedArray()
-                )
-            }
-            .sortedByDescending { it.locales.count() }
-            .map {
-                AddressStyle(
-                    it.summariesOfLocale.getStyle(it.locales),
-                    it.locales
-                )
-            }
-            .groupBy { it.style }
-            .map { g ->
-                AddressStyle(
-                    g.key,
-                    g.value
-                        .map { it.locales.toList() }
-                        .flatten()
-                        .sortedBy { it }
-                        .toTypedArray()
-                )
-            }
-            .also { results ->
-                getSharedPreferences(packageName, 0)
-                    .edit()
-                    .apply {
-                        putString(
-                            "grouped_results",
-                            JSONArray().also { array ->
-                                results.forEach { array.put(it.toJSONObject()) }
-                            }.toString(2)
-                        )
-                        apply()
-                    }
-            }
+    override fun onDestroy() {
+        super.onDestroy()
+        (Dispatchers.IO + job).cancel()
+        (Dispatchers.Default + job).cancel()
+    }
+
+    companion object {
+        private val TAG = "TestActivity"
     }
 }

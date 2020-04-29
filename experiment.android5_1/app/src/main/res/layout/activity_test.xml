@@ -12,10 +12,41 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/testActivityState"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/testActivityRun1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="リクエストの作成"
+                tools:ignore="ButtonStyle,HardcodedText" />
+
+            <Button
+                android:id="@+id/testActivityRun2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:text="住所の解決"
+                tools:ignore="ButtonStyle,HardcodedText" />
+
+            <Button
+                android:id="@+id/testActivityRun3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:enabled="false"
+                android:text="住所の解決の中断"
+                tools:ignore="ButtonStyle,HardcodedText" />
+
+            <TextView
+                android:id="@+id/testActivityState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </ScrollView>
 
@@ -30,24 +61,6 @@
             android:layout_margin="4dp"
             android:layout_weight="1"
             android:text="キャンセル"
-            tools:ignore="ButtonStyle,HardcodedText" />
-
-        <Button
-            android:id="@+id/testActivityRun1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:layout_weight="1"
-            android:text="データの収集"
-            tools:ignore="ButtonStyle,HardcodedText" />
-
-        <Button
-            android:id="@+id/testActivityRun2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:layout_weight="1"
-            android:text="データの分析"
             tools:ignore="ButtonStyle,HardcodedText" />
 
         <Button

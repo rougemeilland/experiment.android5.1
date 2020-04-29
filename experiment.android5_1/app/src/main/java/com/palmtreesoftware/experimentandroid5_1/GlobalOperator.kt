@@ -2,8 +2,6 @@ package com.palmtreesoftware.experimentandroid5_1
 
 import android.location.Address
 import android.location.Location
-import org.json.JSONArray
-import org.json.JSONObject
 
 // divisor >= 0 : equivalent to 'floor(this.toDouble() / divisor).toLong()'
 // divisor < 0 : equivalent to 'ceil(this.toDouble() / divisor).toLong()'
@@ -149,9 +147,6 @@ fun <ELEMENT_TYPE_1, ELEMENT_TYPE_2, RESULT_ELEMENT_TYPE : Any> Array<ELEMENT_TY
         }
     }.flatten()
 
-fun JSONArray.toIterableOfJSONObject(): Iterable<JSONObject> =
-    (0 until length()).map { index -> getJSONObject(index) }
-
 operator fun Long.times(multiplicand: TimeDuration): TimeDuration =
     multiplicand.times(this)
 
@@ -269,7 +264,6 @@ internal abstract class CharacterMap {
     }
 }
 
-
 fun String.toHankaku(): String =
     CharacterMap.fromZenkakuToHankaku(this)
 
@@ -277,8 +271,8 @@ fun Address.distanceTo(other: Address): Double? =
     FloatArray(3)
         .also {
             Location.distanceBetween(
-                this.latitude,
-                this.longitude,
+                latitude,
+                longitude,
                 other.latitude,
                 other.longitude,
                 it
@@ -290,3 +284,22 @@ fun Address.distanceTo(other: Address): Double? =
                 this[0].toDouble()
         }
 
+fun Address.omitAddress(currentAddress: Address): String =
+    AddressFormatter.of(this.locale).omitAddress(currentAddress, this)
+
+var Address.addressLines: Array<String>
+    get() =
+        (0..this.maxAddressLineIndex).map { index ->
+            this.getAddressLine(index)
+        }.toTypedArray()
+    set(value) {
+        val previousMaxAddressLineIndex = this.maxAddressLineIndex
+        value.forEachIndexed { index, s ->
+            this.setAddressLine(index, s)
+        }
+        if (value.size <= previousMaxAddressLineIndex) {
+            (value.size..previousMaxAddressLineIndex).forEach { index ->
+                this.setAddressLine(index, null)
+            }
+        }
+    }

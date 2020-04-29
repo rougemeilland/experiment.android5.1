@@ -8,8 +8,18 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CoroutineScope {
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     private class ViewSettings {
         fun save(activity: MainActivity) {
@@ -92,6 +102,12 @@ class MainActivity : AppCompatActivity() {
         mainActivityRun.setOnClickListener {
             mainActivityResult.text = mainActivityTimeZone.value.id
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        (Dispatchers.IO + job).cancel()
+        (Dispatchers.Default + job).cancel()
     }
 
     override fun onPause() {

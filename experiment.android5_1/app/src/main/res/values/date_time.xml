@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="date_time_format_relative_date_time_days_later">%2$d days later at %1$s</string>
+    <string name="date_time_format_relative_date_time_tomorrow">tomorrow %s</string>
+    <plurals name="date_time_format_relative_date_time_hours_later">
+        <item quantity="one">one hour later</item>
+        <item quantity="other">%d hours later</item>
+    </plurals>
+    <plurals name="date_time_format_relative_date_time_minutes_later">
+        <item quantity="one">one minute later</item>
+        <item quantity="other">%d minutes later</item>
+    </plurals>
+    <plurals name="date_time_view_format_relative_date_time_minutes_ago">>
+        <item quantity="one">one minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <plurals name="date_time_format_relative_date_time_hours_ago">>
+        <item quantity="one">one hour ago</item>
+        <item quantity="other">%d hours ago</item>
+    </plurals>
+    <string name="date_time_format_relative_date_time_yesterday">yesterday at %s</string>
+    <string name="date_time_format_relative_date_time_days_ago">%2$d days ago at %1$s</string>
+    <string name="date_time_format_relative_date_time_time">HH:mm:ss</string>
+</resources>

@@ -192,7 +192,7 @@ class OpenWeatherMap {
                 apiCache: ApiCache,
                 url: Uri,
                 onCompleted: (T, DateTime) -> Unit,
-                onFailed: (Exception) -> Unit,
+                onFailed: (Throwable) -> Unit,
                 jsonStringParser: (String, Boolean) -> T
             ) {
                 if (ActivityCompat.checkSelfPermission(
@@ -278,7 +278,7 @@ class OpenWeatherMap {
                 locale: java.util.Locale,
                 coordinates: Coordinates,
                 onCompleted: (CurrentWeatherData, DateTime) -> Unit,
-                onFailed: (Exception) -> Unit
+                onFailed: (Throwable) -> Unit
             ) {
                 getInstance(
                     context,
@@ -531,7 +531,7 @@ class OpenWeatherMap {
                 locale: java.util.Locale,
                 coordinates: Coordinates,
                 onCompleted: (OneCall, DateTime) -> Unit,
-                onFailed: (Exception) -> Unit
+                onFailed: (Throwable) -> Unit
             ) {
                 getInstance(
                     context,
@@ -662,7 +662,7 @@ class OpenWeatherMap {
                 locale: java.util.Locale,
                 coordinates: Coordinates,
                 onCompleted: (FiveDayWeatherForecast, DateTime) -> Unit,
-                onFailed: (Exception) -> Unit
+                onFailed: (Throwable) -> Unit
             ) {
                 getInstance(
                     context,

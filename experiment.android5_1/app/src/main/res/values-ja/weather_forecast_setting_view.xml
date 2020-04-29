@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="weather_forecast_setting_view_about_permissions">このアプリでは現在位置の気象情報を表示する機能を使用することができます。\nそのためには以下の権限が許可されている必要があります。\n%s\n次の画面で上記の権限を許可してください。\n許可されない場合は、現在位置の気象情報を表示する機能を使用することができませんが、それ以外の機能は使用できます。</string>
+    <string name="weather_forecast_setting_view_internet_permission_friendly_name">ネットワークへのフルアクセス</string>
+    <string name="weather_forecast_setting_view_location_permission_friendly_name">位置情報</string>
+    <string name="weather_forecast_setting_view_about_permissions_title">このアプリの権限について</string>
+    <string name="weather_forecast_setting_view_next_button_text">次へ</string>
+    <string name="weather_forecast_setting_view_about_location_setting">このアプリでは現在位置の気象情報を表示する機能を使用することができます。\nそのためには位置情報の機能が使用できる必要があります。\n次の画面で「位置情報の使用」をONにしてください。\nまた、「モード」の項目がある場合は「高精度」を選択することをお勧めします。\nなお、操作方法は機種によって異なる場合があります。</string>
+    <string name="weather_forecast_setting_view_about_location_setting_title">位置情報の設定について</string>
+    <string name="weather_forecast_setting_view_about_optional_location_setting">このアプリでは現在位置の気象情報を表示する機能を使用することができます。\n通常は位置情報を取得する機器としてGPSが利用できますが、電力消費が比較的大きいことや屋内などで利用できないことが多いなどの欠点もあるため、Wi-FiやBluetooth、モバイルネットワークなどとの併用をお勧めします。\n次の画面で、位置情報を取得するために利用する機器の設定を行ってください。\nなお、操作方法は機種によって異なる場合があります。\n例) 「モード」の項目をタッチする、「Wi-FiのスキャンとBluetoothのスキャン」の項目をタッチする、など</string>
+    <string name="weather_forecast_setting_view_about_optional_location_setting_title">バッテリーを節約するために</string>
+    <string name="weather_forecast_setting_view_error_location_is_disabled">位置情報が利用できないため、端末の現在位置を知ることができません。</string>
+    <string name="weather_forecast_setting_view_error_permission_is_not_granted">許可されていない権限があるため、天気予報を表示する機能が使用できません。</string>
+    <string name="weather_forecast_setting_view_power_savng_mode_enabled_description">省電力モードがオンになっています。\n天気予報の更新間隔は約60分です。\n位置情報の精度は最悪で約10km程度になる可能性があるため、場合によってはやや精度不足に感じるかもしれません。</string>
+    <string name="weather_forecast_setting_view_power_savng_mode_disabled_description">省電力モードがオフになっています。\n天気予報の更新間隔は約10分です。\n位置情報は天気予報のためには十分な精度が期待できます。</string>
+    <string name="weather_forecast_setting_view_enabled_label">天気予報を表示する</string>
+    <string name="weather_forecast_setting_view_power_saving_mode_label">省電力モード</string>
+    <string name="weather_forecast_setting_view_confirm_permission_text">必要な権限を確認する</string>
+    <string name="weather_forecast_setting_view_touch_after_confirming_permissions_text">権限の確認を終えたらタッチしてください</string>
+    <string name="weather_forecast_setting_view_confirm_location_setting_text">位置情報の設定を確認する</string>
+    <string name="weather_forecast_setting_view_touch_after_confirming_location_setting_text">位置情報の設定の確認を終えたらタッチしてください</string>
+    <string name="weather_forecast_setting_view_for_power_saving_text">バッテリーを節約するために (オプション)</string>
+</resources>

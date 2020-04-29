@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="current_weather_view_format_distance_1">%,.0fkm</string>
+    <string name="current_weather_view_format_distance_2">%,.1fkm</string>
+    <string name="current_weather_view_format_distance_3">%,.2fkm</string>
+    <string name="current_weather_view_format_distance_4">%,.0fm</string>
+    <string name="current_weather_view_format_relative_location">%s1$\n(現在地から約 %2$s)</string>
+    <string name="current_weather_view_format_location_accuracy">(精度: %,.0fm)</string>
+    <string name="current_weather_view_format_temperature">%1$,.1f℃ (%2$,.1f℃/%3$,.1f℃)</string>
+    <string name="current_weather_view_format_humidity">%,.0f%%</string>
+    <string name="current_weather_view_format_feels_like_temperature">%,.1f℃</string>
+    <string name="current_weather_view_format_pressure_1">%1$,.0fhPa (現地気圧: %2$,.0fhPa、海面気圧: %3$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_2">%1$,.0fhPa (現地気圧: %2$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_3">%1$,.0fhPa (海面気圧: %2$,.0fhPa)</string>
+    <string name="current_weather_view_format_pressure_4">%,.0fhPa</string>
+    <string name="current_weather_view_format_wind_1">%1$sの風、風速 %2$,.2fm/s</string>
+    <string name="current_weather_view_format_wind_2">風速 %,.2fm/s</string>
+    <string name="current_weather_view_format_clouds">%,.0f%%</string>
+    <string name="current_weather_view_format_precipitation_1">過去1時間: %1$,.0fmm、過去3時間: %2$,.0fmm</string>
+    <string name="current_weather_view_format_precipitation_2">過去1時間: %,.0fmm</string>
+    <string name="current_weather_view_format_precipitation_3">過去3時間: %,.0fmm</string>
+    <string name="current_weather_view_sunset_label">日の入り</string>
+    <string name="current_weather_view_format_sunrise_label">日の出</string>
+    <string name="current_weather_view_region_label">区域</string>
+    <string name="current_weather_view_data_acquisition_time_label">データ取得時刻</string>
+    <string name="current_weather_view_data_is_cached_text">(キャッシュされています)</string>
+    <string name="current_weather_view_observation_time_label">観測時刻</string>
+    <string name="current_weather_view_observation_point_label">観測地点</string>
+    <string name="current_weather_view_weather_label">天候</string>
+    <string name="current_weather_view_temperature_label">気温:</string>
+    <string name="current_weather_view_humidity_label">湿度:</string>
+    <string name="current_weather_view_feels_like_temperature_label">体感温度:</string>
+    <string name="current_weather_view_pressure_label">気圧</string>
+    <string name="current_weather_view_clouds_label">雲量</string>
+    <string name="current_weather_view_rainfall_label">降雨量</string>
+    <string name="current_weather_view_snowfall_label">降雪量</string>
+</resources>

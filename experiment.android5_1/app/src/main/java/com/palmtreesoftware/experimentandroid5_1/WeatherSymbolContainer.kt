@@ -6,12 +6,10 @@ import android.net.Uri
 import android.os.Handler
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
-abstract class WeatherSymbolContainer {
+abstract class WeatherSymbolContainer(private val scope: CoroutineScope) {
     private class WeatherInfo(val iconUrl: Uri, var iconImage: Bitmap?, val description: String)
 
-    private val scope = CoroutineScope(Dispatchers.Default)
     private val imageUpdateHandler: Handler = Handler()
     private var imageUpdateRunnable: Runnable = Runnable {}
     private val updatingWeatherIconIntervalMilliSeconds: Long = 1000 * 1
