@@ -1,8 +1,20 @@
 package com.palmtreesoftware.experimentandroid5_1
 
-class LongRangeSet : MutableSet<Long> {
-    private val mapIndexedByFirst = mutableMapOf<Long, LongRange>()
-    private val mapIndexedByLast = mutableMapOf<Long, LongRange>()
+class LongRangeSet() : MutableSet<Long> {
+    private val mapIndexedByFirst: MutableMap<Long, LongRange> = mutableMapOf()
+    private val mapIndexedByLast: MutableMap<Long, LongRange> = mutableMapOf()
+
+    constructor(vararg values: Long) : this() {
+        values.forEach {
+            add(it)
+        }
+    }
+
+    constructor(vararg values: ClosedRange<Long>) : this() {
+        values.forEach { range ->
+            addAll(range)
+        }
+    }
 
     /**
      * Adds the specified element to the set.
@@ -22,51 +34,34 @@ class LongRangeSet : MutableSet<Long> {
             if (foundRangeLowerBoundary != null) {
                 // element の前で終わる Range が存在し、element の次から始まる Range も存在する場合
                 // 見つかった Range を map から削除する
-                mapIndexedByFirst.remove(foundRangeUpperBoundary.first)
-                mapIndexedByFirst.remove(foundRangeLowerBoundary.first)
-                mapIndexedByLast.remove(foundRangeUpperBoundary.last)
-                mapIndexedByLast.remove(foundRangeLowerBoundary.last)
+                removeItem(foundRangeUpperBoundary)
+                removeItem(foundRangeLowerBoundary)
                 // 二つの Range を結合して map に追加する
-                (foundRangeUpperBoundary.first..foundRangeLowerBoundary.last).also {
-                    mapIndexedByFirst[it.first] = it
-                    mapIndexedByLast[it.last] = it
-                }
+                addItem(foundRangeUpperBoundary.first..foundRangeLowerBoundary.last)
                 return true
             } else {
                 // element の前で終わる Range が存在し、element の次から始まる Range が存在しない場合
                 // 見つかった Range を map から削除する
-                mapIndexedByFirst.remove(foundRangeUpperBoundary.first)
-                mapIndexedByLast.remove(foundRangeUpperBoundary.last)
+                removeItem(foundRangeUpperBoundary)
                 // 新たな Rangeを map に追加する
-                (foundRangeUpperBoundary.first..element).also {
-                    mapIndexedByFirst[it.first] = it
-                    mapIndexedByLast[it.last] = it
-                }
+                addItem(foundRangeUpperBoundary.first..element)
                 return true
             }
         } else if (foundRangeLowerBoundary != null) {
             // element の前で終わる Range が存在せず、element の次から始まる Range が存在する場合
             // 見つかった Range を map から削除する
-            mapIndexedByFirst.remove(foundRangeLowerBoundary.first)
-            mapIndexedByLast.remove(foundRangeLowerBoundary.last)
+            removeItem(foundRangeLowerBoundary)
             // 新たな Rangeを map に追加する
-            (element..foundRangeLowerBoundary.last).also {
-                mapIndexedByFirst[it.first] = it
-                mapIndexedByLast[it.last] = it
-            }
+            addItem(element..foundRangeLowerBoundary.last)
             return true
         } else {
             // element の前で終わる Range が存在せず、element の次から始まる Range も存在しない場合
             // 新たな Rangeを map に追加する
-            (element..element).also {
-                mapIndexedByFirst[it.first] = it
-                mapIndexedByLast[it.last] = it
-            }
+            addItem(element..element)
             return true
         }
     }
 
-    // Bulk Modification Operations
     /**
      * Adds all of the elements of the specified collection to this collection.
      *
@@ -74,11 +69,45 @@ class LongRangeSet : MutableSet<Long> {
      */
     override fun addAll(elements: Collection<Long>): Boolean {
         var modified = false
-        elements.forEach {
-            if (add(it))
-                modified = true
+        if (elements is LongRangeSet) {
+            elements.mapIndexedByFirst.values.forEach {
+                if (addAll(it as ClosedRange<Long>))
+                    modified = true
+            }
+        } else {
+            elements.forEach {
+                if (add(it))
+                    modified = true
+            }
         }
         return modified
+    }
+
+    /**
+     * Adds all of the elements of the specified collection to this collection.
+     *
+     * @return `true` if any of the specified elements was added to the collection, `false` if the collection was not modified.
+     */
+    fun addAll(elements: ClosedRange<Long>): Boolean {
+        // elements と完全一致する要素が存在した場合は false で復帰する
+        if (mapIndexedByFirst[elements.start].let { it != null && it.last == elements.endInclusive })
+            return false
+        // elements と共通項を持つ要素を探す
+        val intersectedElements =
+            mapIndexedByFirst.values.filter { it.isIntersectedRange(elements) }.toTypedArray()
+        // elements と共通項を持つ要素を map から削除する
+        intersectedElements.forEach { removeItem(it) }
+        // 新たに追加する要素を作成する
+        intersectedElements.fold(elements.toLongRange()) { value, element ->
+            value.unionRange(element).let {
+                // element には value と共通項を持つ Range しか渡されないはずなので、 it.size は必ず 1 になる
+                if (it.size != 1)
+                    throw Exception("${it.javaClass.canonicalName}.allAll(): Internal error")
+                else
+                    it[0]
+            }
+        }.also { addItem(it) }
+        return true
     }
 
     /**
@@ -92,12 +121,12 @@ class LongRangeSet : MutableSet<Long> {
     /**
      * Returns an iterator over the elements of this object.
      */
-    override fun iterator(): MutableIterator<Long> {
-        return object : MutableIterator<Long> {
+    override fun iterator(): MutableIterator<Long> =
+        object : MutableIterator<Long> {
             private val source =
                 mapIndexedByFirst.values
                     .flatten()
-                    .toTypedArray()
+                    .toList()
                     .iterator()
 
             private var currentElement: Long? = null
@@ -105,10 +134,16 @@ class LongRangeSet : MutableSet<Long> {
             /**
              * Returns `true` if the iteration has more elements.
              */
+            /**
+             * Returns `true` if the iteration has more elements.
+             */
             override fun hasNext(): Boolean {
                 return source.hasNext()
             }
 
+            /**
+             * Returns the next element in the iteration.
+             */
             /**
              * Returns the next element in the iteration.
              */
@@ -121,16 +156,18 @@ class LongRangeSet : MutableSet<Long> {
             /**
              * Removes from the underlying collection the last element returned by this iterator.
              */
+            /**
+             * Removes from the underlying collection the last element returned by this iterator.
+             */
             override fun remove() {
                 currentElement.also {
                     if (it == null)
-                        throw Exception("")
+                        throw IllegalStateException()
                     remove(it)
                 }
             }
 
         }
-    }
 
     /**
      * Removes a single instance of the specified element from this
@@ -143,26 +180,19 @@ class LongRangeSet : MutableSet<Long> {
             mapIndexedByFirst.values.firstOrNull { it.contains(element) }
                 ?: return false
         // map から foundRange を削除する
-        mapIndexedByFirst.remove(foundRange.first)
-        mapIndexedByLast.remove(foundRange.last)
+        removeItem(foundRange)
         if (foundRange.count() > 1) {
             // foundRange に要素が複数あった場合、 element を除いた要素を map に追加する
             when (element) {
                 foundRange.first -> {
                     // foundRange の先頭の要素が element だった場合
                     // foundRange から 先頭の要素を除いた Range を map に追加する
-                    (foundRange.first + 1..foundRange.last).also {
-                        mapIndexedByFirst[it.first] = it
-                        mapIndexedByLast[it.last] = it
-                    }
+                    addItem(foundRange.first + 1..foundRange.last)
                 }
                 foundRange.last -> {
                     // foundRange の最後の要素が element だった場合
                     // foundRange から最後の要素を除いた Range を map に追加する
-                    (foundRange.first until foundRange.last).also {
-                        mapIndexedByFirst[it.first] = it
-                        mapIndexedByLast[it.last] = it
-                    }
+                    addItem(foundRange.first until foundRange.last)
                 }
                 else -> {
                     // foundRange の最初と最後以外の要素が element だった場合
@@ -170,10 +200,7 @@ class LongRangeSet : MutableSet<Long> {
                     arrayOf(
                         foundRange.first until element,
                         element + 1..foundRange.last
-                    ).forEach {
-                        mapIndexedByFirst[it.first] = it
-                        mapIndexedByLast[it.last] = it
-                    }
+                    ).forEach { addItem(it) }
                 }
             }
         }
@@ -187,9 +214,71 @@ class LongRangeSet : MutableSet<Long> {
      */
     override fun removeAll(elements: Collection<Long>): Boolean {
         var modified = false
-        elements.forEach {
-            if (remove(it))
-                modified = true
+        if (elements is LongRangeSet) {
+            elements.mapIndexedByFirst.values.forEach {
+                if (removeAll(it as ClosedRange<Long>))
+                    modified = true
+            }
+        } else {
+            elements.forEach {
+                if (remove(it))
+                    modified = true
+            }
+        }
+        return modified
+    }
+
+    /**
+     * Removes all of this collection's elements that are also contained in the specified collection.
+     *
+     * @return `true` if any of the specified elements was removed from the collection, `false` if the collection was not modified.
+     */
+    fun removeAll(elements: ClosedRange<Long>): Boolean {
+        // elements と共通項を持つ要素を探す
+        val intersectedElements =
+            mapIndexedByFirst.values
+                .filter { it.isIntersectedRange(elements) }
+                .toList()
+        // elements と共通項を持つ要素が存在しなければ false を返す
+        if (intersectedElements.isEmpty())
+            return false
+        // elements と共通項を持つ要素を map から削除する
+        intersectedElements.forEach { removeItem(it) }
+        // 新たに追加する要素を作成して map に追加する
+        intersectedElements
+            .map { it.differenceRange(elements) }
+            .flatten()
+            .forEach { addItem(it) }
+        return true
+    }
+
+    /**
+     * Retains only the elements in this collection that are contained in the specified collection.
+     *
+     * @return `true` if any element was removed from the collection, `false` if the collection was not modified.
+     */
+    override fun retainAll(elements: Collection<Long>): Boolean {
+        var modified = false
+        if (elements is LongRangeSet) {
+            if (mapIndexedByFirst.values.all { elements.containsAll(it) })
+                return false
+            mapIndexedByFirst.values
+                .crossMap(elements.mapIndexedByFirst.values) { x, y -> x.intersectionRange(y) }
+                .filter { it.isNotEmpty() }
+                .toList()
+                .also { clear() }
+                .forEach { addItem(it) }
+        } else {
+            val mapOfElements = elements.map { Pair(it, it) }.toMap()
+            mapIndexedByFirst.values
+                .flatten()
+                .toTypedArray()
+                .forEach {
+                    if (!mapOfElements.containsKey(it)) {
+                        remove(it)
+                        modified = true
+                    }
+                }
         }
         return modified
     }
@@ -199,33 +288,93 @@ class LongRangeSet : MutableSet<Long> {
      *
      * @return `true` if any element was removed from the collection, `false` if the collection was not modified.
      */
-    override fun retainAll(elements: Collection<Long>): Boolean {
-        val mapOfElements = elements.map { Pair(it, it) }.toMap()
+    fun retainAll(elements: ClosedRange<Long>): Boolean {
         var modified = false
-        mapIndexedByFirst.values
-            .flatten()
-            .toTypedArray()
-            .forEach {
-                if (!mapOfElements.containsKey(it)) {
-                    remove(it)
-                    modified = true
-                }
-            }
+        elements.toComplementRange().forEach {
+            if (removeAll(it as ClosedRange<Long>))
+                modified = true
+        }
         return modified
     }
 
+    /**
+     * Returns the size of the collection.
+     */
     override val size: Int
-        get() = mapIndexedByFirst.values.sumBy { it.count() }
+        get() =
+            mapIndexedByFirst.values.sumBy { it.count() }
 
-    override fun contains(element: Long): Boolean {
-        return mapIndexedByFirst.values.any { it.contains(element) }
+    /**
+     * Checks if the specified element is contained in this collection.
+     */
+    override fun contains(element: Long): Boolean =
+        mapIndexedByFirst.values.any { it.contains(element) }
+
+    /**
+     * Checks if all elements in the specified collection are contained in this collection.
+     */
+    override fun containsAll(elements: Collection<Long>): Boolean =
+        if (elements is LongRangeSet) {
+            elements.mapIndexedByFirst.values.all { containsAll(it as ClosedRange<Long>) }
+        } else {
+            elements.all { element -> mapIndexedByFirst.values.any { it.contains(element) } }
+        }
+
+    fun containsAll(elements: ClosedRange<Long>): Boolean =
+        mapIndexedByFirst[elements.start]
+            .let { it != null && it.last == elements.endInclusive }
+
+    /**
+     * Returns `true` if the collection is empty (contains no elements), `false` otherwise.
+     */
+    override fun isEmpty(): Boolean =
+        mapIndexedByFirst.isEmpty()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as LongRangeSet
+        if (!equals(mapIndexedByFirst, other.mapIndexedByFirst)) return false
+        return true
     }
 
-    override fun containsAll(elements: Collection<Long>): Boolean {
-        return elements.all { element -> mapIndexedByFirst.values.any { it.contains(element) } }
+    override fun hashCode(): Int {
+        return hashCode(mapIndexedByFirst)
     }
 
-    override fun isEmpty(): Boolean {
-        return mapIndexedByFirst.isEmpty()
+    override fun toString(): String =
+        mapIndexedByFirst.values
+            .joinToString(
+                separator = ", ",
+                prefix = "[",
+                postfix = "]"
+            ) {
+                if (it.first == it.last)
+                    it.first.toString()
+                else
+                    "${it.first}..${it.last}"
+            }
+
+    private fun addItem(element: LongRange) {
+        if (element.isEmpty())
+            throw Exception("internal exception: 'first' must be lesser than or equals 'last': first=${element.first}, last=${element.last}")
+        mapIndexedByFirst[element.first] = element
+        mapIndexedByLast[element.last] = element
     }
+
+    private fun removeItem(element: LongRange) {
+        mapIndexedByFirst.remove(element.first)
+        mapIndexedByLast.remove(element.last)
+    }
+
+    private fun equals(x: MutableMap<Long, LongRange>, y: MutableMap<Long, LongRange>): Boolean =
+        x.size == y.size &&
+                x.all { keyValueOfX ->
+                    val valueOfY = y[keyValueOfX.key]
+                    valueOfY != null && valueOfY == keyValueOfX.value
+                }
+
+    private fun hashCode(x: MutableMap<Long, LongRange>): Int =
+        // x.values の要素の順番に依存しないように計算する
+        x.values.sumBy { it.hashCode() }
 }

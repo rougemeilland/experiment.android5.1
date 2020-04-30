@@ -202,12 +202,12 @@ internal class CSVExtensionsInstrumentedTest {
         val scenario = scenarioExtension.scenario
         scenario.onActivity { activity ->
             var rows = arrayOf<CSVRow>()
-            assertDoesNotThrow({
+            assertDoesNotThrow {
                 rows = activity.resources.getCommaSeparatedValues(
                     R.raw.test_csv_comma_4,
                     DelimiterOfCSV.TAB
                 )
-            })
+            }
             assertEquals(21, rows.size)
 
             rows[0].also { row ->

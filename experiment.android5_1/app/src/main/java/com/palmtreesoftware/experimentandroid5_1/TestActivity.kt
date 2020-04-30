@@ -26,26 +26,34 @@ class TestActivity : AppCompatActivity(), CoroutineScope {
     ) {
         private var textReader: BufferedReader? = null
         private var textWriter: PrintWriter? = null
-        private var totalCount: Long = 0
+        private var totalCount: Int = 0
         private var startTime: DateTime = DateTime.EPOCH
-        private var countofWrittenItems: Long = 0
-        private val skippedItems = LongRangeSet()
+        private var countofWrittenItems: Int = 0
+        private val serialNumbersOfUnprocessedItem = LongRangeSet()
         private var isCancelRequested = false
 
         fun resolveAddress(context: Context, scope: CoroutineScope) {
             close()
             startTime = DateTime.now()
-            totalCount = sourceFile.useLines { it.count() }.toLong()
+            sourceFile.useLines { lines ->
+                lines.forEach { line ->
+                    try {
+                        serialNumbersOfUnprocessedItem.add(JSONObject(line).getLong("serialNumber"))
+                    } catch (ex: JSONException) {
+                    }
+                }
+            }
+            totalCount = serialNumbersOfUnprocessedItem.count()
             countofWrittenItems = 0
-            skippedItems.clear()
-            textReader = BufferedReader(
-                FileReader(sourceFile)
-            )
+            serialNumbersOfUnprocessedItem.clear()
+            textReader = BufferedReader(FileReader(sourceFile))
             if (destinationFile.exists()) {
                 destinationFile.useLines { lines ->
                     lines.forEach { line ->
                         try {
-                            skippedItems.add(JSONObject(line).getLong("serialNumber"))
+                            serialNumbersOfUnprocessedItem.remove(
+                                JSONObject(line).getLong("serialNumber")
+                            )
                         } catch (ex: JSONException) {
                         }
                     }
@@ -79,9 +87,14 @@ class TestActivity : AppCompatActivity(), CoroutineScope {
                         locale,
                         coordinates,
                         { address ->
-                            writeAddress(address, serialNumber)
-                            reportProgress(context)
-                            resolveAddressLoop(context, scope)
+                            try {
+                                writeAddress(address, serialNumber)
+                                reportProgress(context)
+                                resolveAddressLoop(context, scope)
+                            } catch (throwable: Throwable) {
+                                close()
+                                onFailed(throwable)
+                            }
                         },
                         { throwable ->
                             close()
@@ -89,9 +102,9 @@ class TestActivity : AppCompatActivity(), CoroutineScope {
                         }
                     )
                 }
-            } catch (ex: Throwable) {
+            } catch (throwable: Throwable) {
                 close()
-                onFailed(ex)
+                onFailed(throwable)
             }
         }
 
@@ -113,9 +126,12 @@ class TestActivity : AppCompatActivity(), CoroutineScope {
                 while (true) {
                     val line = reader.readLine()
                         ?: return null
-                    val o = JSONObject(line)
-                    if (!skippedItems.contains(o.getLong("serialNumber")))
-                        return o
+                    try {
+                        val o = JSONObject(line)
+                        if (serialNumbersOfUnprocessedItem.contains(o.getLong("serialNumber")))
+                            return o
+                    } catch (throwable: Throwable) {
+                    }
                 }
             }
         }
@@ -136,15 +152,17 @@ class TestActivity : AppCompatActivity(), CoroutineScope {
         }
 
         private fun reportProgress(context: Context) {
-            if (countofWrittenItems != 0L && countofWrittenItems % 100 == 0L) {
+            if (countofWrittenItems != 0 && countofWrittenItems % 100 == 0) {
                 val now = DateTime.now()
-                val countOfSkippedItems = skippedItems.count()
+                val countOfUnprocessedItems = serialNumbersOfUnprocessedItem.count()
                 val endtime =
-                    now + (now - startTime) * (totalCount - countOfSkippedItems - countofWrittenItems) / countofWrittenItems
+                    now + (now - startTime) *
+                            (countOfUnprocessedItems - countofWrittenItems).toLong() /
+                            countofWrittenItems.toLong()
 
                 progressReporter(
                     "resolving address... %.02f%% expected to end %s %s%s".format(
-                        ((countofWrittenItems + countOfSkippedItems) * 100.0 / totalCount),
+                        ((countofWrittenItems + (totalCount - countOfUnprocessedItems)) * 100.0 / totalCount),
                         endtime.formatRelativeTime(context, now, TimeZone.getDefault()),
                         "■".repeat(((countofWrittenItems / 100) % 10).toInt()),
                         "□".repeat(10 - ((countofWrittenItems / 100) % 10).toInt())

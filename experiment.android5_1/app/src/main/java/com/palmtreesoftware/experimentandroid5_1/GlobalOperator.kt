@@ -303,3 +303,122 @@ var Address.addressLines: Array<String>
             }
         }
     }
+
+fun ClosedRange<Long>.unionRange(other: ClosedRange<Long>): List<LongRange> =
+    when {
+        this.endInclusive + 1 < other.start -> {
+            // other の上端と下端がともに this の上端 + 1 より大きい場合 (this と other は重なっていない)
+            listOf(this.toLongRange(), other.toLongRange())
+        }
+        this.start <= other.start -> {
+            when {
+                this.endInclusive < other.endInclusive -> {
+                    // other の下端が this に含まれており、かつ other の上端が this より大きい場合 (this と other は一部重なっているか隣り合っている)
+                    listOf(this.start..other.endInclusive)
+                }
+                else -> {
+                    // other の下端と下端がともに this に含まれている場合 (this が other を含んでいる)
+                    listOf(this.toLongRange())
+                }
+            }
+        }
+        this.endInclusive < other.endInclusive -> {
+            // other の下端が this より小さく、かつ other の上端が this より大きい場合 (other が this を含んでいる)
+            listOf(other.toLongRange())
+        }
+        this.start <= other.endInclusive + 1 -> {
+            // other の下端が this より小さく、かつ other の上端が this に含まれている場合 (this と other は 一部重なっているか隣り合っている)
+            listOf(other.start..this.endInclusive)
+        }
+        else -> {
+            // other の上端と下端がともに this より小さい場合 (this と other は重なっていない)
+            listOf(other.toLongRange(), this.toLongRange())
+        }
+    }
+
+fun ClosedRange<Long>.differenceRange(other: ClosedRange<Long>): List<LongRange> =
+    when {
+        this.endInclusive < other.start -> {
+            // other の上端と下端がともに this の上端より大きい場合 (this と other は重なっていない)
+            listOf(this.toLongRange())
+        }
+        this.start < other.start -> {
+            if (this.endInclusive <= other.endInclusive) {
+                // other の下端が start の下端より大きく、かつ other の上端が this の上端と等しいかまたは大きい場合 (this と other は一部重なっている)
+                listOf(this.start until other.start)
+            } else {
+                // other の下端が start の下端より大きく、かつ other の上端が this の上端より小さい場合 (this は other を含んでいる)
+                listOf(
+                    this.start..other.start - 1,
+                    other.endInclusive + 1..this.endInclusive
+                )
+            }
+        }
+        this.endInclusive <= other.endInclusive -> {
+            // other の下端が this より小さく、かつ other の上端が this の上端と等しいかまたは大きい場合 (other が this を含んでいる)
+            listOf()
+        }
+        this.start <= other.endInclusive -> {
+            // other の下端が this より小さく、かつ other の上端が this の上端より小さい場合 (this と other は 一部重なっている)
+            listOf(other.endInclusive + 1..this.endInclusive)
+        }
+        else -> {
+            // other の上端と下端がともに this より小さい場合 (this と other は重なっていない)
+            listOf(this.toLongRange())
+        }
+    }
+
+fun ClosedRange<Long>.intersectionRange(other: ClosedRange<Long>): LongRange {
+    return when {
+        this.endInclusive < other.start -> {
+            // other の上端と下端がともに this の上端より大きい場合 (this と other は重なっていない)
+            LongRange.EMPTY
+        }
+        this.start <= other.start -> {
+            when {
+                this.endInclusive < other.endInclusive -> {
+                    // other の下端が this に含まれており、かつ other の上端が this より大きい場合 (this と other は一部重なっている)
+                    other.start..this.endInclusive
+                }
+                else -> {
+                    // other の下端と下端がともに this に含まれている場合 (this が other を含んでいる)
+                    other.toLongRange()
+                }
+            }
+        }
+        this.endInclusive < other.endInclusive -> {
+            // other の下端が this より小さく、かつ other の上端が this より大きい場合 (other が this を含んでいる)
+            this.toLongRange()
+        }
+        this.start <= other.endInclusive -> {
+            // other の下端が this より小さく、かつ other の上端が this に含まれている場合 (this と other は 一部重なっている)
+            this.start..other.endInclusive
+        }
+        else -> {
+            // other の上端と下端がともに this より小さい場合 (this と other は重なっていない)
+            LongRange.EMPTY
+        }
+    }
+}
+
+fun ClosedRange<Long>.isIntersectedRange(other: ClosedRange<Long>): Boolean =
+    this.endInclusive < other.start || this.start > other.endInclusive
+
+
+fun ClosedRange<Long>.toComplementRange(): List<LongRange> {
+    if (this.start > Long.MIN_VALUE) {
+        if (this.endInclusive < Long.MAX_VALUE)
+            return listOf(Long.MIN_VALUE..this.start - 1, this.endInclusive + 1..Long.MAX_VALUE)
+        else
+            return listOf(Long.MIN_VALUE..this.start - 1)
+    } else if (this.endInclusive < Long.MAX_VALUE)
+        return listOf(this.endInclusive + 1..Long.MAX_VALUE)
+    else
+        return listOf()
+}
+
+fun ClosedRange<Long>.isNotEmpty(): Boolean =
+    this.start <= this.endInclusive
+
+fun ClosedRange<Long>.toLongRange(): LongRange =
+    this.start..this.endInclusive

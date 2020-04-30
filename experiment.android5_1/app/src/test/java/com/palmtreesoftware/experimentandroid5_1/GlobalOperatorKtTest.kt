@@ -1,11 +1,14 @@
 package com.palmtreesoftware.experimentandroid5_1
 
+import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.math.ceil
 import kotlin.math.floor
 
 internal class GlobalOperatorKtTest {
+
+    // TODO("パラメタつきテスト これを参考に。 https://qiita.com/opengl-8080/items/efe54204e25f615e322f#%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89%E3%82%92%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AB%E3%81%99%E3%82%8B")
 
     @Test
     fun crossMapIterableIterable() {
@@ -319,5 +322,142 @@ internal class GlobalOperatorKtTest {
         assertEquals("ああhijklmno嗚呼", "ああhijklmno嗚呼".toHankaku())
         assertEquals("ああpqrstuvw嗚呼", "ああpqrstuvw嗚呼".toHankaku())
         assertEquals("ああxyz{|}~嗚呼", "ああxyz{|}～嗚呼".toHankaku())
+    }
+
+    @Test
+    fun unionRangeTest() {
+        (0L..5L)
+            .crossMap(1L..4L) { start, length ->
+                start until start + length
+            }
+            .plusElement(LongRange.EMPTY)
+            .forEach { rangeOfX ->
+                (0L..5L)
+                    .crossMap(1L..4L) { start, length ->
+                        start until start + length
+                    }
+                    .plusElement(LongRange.EMPTY)
+                    .forEach { rangeOfY ->
+                        assertArrayEquals(
+                            getExpectedValueOfUnion(
+                                rangeOfX,
+                                rangeOfY
+                            ) { i, x, y -> i in x || i in y }
+                                .toTypedArray(),
+                            rangeOfX.unionRange(rangeOfY).toTypedArray(),
+                            "($rangeOfX).unionRange($rangeOfY)"
+                        )
+                    }
+            }
+    }
+
+    @Test
+    fun differenceRangeTest() {
+        (0L..5L)
+            .crossMap(1L..4L) { start, length ->
+                start until start + length
+            }
+            .plusElement(LongRange.EMPTY)
+            .forEach { rangeOfX ->
+                (0L..5L)
+                    .crossMap(1L..4L) { start, length ->
+                        start until start + length
+                    }
+                    .plusElement(LongRange.EMPTY)
+                    .forEach { rangeOfY ->
+                        assertArrayEquals(
+                            getExpectedValueOfUnion(
+                                rangeOfX,
+                                rangeOfY
+                            ) { i, x, y -> i in x && i !in y }
+                                .toTypedArray(),
+                            rangeOfX.differenceRange(rangeOfY).toTypedArray(),
+                            "($rangeOfX).differenceRange($rangeOfY)"
+                        )
+                    }
+            }
+    }
+
+    @Test
+    fun intersectionRangeTest() {
+        (0L..5L)
+            .crossMap(1L..4L) { start, length ->
+                start until start + length
+            }
+            .plusElement(LongRange.EMPTY)
+            .forEach { rangeOfX ->
+                (0L..5L)
+                    .crossMap(1L..4L) { start, length ->
+                        start until start + length
+                    }
+                    .plusElement(LongRange.EMPTY)
+                    .forEach { rangeOfY ->
+                        assertEquals(
+                            rangeOfX.filter { it in rangeOfY }
+                                .let {
+                                    val min = it.min()
+                                    val max = it.max()
+                                    if (min == null || max == null)
+                                        LongRange.EMPTY
+                                    else
+                                        min..max
+                                },
+                            rangeOfX.intersectionRange(rangeOfY),
+                            "($rangeOfX).intersectionRange($rangeOfY)"
+                        )
+                    }
+            }
+    }
+
+    @Test
+    fun isIntersectedRangeTest() {
+        (0L..5L)
+            .crossMap(1L..4L) { start, length ->
+                start until start + length
+            }
+            .plusElement(LongRange.EMPTY)
+            .forEach { rangeOfX ->
+                (0L..5L)
+                    .crossMap(1L..4L) { start, length ->
+                        start until start + length
+                    }
+                    .plusElement(LongRange.EMPTY)
+                    .forEach { rangeOfY ->
+                        assertEquals(
+                            rangeOfX.any { it in rangeOfY },
+                            rangeOfX.isIntersectedRange(rangeOfY),
+                            "($rangeOfX).isIntersectedRange($rangeOfY)"
+                        )
+                    }
+            }
+    }
+
+    private fun getExpectedValueOfUnion(
+        rangeOfX: LongRange,
+        rangeOfY: LongRange,
+        op: (Long, LongRange, LongRange) -> Boolean
+    ): List<LongRange> {
+        val expected = mutableListOf<LongRange>()
+        var startOfExpected = 0L
+        var i = -1L
+        while (!op(i, rangeOfX, rangeOfY) && i <= 10)
+            ++i
+        startOfExpected = i
+        while (op(i, rangeOfX, rangeOfY) && i <= 10)
+            ++i
+        if (i <= 10)
+            expected.add(startOfExpected..i - 1)
+        while (!op(i, rangeOfX, rangeOfY) && i <= 10)
+            ++i
+        startOfExpected = i
+        while (op(i, rangeOfX, rangeOfY) && i <= 10)
+            ++i
+        if (i <= 10)
+            expected.add(startOfExpected..i - 1)
+        while (!op(i, rangeOfX, rangeOfY) && i <= 10)
+            ++i
+        if (i <= 10)
+            throw Exception()
+        return expected
     }
 }
